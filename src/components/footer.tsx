@@ -3,14 +3,14 @@ import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="bg-secondary">
+    <footer className="bg-secondary border-t border-border/50">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
             <Plane className="h-6 w-6 text-primary" />
             <span className="font-headline text-xl font-bold">Utsav Travels</span>
           </div>
-          <p className="text-sm text-muted-foreground mb-4 md:mb-0">
+          <p className="text-sm text-muted-foreground mb-4 md:mb-0 order-last md:order-none mt-4 md:mt-0">
             © {new Date().getFullYear()} Utsav Travels. All rights reserved.
           </p>
           <div className="flex gap-4">

@@ -10,7 +10,7 @@ export default function Globe() {
       <pointLight position={[10, 10, 10]} />
       <mesh>
         <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial color="#FF851B" wireframe />
+        <meshStandardMaterial color="hsl(var(--primary))" wireframe />
       </mesh>
       <OrbitControls autoRotate autoRotateSpeed={0.5} enableZoom={false} enablePan={false} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
