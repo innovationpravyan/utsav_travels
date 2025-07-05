@@ -16,6 +16,15 @@ type PackageDetailPageProps = {
   };
 };
 
+// Generate static params for all packages
+export async function generateStaticParams() {
+  const pkg = await getPackages();
+  
+  return pkg.map((packageId) => ({
+    packageId: packageId.id,
+  }));
+}
+
 export default async function PackageDetailPage({ params }: PackageDetailPageProps) {
   const pkg = await getPackageById(params.packageId);
 

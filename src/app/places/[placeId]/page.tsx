@@ -20,6 +20,15 @@ type PlaceDetailPageProps = {
   };
 };
 
+// Generate static params for all places
+export async function generateStaticParams() {
+  const places = await getPlaces();
+  
+  return places.map((place) => ({
+    placeId: place.id,
+  }));
+}
+
 export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) {
   const place = await getPlaceById(params.placeId);
 

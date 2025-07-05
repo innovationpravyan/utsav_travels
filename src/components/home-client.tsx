@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { PlaceCard } from "@/components/place-card";
 import { PackageCard } from "@/components/package-card";
@@ -10,11 +10,8 @@ import { ArrowRight, Sparkles, MapPin, Star, Users, Calendar, Award, Globe } fro
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { MotionDiv, StaggerContainer } from "@/components/motion-div";
 import { HeroBanner } from "@/components/hero-banner";
-import { ParallaxSection, ParallaxContent } from "@/components/ui/parallax-section";
-import { GlassCard, InteractiveGlassCard, FloatingGlassCard } from "@/components/ui/glass-card";
-import { FloatingElements, ParticleSystem } from "@/components/ui/floating-elements";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { useScrollReveal } from "@/hooks/use-scroll";
+import { GlassCard } from "@/components/ui/glass-card";
+import { motion, useInView } from "framer-motion";
 import { cn } from '@/lib/utils';
 import { Suspense } from 'react';
 
@@ -28,7 +25,8 @@ interface HomeClientProps {
  */
 const StatsSection = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const { ref, isInView } = useInView({ threshold: 0.3 });
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const isInView = useInView(sectionRef, { amount: 0.3 });
 
   useEffect(() => {
     if (isInView) setIsVisible(true);
@@ -72,23 +70,11 @@ const StatsSection = () => {
   };
 
   return (
-    <ParallaxSection
-      height="80vh"
-      className="relative flex items-center justify-center"
-      layers={[
-        {
-          id: 'stats-bg',
-          speed: -0.3,
-          content: (
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-purple-900 to-slate-800" />
-          ),
-        },
-      ]}
-      floatingElements
-      overlay
-      overlayColor="rgba(0,0,0,0.4)"
-    >
-      <div ref={ref} className="container mx-auto px-4 relative z-10">
+    <section className="relative section-padding bg-gradient-to-br from-slate-800 via-purple-900 to-slate-800">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-10 pattern-dots" />
+      
+      <div ref={sectionRef} className="container mx-auto px-4 relative z-10">
         <StaggerContainer className="text-center mb-16">
           <MotionDiv preset="slideUp" delay={0.2}>
             <h2 className="text-5xl md:text-6xl font-headline font-bold text-white mb-6">
@@ -110,17 +96,13 @@ const StatsSection = () => {
               preset="scaleIn"
               delay={0.6 + index * 0.1}
               hover
-              magnetic
             >
-              <InteractiveGlassCard
+              <GlassCard
                 variant="frosted"
-                size="lg"
-                className="text-center p-8 group"
+                className="text-center p-8 group hover:scale-105 transition-all duration-300"
               >
                 <motion.div
-                  className={cn("mx-auto mb-4 p-4 rounded-full w-fit", 
-                    `bg-gradient-to-br from-${stat.color.split('-')[1]}-400/20 to-${stat.color.split('-')[1]}-600/20`
-                  )}
+                  className={cn("mx-auto mb-4 p-4 rounded-full w-fit bg-white/10")}
                   whileHover={{ rotate: 360, scale: 1.1 }}
                   transition={{ duration: 0.6 }}
                 >
@@ -132,61 +114,36 @@ const StatsSection = () => {
                 </div>
                 
                 <p className="text-white/70 font-medium">{stat.label}</p>
-                
-                {/* Hover glow effect */}
-                <motion.div
-                  className="absolute inset-0 rounded-inherit opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: `radial-gradient(circle at center, ${stat.color.replace('text-', 'rgba(').replace('-400', ', 0.1)')} 0%, transparent 70%)`,
-                  }}
-                />
-              </InteractiveGlassCard>
+              </GlassCard>
             </MotionDiv>
           ))}
         </div>
       </div>
-    </ParallaxSection>
+    </section>
   );
 };
 
 /**
- * Featured Destinations Section with Advanced Grid
+ * Featured Destinations Section
  */
 const FeaturedDestinationsSection = ({ featuredPlaces }: { featuredPlaces: Place[] }) => {
   return (
-    <ParallaxSection
-      height="auto"
-      className="section-padding"
-      layers={[
-        {
-          id: 'destinations-bg',
-          speed: -0.5,
-          content: (
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900" />
-          ),
-        },
-        {
-          id: 'destinations-pattern',
-          speed: -0.3,
-          content: (
-            <div className="absolute inset-0 pattern-grid opacity-10" />
-          ),
-        },
-      ]}
-      floatingElements
-    >
+    <section className="section-padding bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative">
+      {/* Background pattern */}
+      <div className="absolute inset-0 pattern-grid opacity-10" />
+      
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <StaggerContainer className="text-center mb-16">
           <MotionDiv preset="slideUp" delay={0.2}>
             <div className="flex justify-center mb-6">
-              <FloatingGlassCard variant="gradient" size="sm" className="p-4">
+              <GlassCard variant="gradient" className="p-4 rounded-full">
                 <MapPin className="w-8 h-8 text-white" />
-              </FloatingGlassCard>
+              </GlassCard>
             </div>
           </MotionDiv>
 
-          <MotionDiv preset="typewriter" delay={0.4}>
+          <MotionDiv preset="slideUp" delay={0.4}>
             <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
               Sacred
               <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
@@ -217,15 +174,7 @@ const FeaturedDestinationsSection = ({ featuredPlaces }: { featuredPlaces: Place
                       preset="scaleIn"
                       delay={index * 0.1}
                     >
-                      <div className="group relative overflow-hidden rounded-3xl">
-                        <PlaceCard place={place} index={index} />
-                        
-                        {/* Card overlay effect */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"
-                          whileHover={{ scale: 1.02 }}
-                        />
-                      </div>
+                      <PlaceCard place={place} index={index} />
                     </MotionDiv>
                   </CarouselItem>
                 ))}
@@ -244,7 +193,7 @@ const FeaturedDestinationsSection = ({ featuredPlaces }: { featuredPlaces: Place
         )}
 
         {/* Call to Action */}
-        <MotionDiv preset="bounce" delay={1.2} className="text-center mt-16">
+        <MotionDiv preset="slideUp" delay={1.2} className="text-center mt-16">
           <Button asChild className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm hover:from-white/20 hover:to-white/10 text-white border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 px-8 py-6 text-lg rounded-full group">
             <Link href="/destinations">
               <span className="flex items-center">
@@ -261,50 +210,44 @@ const FeaturedDestinationsSection = ({ featuredPlaces }: { featuredPlaces: Place
           </Button>
         </MotionDiv>
       </div>
-    </ParallaxSection>
+    </section>
   );
 };
 
 /**
- * Popular Packages Section with Enhanced Cards
+ * Popular Packages Section
  */
 const PopularPackagesSection = ({ popularPackages }: { popularPackages: Package[] }) => {
   return (
-    <ParallaxSection
-      height="auto"
-      className="section-padding"
-      layers={[
-        {
-          id: 'packages-bg',
-          speed: -0.4,
-          content: (
-            <div className="absolute inset-0 bg-gradient-to-br from-rose-900 via-pink-900 to-purple-900" />
-          ),
-        },
-        {
-          id: 'packages-particles',
-          speed: -0.2,
-          content: (
-            <div className="absolute inset-0">
-              <ParticleSystem count={30} color="rgba(255,255,255,0.1)" />
-            </div>
-          ),
-        },
-      ]}
-      floatingElements
-    >
+    <section className="section-padding bg-gradient-to-br from-rose-900 via-pink-900 to-purple-900 relative">
+      {/* Simple background effect */}
+      <div className="absolute inset-0">
+        <motion.div
+          className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-r from-pink-400/10 to-purple-600/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+      
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <StaggerContainer className="text-center mb-16">
           <MotionDiv preset="slideUp" delay={0.2}>
             <div className="flex justify-center mb-6">
-              <FloatingGlassCard variant="colored" size="sm" className="p-4">
+              <GlassCard variant="colored" className="p-4 rounded-full">
                 <Star className="w-8 h-8 text-white" />
-              </FloatingGlassCard>
+              </GlassCard>
             </div>
           </MotionDiv>
 
-          <MotionDiv preset="morphing" delay={0.4}>
+          <MotionDiv preset="slideUp" delay={0.4}>
             <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
               Popular
               <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
@@ -313,7 +256,7 @@ const PopularPackagesSection = ({ popularPackages }: { popularPackages: Package[
             </h2>
           </MotionDiv>
 
-          <MotionDiv preset="wave" delay={0.8}>
+          <MotionDiv preset="fadeIn" delay={0.8}>
             <p className="text-white/90 max-w-3xl mx-auto text-xl md:text-2xl font-light leading-relaxed">
               Carefully curated spiritual experiences that blend adventure, culture, and luxury into unforgettable journeys.
             </p>
@@ -326,21 +269,12 @@ const PopularPackagesSection = ({ popularPackages }: { popularPackages: Package[
             {popularPackages.map((pkg, index) => (
               <MotionDiv
                 key={pkg.id}
-                preset="spiral"
+                preset="slideUp"
                 delay={index * 0.2}
                 hover
-                magnetic
                 className="group"
               >
-                <div className="relative overflow-hidden rounded-3xl transform-3d">
-                  <PackageCard pkg={pkg} index={index} />
-                  
-                  {/* Enhanced hover effects */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-accent/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"
-                    whileHover={{ scale: 1.02, rotateY: 5 }}
-                  />
-                </div>
+                <PackageCard pkg={pkg} index={index} />
               </MotionDiv>
             ))}
           </StaggerContainer>
@@ -353,7 +287,7 @@ const PopularPackagesSection = ({ popularPackages }: { popularPackages: Package[
         )}
 
         {/* Call to Action */}
-        <MotionDiv preset="elastic" delay={1.5} className="text-center mt-16">
+        <MotionDiv preset="slideUp" delay={1.5} className="text-center mt-16">
           <Button asChild className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm hover:from-white/20 hover:to-white/10 text-white border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 px-8 py-6 text-lg rounded-full group">
             <Link href="/packages">
               <span className="flex items-center">
@@ -370,12 +304,12 @@ const PopularPackagesSection = ({ popularPackages }: { popularPackages: Package[
           </Button>
         </MotionDiv>
       </div>
-    </ParallaxSection>
+    </section>
   );
 };
 
 /**
- * Testimonials Section with Advanced Animations
+ * Testimonials Section
  */
 const TestimonialsSection = () => {
   const testimonials = [
@@ -403,7 +337,7 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <ParallaxContent className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+    <section className="section-padding bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
       <div className="container mx-auto px-4">
         <StaggerContainer className="text-center mb-16">
           <MotionDiv preset="slideUp" delay={0.2}>
@@ -418,20 +352,18 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <MotionDiv
               key={testimonial.name}
-              preset="float"
+              preset="slideUp"
               delay={index * 0.2}
               hover
-              magnetic
             >
-              <InteractiveGlassCard
+              <GlassCard
                 variant="frosted"
-                size="lg"
-                className="p-8 text-center h-full"
+                className="p-8 text-center h-full hover:scale-105 transition-all duration-300"
               >
                 <motion.div
                   className="w-20 h-20 mx-auto mb-6 rounded-full overflow-hidden"
-                  whileHover={{ scale: 1.1, rotate: 360 }}
-                  transition={{ duration: 0.6 }}
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <img
                     src={testimonial.image}
@@ -459,12 +391,12 @@ const TestimonialsSection = () => {
                   <p className="font-semibold">{testimonial.name}</p>
                   <p className="text-white/60 text-sm">{testimonial.location}</p>
                 </div>
-              </InteractiveGlassCard>
+              </GlassCard>
             </MotionDiv>
           ))}
         </div>
       </div>
-    </ParallaxContent>
+    </section>
   );
 };
 
@@ -480,39 +412,6 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
 
   return (
     <div className="relative overflow-hidden">
-      {/* Ambient Background Effects */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-blue-400/10 to-purple-600/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3],
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-pink-400/10 to-red-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.4, 0.2, 0.4],
-            x: [0, -50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 10,
-          }}
-        />
-      </div>
-
       {/* Main Content */}
       <div className={cn(
         "relative z-10 transition-all duration-1000",
@@ -543,20 +442,23 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
         <TestimonialsSection />
 
         {/* Final CTA Section */}
-        <ParallaxSection
-          height="60vh"
-          className="flex items-center justify-center"
-          layers={[
-            {
-              id: 'cta-bg',
-              speed: -0.3,
-              content: (
-                <div className="absolute inset-0 bg-gradient-to-br from-black via-slate-900 to-black" />
-              ),
-            },
-          ]}
-          floatingElements
-        >
+        <section className="section-padding bg-gradient-to-br from-black via-slate-900 to-black flex items-center justify-center relative">
+          {/* Simple background animation */}
+          <div className="absolute inset-0">
+            <motion.div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-400/5 to-purple-600/5 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </div>
+          
           <div className="container mx-auto px-4 text-center relative z-10">
             <StaggerContainer>
               <MotionDiv preset="scaleIn" delay={0.2}>
@@ -576,7 +478,7 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
                 </p>
               </MotionDiv>
               
-              <MotionDiv preset="bounce" delay={0.8}>
+              <MotionDiv preset="slideUp" delay={0.8}>
                 <Button asChild className="bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary text-white px-12 py-6 text-xl rounded-full shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300">
                   <Link href="/contact">
                     Start Your Journey
@@ -586,8 +488,10 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
               </MotionDiv>
             </StaggerContainer>
           </div>
-        </ParallaxSection>
+        </section>
       </div>
     </div>
   );
 }
+
+/* removed custom useRef - using React's useRef instead */
