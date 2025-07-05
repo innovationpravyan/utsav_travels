@@ -1,131 +1,106 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import * as THREE from "three";
-import { Button } from "./ui/button";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { RunningText } from "./running-text";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
+import { type Place } from '@/lib/data';
+import Autoplay from 'embla-carousel-autoplay';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Button } from './ui/button';
+import { useEffect, useState, useRef } from 'react';
+import { cn } from '@/lib/utils';
+import { RunningText } from './running-text';
 
-export function HeroBanner() {
-  const mountRef = useRef<HTMLDivElement>(null);
+export function HeroBanner({ places }: { places: Place[] }) {
+  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    if (!mountRef.current) return;
-
-    const currentMount = mountRef.current;
-    const clock = new THREE.Clock();
-
-    // Scene
-    const scene = new THREE.Scene();
-
-    // Camera
-    const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
-    camera.position.z = 2.0;
-
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    currentMount.appendChild(renderer.domElement);
-
-    // 3D Globe
-    const geometry = new THREE.SphereGeometry(1, 64, 64);
-    const material = new THREE.ShaderMaterial({
-        uniforms: {
-            time: { value: 1.0 },
-            colorA: { value: new THREE.Color(0xff851b) },
-            colorB: { value: new THREE.Color(0x008080) },
-        },
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float time;
-            uniform vec3 colorA;
-            uniform vec3 colorB;
-            varying vec2 vUv;
-
-            void main() {
-                vec2 rotatedUv = vec2(vUv.x + time * 0.05, vUv.y);
-                float noise = (sin(rotatedUv.x * 10.0) + cos(rotatedUv.y * 10.0)) * 0.5 + 0.5;
-                vec3 color = mix(colorA, colorB, noise);
-                gl_FragColor = vec4(color, 1.0);
-            }
-        `,
-    });
-    const sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
-    
-    let mouseX = 0;
-    let mouseY = 0;
-
-    const onMouseMove = (event: MouseEvent) => {
-        mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-        mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-    }
-    window.addEventListener('mousemove', onMouseMove);
-
-    // Animation
-    const animate = () => {
-      requestAnimationFrame(animate);
-      sphere.rotation.y += 0.001;
-
-      // Parallax effect
-      camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
-      camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
-      camera.lookAt(scene.position);
-
-      material.uniforms.time.value = clock.getElapsedTime();
-      renderer.render(scene, camera);
+    if (!api) return;
+    setCurrent(api.selectedScrollSnap());
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap());
     };
-    animate();
-
-    // Handle resize
-    const handleResize = () => {
-      camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-    };
-    window.addEventListener("resize", handleResize);
-
+    api.on('select', onSelect);
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mousemove", onMouseMove);
-      if (currentMount && renderer.domElement) {
-        currentMount.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
-      geometry.dispose();
-      material.dispose();
+      api.off('select', onSelect);
     };
-  }, []);
+  }, [api]);
+
+  const currentPlace = places[current];
 
   return (
-    <div className="relative h-[70vh] md:h-screen w-full overflow-hidden bg-background">
-      <div
-        ref={mountRef}
-        className="absolute inset-0 z-0"
-      />
-      <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/20 backdrop-blur-sm">
-        <div className="text-center container px-4">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl mb-4">
-            <RunningText text="Explore the World" />
-          </h1>
-          <p className="text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto mb-8 drop-shadow-md text-foreground/80">
-            Your next adventure is just a click away. Discover curated travel experiences that you'll never forget.
-          </p>
+    <section className="relative h-screen w-full overflow-hidden bg-background">
+      <Carousel
+        setApi={setApi}
+        plugins={[plugin.current]}
+        className="w-full h-full"
+        onMouseEnter={plugin.current.stop}
+        onMouseLeave={plugin.current.reset}
+        opts={{ loop: true }}
+      >
+        <CarouselContent className="h-full">
+          {places.map((place, index) => (
+            <CarouselItem key={place.id} className="h-full">
+              <div className="w-full h-full relative">
+                <Image
+                  src={place.images[0] || place.thumbnail}
+                  alt={place.name}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                  data-ai-hint="sacred landscape"
+                />
+                <div className="absolute inset-0 bg-black/60" />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4">
+        <h1 className="font-headline text-5xl md:text-7xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
+            <span className={cn(
+              "font-headline font-bold drop-shadow-2xl",
+              "animate-text-shimmer bg-gradient-to-r from-white via-neutral-300 to-white bg-[200%_auto] bg-clip-text text-transparent"
+            )}>Discover Sacred</span>
+          <br/>
+           <span className={cn(
+              "font-headline font-bold drop-shadow-2xl",
+              "animate-text-shimmer bg-gradient-to-r from-primary via-amber-300 to-primary bg-[200%_auto] bg-clip-text text-transparent"
+            )}>Destinations</span>
+        </h1>
+        <p className="max-w-3xl mx-auto text-lg md:text-xl text-white/90 mb-8 drop-shadow-lg">
+          Embark on a spiritual journey through Varanasi, Prayagraj, and Ayodhya.
+          <br className="hidden md:block" />
+          Experience the rich heritage and timeless beauty of India.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4">
           <Button asChild size="lg" className="text-lg py-7 px-10">
-            <Link href="/packages">
-              Start Your Journey <ArrowRight className="ml-2"/>
-            </Link>
+            <Link href="/destinations">Explore Destinations</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="text-lg py-7 px-10 border-white/50 bg-black/20 hover:bg-white/10 text-white">
+            <Link href="/packages">View Packages</Link>
           </Button>
         </div>
       </div>
-    </div>
+      
+      <div className="absolute bottom-8 left-0 right-0 z-10 flex items-center justify-center gap-4 text-white px-4">
+        {currentPlace && <p className="text-sm font-medium tracking-wider hidden sm:block">Experience {currentPlace.tagline}</p>}
+        <div className="flex items-center gap-3">
+          {places.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => api?.scrollTo(index)}
+              aria-label={`Go to slide ${index + 1}`}
+              className={cn(
+                "h-2 w-2 rounded-full transition-all duration-300",
+                current === index ? "w-6 bg-primary" : "bg-white/50 hover:bg-white"
+              )}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

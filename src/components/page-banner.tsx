@@ -27,7 +27,7 @@ export function PageBanner({ title, items }: PageBannerProps) {
       {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
-          className="absolute inset-0 z-10 w-full h-full"
+          className="absolute inset-0 z-0 w-full h-full"
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
           opts={{
@@ -35,17 +35,17 @@ export function PageBanner({ title, items }: PageBannerProps) {
           }}
         >
           <CarouselContent className="h-full">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <CarouselItem key={item.id} className="relative h-full">
                 <Image
                   src={item.image}
                   alt={item.name}
                   fill
                   className="object-cover"
-                  priority
+                  priority={index === 0}
                   data-ai-hint="travel background"
                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                 <div className="absolute inset-0 bg-black/50" />
                  <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white">
                     <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
                     <p className="text-lg text-primary">{item.tagline}</p>
@@ -55,7 +55,8 @@ export function PageBanner({ title, items }: PageBannerProps) {
           </CarouselContent>
         </Carousel>
       )}
-      <div className="absolute inset-0 z-20 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center pointer-events-none">
+       <div className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm" />
+       <div className="relative z-20 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
         <h1 className="text-5xl md:text-7xl lg:text-8xl">
           <RunningText text={title} />
         </h1>

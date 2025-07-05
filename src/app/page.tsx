@@ -13,7 +13,7 @@ export default async function Home() {
 
   return (
     <div className="animate-fade-in">
-      <HeroBanner />
+      <HeroBanner places={featuredPlaces} />
 
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">

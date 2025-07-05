@@ -1,4 +1,4 @@
-import { Building, Target, Heart, MapPin } from 'lucide-react';
+import { Target, Heart, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { getPlaces, getPackages } from '@/lib/data';
@@ -22,7 +22,7 @@ export default async function AboutPage() {
     tagline: p.duration
   }));
 
-  const bannerItems = [...bannerPlaces, ...bannerPackages];
+  const bannerItems = [...bannerPlaces, ...bannerPackages].sort(() => 0.5 - Math.random());
   
   const galleryItems = [...topPlaces, ...topPackages].sort(() => 0.5 - Math.random()).slice(0, 10);
 
@@ -56,7 +56,7 @@ export default async function AboutPage() {
         </div>
       </section>
       
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
            <h2 className="text-4xl md:text-5xl font-headline text-center mb-12">Our Gallery</h2>
            <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
@@ -81,7 +81,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-headline text-center mb-12">Our Core Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
