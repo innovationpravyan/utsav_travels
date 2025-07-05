@@ -1,3 +1,4 @@
+
 'use client';
 import * as React from 'react';
 import Autoplay from 'embla-carousel-autoplay';
@@ -42,9 +43,9 @@ export function PageBanner({ title, items }: PageBannerProps) {
                   data-ai-hint="travel background"
                 />
                 <div className="absolute inset-0 bg-black/50" />
-                <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white">
-                  <h3 className="text-3xl font-bold font-headline drop-shadow-lg">{item.name}</h3>
-                  <p className="text-lg text-white/90 drop-shadow-md">{item.tagline}</p>
+                <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white drop-shadow-lg">
+                  <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
+                  <p className="text-lg text-white/90">{item.tagline}</p>
                 </div>
               </CarouselItem>
             ))}
@@ -52,9 +53,9 @@ export function PageBanner({ title, items }: PageBannerProps) {
         </Carousel>
       )}
 
-      <div className="relative z-10 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl drop-shadow-2xl">
-          <RunningText text={title} className="text-white" />
+      <div className="absolute inset-0 z-10 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
+        <h1 className="text-5xl md:text-7xl drop-shadow-2xl">
+          <RunningText text={title} />
         </h1>
       </div>
     </section>

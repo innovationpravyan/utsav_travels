@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
@@ -58,16 +59,9 @@ export function HeroBanner({ places }: { places: Place[] }) {
 
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4">
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
-          <RunningText text="Discover Sacred" className="text-white" />
+          <RunningText text="Discover Sacred" />
           <br />
-          <span
-            className={cn(
-              'font-headline font-bold drop-shadow-2xl',
-              'animate-text-shimmer bg-gradient-to-r from-primary via-amber-300 to-primary bg-[200%_auto] bg-clip-text text-transparent'
-            )}
-          >
-            Destinations
-          </span>
+          <RunningText text="Destinations" className="font-headline" />
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-white/90 drop-shadow-lg">
           Embark on a spiritual journey through Varanasi, Prayagraj, and Ayodhya.
@@ -89,10 +83,10 @@ export function HeroBanner({ places }: { places: Place[] }) {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-0 right-0 z-10 flex items-center justify-center gap-4 text-white px-4">
+      <div className="absolute bottom-8 left-0 right-0 z-10 flex flex-col items-center justify-center gap-4 text-white px-4">
         {currentPlace && (
           <p className="text-sm font-medium tracking-wider hidden sm:block drop-shadow-md">
-            Experience {currentPlace.tagline}
+            Now Showing: {currentPlace.name}, {currentPlace.city}
           </p>
         )}
         <div className="flex items-center gap-3">
