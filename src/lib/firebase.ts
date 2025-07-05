@@ -1,17 +1,427 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import {
+  getFirestore,
+  type Firestore,
+  connectFirestoreEmulator,
+  enableNetwork,
+  disableNetwork,
+  terminate,
+  clearIndexedDbPersistence,
+} from "firebase/firestore";
+import { getAuth, type Auth } from "firebase/auth";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
+import { getPerformance, type FirebasePerformance } from "firebase/performance";
+import { AppError, env } from "./utils";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBT5lx7-y8e5_oWbGYcLcoA9_aQeMRxT08",
-  authDomain: "utsavtraveltourism.firebaseapp.com",
-  projectId: "utsavtraveltourism",
-  storageBucket: "utsavtraveltourism.firebasestorage.app",
-  messagingSenderId: "334927607544",
-  appId: "1:334927607544:web:f154a4606f17e279a16d0d",
-  measurementId: "G-5NHBBVDZ7L"
+/**
+ * Firebase configuration interface
+ */
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId?: string;
+}
+
+/**
+ * Firebase configuration with validation
+ */
+const firebaseConfig: FirebaseConfig = {
+  apiKey:
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    "AIzaSyDbifj2_jatQIx5GNkiDXAOHmAYOCrnzqo",
+  authDomain:
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+    "utsavtravels-299d5.firebaseapp.com",
+  projectId:
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "utsavtravels-299d5",
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+    "utsavtravels-299d5.firebasestorage.app",
+  messagingSenderId:
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "841887025085",
+  appId:
+    process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+    "1:841887025085:web:b663dd26817b4aa849f4d4",
+  measurementId:
+    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-8S5PS1SVXG",
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+/**
+ * Validates Firebase configuration
+ */
+function validateFirebaseConfig(config: FirebaseConfig): void {
+  const requiredFields = [
+    "apiKey",
+    "authDomain",
+    "projectId",
+    "storageBucket",
+    "messagingSenderId",
+    "appId",
+  ];
 
-export { app, db };
+  for (const field of requiredFields) {
+    if (!config[field as keyof FirebaseConfig]) {
+      throw new AppError(
+        `Firebase configuration missing required field: ${field}`,
+        "FIREBASE_CONFIG_ERROR",
+        500
+      );
+    }
+  }
+
+  // Validate format
+  if (!config.apiKey.startsWith("AIza")) {
+    throw new AppError(
+      "Invalid Firebase API key format",
+      "FIREBASE_CONFIG_ERROR",
+      500
+    );
+  }
+
+  if (!config.projectId.match(/^[a-z0-9-]+$/)) {
+    throw new AppError(
+      "Invalid Firebase project ID format",
+      "FIREBASE_CONFIG_ERROR",
+      500
+    );
+  }
+}
+
+/**
+ * Firebase services interface
+ */
+interface FirebaseServices {
+  app: FirebaseApp;
+  db: Firestore;
+  auth: Auth;
+  storage: FirebaseStorage;
+  analytics: Analytics | null;
+  performance: FirebasePerformance | null;
+}
+
+/**
+ * Initialize Firebase app with error handling
+ */
+function initializeFirebaseApp(): FirebaseApp {
+  try {
+    validateFirebaseConfig(firebaseConfig);
+
+    // Check if app already exists
+    const existingApps = getApps();
+    if (existingApps.length > 0) {
+      return getApp();
+    }
+
+    const app = initializeApp(firebaseConfig);
+
+    if (env.isDev) {
+      console.log("🔥 Firebase app initialized successfully");
+    }
+
+    return app;
+  } catch (error) {
+    console.error("❌ Failed to initialize Firebase app:", error);
+    throw new AppError(
+      "Failed to initialize Firebase application",
+      "FIREBASE_INIT_ERROR",
+      500
+    );
+  }
+}
+
+/**
+ * Initialize Firestore with emulator support
+ */
+function initializeFirestore(app: FirebaseApp): Firestore {
+  try {
+    const db = getFirestore(app);
+
+    // Connect to emulator in development if configured
+    if (env.isDev && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true") {
+      const emulatorHost =
+        process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST || "localhost";
+      const emulatorPort = parseInt(
+        process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_PORT || "8080"
+      );
+
+      try {
+        connectFirestoreEmulator(db, emulatorHost, emulatorPort);
+        console.log(
+          `🔥 Connected to Firestore emulator at ${emulatorHost}:${emulatorPort}`
+        );
+      } catch (error) {
+        console.warn("⚠️ Failed to connect to Firestore emulator:", error);
+      }
+    }
+
+    return db;
+  } catch (error) {
+    console.error("❌ Failed to initialize Firestore:", error);
+    throw new AppError(
+      "Failed to initialize Firestore database",
+      "FIRESTORE_INIT_ERROR",
+      500
+    );
+  }
+}
+
+/**
+ * Initialize Firebase Analytics (client-side only)
+ */
+async function initializeAnalytics(
+  app: FirebaseApp
+): Promise<Analytics | null> {
+  if (env.isServer || !firebaseConfig.measurementId) {
+    return null;
+  }
+
+  try {
+    const supported = await isSupported();
+    if (!supported) {
+      console.warn("⚠️ Firebase Analytics not supported in this environment");
+      return null;
+    }
+
+    const analytics = getAnalytics(app);
+
+    if (env.isDev) {
+      console.log("📊 Firebase Analytics initialized");
+    }
+
+    return analytics;
+  } catch (error) {
+    console.warn("⚠️ Failed to initialize Firebase Analytics:", error);
+    return null;
+  }
+}
+
+/**
+ * Initialize Firebase Performance (client-side only)
+ */
+function initializePerformance(app: FirebaseApp): FirebasePerformance | null {
+  if (env.isServer) {
+    return null;
+  }
+
+  try {
+    const performance = getPerformance(app);
+
+    if (env.isDev) {
+      console.log("⚡ Firebase Performance initialized");
+    }
+
+    return performance;
+  } catch (error) {
+    console.warn("⚠️ Failed to initialize Firebase Performance:", error);
+    return null;
+  }
+}
+
+/**
+ * Initialize all Firebase services
+ */
+async function initializeFirebaseServices(): Promise<FirebaseServices> {
+  const app = initializeFirebaseApp();
+  const db = initializeFirestore(app);
+  const auth = getAuth(app);
+  const storage = getStorage(app);
+  const analytics = await initializeAnalytics(app);
+  const performance = initializePerformance(app);
+
+  return {
+    app,
+    db,
+    auth,
+    storage,
+    analytics,
+    performance,
+  };
+}
+
+/**
+ * Firebase connection manager
+ */
+export class FirebaseManager {
+  private static instance: FirebaseManager;
+  private services: FirebaseServices | null = null;
+  private isInitialized = false;
+  private initPromise: Promise<FirebaseServices> | null = null;
+
+  private constructor() {}
+
+  static getInstance(): FirebaseManager {
+    if (!FirebaseManager.instance) {
+      FirebaseManager.instance = new FirebaseManager();
+    }
+    return FirebaseManager.instance;
+  }
+
+  async getServices(): Promise<FirebaseServices> {
+    if (this.services && this.isInitialized) {
+      return this.services;
+    }
+
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = this.initialize();
+    return this.initPromise;
+  }
+
+  private async initialize(): Promise<FirebaseServices> {
+    try {
+      this.services = await initializeFirebaseServices();
+      this.isInitialized = true;
+
+      if (env.isDev) {
+        console.log("🚀 All Firebase services initialized successfully");
+      }
+
+      return this.services;
+    } catch (error) {
+      this.initPromise = null;
+      throw error;
+    }
+  }
+
+  async enableOfflineSupport(): Promise<void> {
+    if (!this.services) {
+      await this.getServices();
+    }
+
+    try {
+      await enableNetwork(this.services!.db);
+      console.log("🌐 Firestore network enabled");
+    } catch (error) {
+      console.warn("⚠️ Failed to enable Firestore network:", error);
+    }
+  }
+
+  async disableOfflineSupport(): Promise<void> {
+    if (!this.services) return;
+
+    try {
+      await disableNetwork(this.services.db);
+      console.log("📴 Firestore network disabled");
+    } catch (error) {
+      console.warn("⚠️ Failed to disable Firestore network:", error);
+    }
+  }
+
+  async clearCache(): Promise<void> {
+    if (!this.services) return;
+
+    try {
+      await clearIndexedDbPersistence(this.services.db);
+      console.log("🧹 Firestore cache cleared");
+    } catch (error) {
+      console.warn("⚠️ Failed to clear Firestore cache:", error);
+    }
+  }
+
+  async terminate(): Promise<void> {
+    if (!this.services) return;
+
+    try {
+      await terminate(this.services.db);
+      this.services = null;
+      this.isInitialized = false;
+      this.initPromise = null;
+      console.log("🔚 Firebase services terminated");
+    } catch (error) {
+      console.error("❌ Failed to terminate Firebase services:", error);
+    }
+  }
+
+  getConnectionState(): "connected" | "disconnected" | "connecting" {
+    if (!this.services) return "disconnected";
+    if (this.isInitialized) return "connected";
+    return "connecting";
+  }
+}
+
+// Create singleton instance
+const firebaseManager = FirebaseManager.getInstance();
+
+/**
+ * Get Firebase services (async)
+ */
+export async function getFirebaseServices(): Promise<FirebaseServices> {
+  return firebaseManager.getServices();
+}
+
+/**
+ * Export individual services for convenience
+ */
+export const getFirebaseApp = async (): Promise<FirebaseApp> => {
+  const services = await getFirebaseServices();
+  return services.app;
+};
+
+export const getFirebaseDb = async (): Promise<Firestore> => {
+  const services = await getFirebaseServices();
+  return services.db;
+};
+
+export const getFirebaseAuth = async (): Promise<Auth> => {
+  const services = await getFirebaseServices();
+  return services.auth;
+};
+
+export const getFirebaseStorage = async (): Promise<FirebaseStorage> => {
+  const services = await getFirebaseServices();
+  return services.storage;
+};
+
+export const getFirebaseAnalytics = async (): Promise<Analytics | null> => {
+  const services = await getFirebaseServices();
+  return services.analytics;
+};
+
+export const getFirebasePerformance =
+  async (): Promise<FirebasePerformance | null> => {
+    const services = await getFirebaseServices();
+    return services.performance;
+  };
+
+/**
+ * Legacy exports for backward compatibility
+ */
+let legacyApp: FirebaseApp | null = null;
+let legacyDb: Firestore | null = null;
+
+// Initialize legacy exports
+(async () => {
+  try {
+    const services = await getFirebaseServices();
+    legacyApp = services.app;
+    legacyDb = services.db;
+  } catch (error) {
+    console.error("Failed to initialize legacy Firebase exports:", error);
+  }
+})();
+
+export { legacyApp as app, legacyDb as db };
+
+/**
+ * Firebase connection utilities
+ */
+export const firebase = {
+  manager: firebaseManager,
+  enableOffline: () => firebaseManager.enableOfflineSupport(),
+  disableOffline: () => firebaseManager.disableOfflineSupport(),
+  clearCache: () => firebaseManager.clearCache(),
+  terminate: () => firebaseManager.terminate(),
+  getConnectionState: () => firebaseManager.getConnectionState(),
+};
+
+/**
+ * Export types
+ */
+export type { FirebaseConfig, FirebaseServices };
