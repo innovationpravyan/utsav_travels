@@ -1,7 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -34,7 +34,7 @@ function SubmitButton() {
 
 export function RequestCallDialog() {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useFormState(requestCallBack, initialState);
+  const [state, formAction] = useActionState(requestCallBack, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -46,7 +46,7 @@ export function RequestCallDialog() {
       });
       formRef.current?.reset();
       setOpen(false);
-    } else if (state.message && state.errors) {
+    } else if (state.message && state.errors && Object.keys(state.errors).length > 0) {
       toast({
         title: 'Error',
         description: state.message,
