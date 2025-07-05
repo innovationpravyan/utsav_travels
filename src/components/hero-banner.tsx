@@ -1,7 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Globe from '@/components/globe';
+import dynamic from 'next/dynamic';
+import { Skeleton } from './ui/skeleton';
+
+const Globe = dynamic(
+  () => import('@/components/globe'),
+  { 
+    ssr: false,
+    loading: () => <Skeleton className="absolute inset-0 h-full w-full bg-black" />
+  }
+);
+
 
 export function HeroBanner() {
   return (
