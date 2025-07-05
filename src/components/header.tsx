@@ -39,7 +39,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Plane className="h-6 w-6 text-primary" />
-          <span className="font-headline text-xl font-bold">Wanderlust 3D</span>
+          <span className="font-headline text-xl font-bold">Utsav Travels</span>
         </Link>
 
         {isMobile ? (
@@ -54,7 +54,7 @@ export function Header() {
               <div className="flex flex-col gap-8 pt-8">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setSheetOpen(false)}>
                    <Plane className="h-6 w-6 text-primary" />
-                   <span className="font-headline text-xl font-bold">Wanderlust 3D</span>
+                   <span className="font-headline text-xl font-bold">Utsav Travels</span>
                 </Link>
                 <NavLinks className="flex-col items-start gap-4" />
                 <RequestCallDialog />

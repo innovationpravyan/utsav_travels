@@ -6,6 +6,8 @@ import { Calendar, CheckCircle, DollarSign, Pin, Info, Star } from "lucide-react
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { PackageCard } from "@/components/package-card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 type PackageDetailPageProps = {
   params: {
@@ -39,8 +41,8 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-center text-white">
-          <h1 className="font-headline text-5xl md:text-7xl font-bold">{pkg.name}</h1>
-          <p className="text-xl md:text-2xl mt-2 text-primary">{pkg.tagline}</p>
+          <h1 className="font-headline text-5xl md:text-7xl font-bold drop-shadow-lg">{pkg.name}</h1>
+          <p className="text-xl md:text-2xl mt-2 text-primary drop-shadow-md">{pkg.tagline}</p>
           <div className="flex flex-wrap gap-2 mt-4">
             {pkg.tags.map((tag) => (
                 <Badge key={tag} variant="secondary" className="text-sm">
@@ -64,18 +66,17 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
           
             {/* Itinerary */}
             <div className="mb-12">
-              <h2 className="font-headline text-4xl mb-6">Your Adventure Itinerary</h2>
-              <div className="space-y-8 border-l-2 border-primary pl-8 relative">
-                {pkg.itinerary.map((item, index) => (
-                  <div key={item.day} className="relative">
-                    <div className="absolute -left-[42px] top-1 h-6 w-6 rounded-full bg-primary border-4 border-secondary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                      {item.day}
-                    </div>
-                    <h3 className="font-headline text-2xl font-semibold mb-1">{item.title}</h3>
-                    <p className="text-muted-foreground">{item.description}</p>
-                  </div>
-                ))}
-              </div>
+               <h2 className="font-headline text-4xl mb-6">Your Adventure Itinerary</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {pkg.itinerary.map((item) => (
+                    <AccordionItem value={`day-${item.day}`} key={item.day}>
+                      <AccordionTrigger className="text-2xl font-headline hover:no-underline">Day {item.day}: {item.title}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground text-base pl-2">
+                        {item.description}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
             </div>
 
             {/* Gallery */}

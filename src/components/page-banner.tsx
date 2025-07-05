@@ -21,7 +21,6 @@ export function PageBanner({ title, items }: PageBannerProps) {
 
   return (
     <section className="relative h-[50vh] w-full overflow-hidden bg-secondary">
-      {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
           className="absolute inset-0 z-0"
@@ -40,16 +39,11 @@ export function PageBanner({ title, items }: PageBannerProps) {
                   priority={index === 0}
                   data-ai-hint="travel background"
                 />
-                <div className="absolute inset-0 bg-black/60" />
-                <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white drop-shadow-lg">
-                  <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
-                  <p className="text-lg text-white/90">{item.tagline}</p>
-                </div>
+                <div className="absolute inset-0 bg-black/50" />
               </CarouselItem>
             ))}
           </CarouselContent>
         </Carousel>
-      )}
 
       <div className="relative z-10 flex h-full items-center justify-center p-4 text-center text-white">
         <h1 className="text-5xl font-headline font-bold drop-shadow-2xl md:text-7xl">

@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { WhatsappButton } from '@/components/whatsapp-button';
 
 export const metadata: Metadata = {
-  title: 'Wanderlust 3D',
+  title: 'Utsav Travels',
   description: 'Explore the spiritual heritage of Varanasi, Ayodhya, and Prayagraj',
 };
 
