@@ -32,6 +32,7 @@ export function HeroBanner({ places }: { places: Place[] }) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-background">
+      {/* Layer 1: Background Carousel */}
       <Carousel
         setApi={setApi}
         plugins={[plugin.current]}
@@ -57,8 +58,9 @@ export function HeroBanner({ places }: { places: Place[] }) {
         </CarouselContent>
       </Carousel>
 
+      {/* Layer 2: Centered Text Overlay */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4">
           <RunningText text="Discover Sacred" />
           <br />
           <RunningText text="Destinations" className="font-headline" />
@@ -83,7 +85,8 @@ export function HeroBanner({ places }: { places: Place[] }) {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-0 right-0 z-10 flex flex-col items-center justify-center gap-4 text-white px-4">
+      {/* Layer 3: Bottom Info and Controls */}
+      <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center justify-center gap-4 text-white px-4">
         {currentPlace && (
           <p className="text-sm font-medium tracking-wider hidden sm:block drop-shadow-md">
             Now Showing: {currentPlace.name}, {currentPlace.city}

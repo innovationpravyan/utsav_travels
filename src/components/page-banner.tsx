@@ -23,6 +23,7 @@ export function PageBanner({ title, items }: PageBannerProps) {
 
   return (
     <section className="relative h-[50vh] w-full overflow-hidden bg-secondary">
+      {/* Layer 1: Background Carousel */}
       {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
@@ -53,10 +54,13 @@ export function PageBanner({ title, items }: PageBannerProps) {
         </Carousel>
       )}
 
-      <div className="absolute inset-0 z-10 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
-        <h1 className="text-5xl md:text-7xl drop-shadow-2xl">
-          <RunningText text={title} />
-        </h1>
+      {/* Layer 2: Main Title Overlay */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center text-center">
+        <div className="container px-4">
+            <h1 className="text-5xl md:text-7xl drop-shadow-2xl">
+              <RunningText text={title} />
+            </h1>
+        </div>
       </div>
     </section>
   );
