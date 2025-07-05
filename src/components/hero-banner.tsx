@@ -11,6 +11,7 @@ const Globe = dynamic(() => import('@/components/globe'), {
   loading: () => <Skeleton className="h-screen w-full bg-black" /> 
 });
 
+
 export function HeroBanner() {
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
