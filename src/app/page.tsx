@@ -1,19 +1,26 @@
 import Link from "next/link";
-import { HeroBanner } from "@/components/hero-banner";
 import { PlaceCard } from "@/components/place-card";
 import { PackageCard } from "@/components/package-card";
 import { getPlaces, getPackages } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { PageBanner, type BannerItem } from "@/components/page-banner";
 
 export default async function Home() {
   const featuredPlaces = (await getPlaces()).slice(0, 5);
   const popularPackages = (await getPackages()).slice(0, 3);
 
+  const bannerItems: BannerItem[] = featuredPlaces.map(p => ({
+    id: p.id,
+    image: p.images[0] || p.thumbnail,
+    name: p.name,
+    tagline: p.tagline
+  }));
+
   return (
     <div className="animate-fade-in">
-      <HeroBanner />
+      <PageBanner title="Explore the World" items={bannerItems} />
 
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">

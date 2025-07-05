@@ -1,111 +1,26 @@
-'use client';
+import { getPlaces } from '@/lib/data';
+import { PageBanner, type BannerItem } from '@/components/page-banner';
+import { DestinationsClient } from './destinations-client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { getPlaces, Place } from '@/lib/data';
-import { PlaceCard } from '@/components/place-card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Search } from 'lucide-react';
-
-export default function DestinationsPage() {
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
-  useEffect(() => {
-    async function fetchPlaces() {
-      const allPlaces = await getPlaces();
-      setPlaces(allPlaces);
-      setLoading(false);
-    }
-    fetchPlaces();
-  }, []);
-
-  const cities = useMemo(() => ['all', ...Array.from(new Set(places.map(p => p.city)))], [places]);
-  const categories = useMemo(() => ['all', ...Array.from(new Set(places.map(p => p.category)))], [places]);
-
-  const filteredPlaces = useMemo(() => {
-    return places.filter(place => {
-      const matchesSearch = searchQuery.trim() === '' || 
-        place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        place.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesCity = selectedCity === 'all' || place.city === selectedCity;
-      const matchesCategory = selectedCategory === 'all' || place.category === selectedCategory;
-      
-      return matchesSearch && matchesCity && matchesCategory;
-    });
-  }, [places, searchQuery, selectedCity, selectedCategory]);
+export default async function DestinationsPage() {
+  const allPlaces = await getPlaces();
+  
+  const bannerItems: BannerItem[] = allPlaces.slice(0, 5).map(p => ({
+    id: p.id,
+    image: p.images[0] || p.thumbnail,
+    name: p.name,
+    tagline: p.tagline
+  }));
 
   return (
-    <div className="container mx-auto px-4 py-16 animate-fade-in">
-      <h1 className="font-headline text-5xl md:text-7xl font-bold text-center mb-4">Explore Our Destinations</h1>
-      <p className="text-center max-w-2xl mx-auto text-lg text-muted-foreground mb-12">
-        Journey through sacred cities and timeless landmarks. Find your next spiritual adventure.
-      </p>
-
-      {/* Filter and Search Section */}
-      <div className="flex flex-col md:flex-row gap-4 mb-12 p-4 bg-secondary rounded-lg">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input 
-            placeholder="Search by name or tag..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={selectedCity} onValueChange={setSelectedCity}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Filter by City" />
-          </SelectTrigger>
-          <SelectContent>
-            {cities.map(city => (
-              <SelectItem key={city} value={city}>{city === 'all' ? 'All Cities' : city}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Filter by Category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map(cat => (
-              <SelectItem key={cat} value={cat}>{cat === 'all' ? 'All Categories' : cat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Places Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[...Array(6)].map((_, i) => (
-             <div key={i} className="flex flex-col space-y-3">
-                <Skeleton className="h-[200px] w-full rounded-xl" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[250px]" />
-                  <Skeleton className="h-4 w-[200px]" />
-                </div>
-              </div>
-          ))}
-        </div>
-      ) : (
-        <>
-          {filteredPlaces.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} />
-              ))}
-            </div>
-          ) : (
-             <p className="text-center text-muted-foreground text-lg col-span-full">No destinations found matching your criteria.</p>
-          )}
-        </>
-      )}
+    <div className="animate-fade-in">
+       <PageBanner title="Explore Our Destinations" items={bannerItems} />
+       <div className="container mx-auto px-4 py-16">
+         <p className="text-center max-w-2xl mx-auto text-lg text-muted-foreground mb-12">
+            Journey through sacred cities and timeless landmarks. Find your next spiritual adventure.
+         </p>
+         <DestinationsClient places={allPlaces} />
+       </div>
     </div>
   );
 }
