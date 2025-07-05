@@ -45,8 +45,8 @@ export function PageBanner({ title, items }: PageBannerProps) {
                   priority
                   data-ai-hint="travel background"
                 />
-                 <div className="absolute inset-0 bg-black/50" />
-                 <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8 text-white">
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                 <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white">
                     <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
                     <p className="text-lg text-primary">{item.tagline}</p>
                  </div>
@@ -55,7 +55,7 @@ export function PageBanner({ title, items }: PageBannerProps) {
           </CarouselContent>
         </Carousel>
       )}
-      <div className="absolute inset-0 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white z-20 pointer-events-none">
+      <div className="absolute inset-0 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center z-20 pointer-events-none">
         <h1 className="text-5xl md:text-7xl lg:text-8xl">
           <RunningText text={title} />
         </h1>
