@@ -3,7 +3,9 @@ import { Suspense } from 'react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Globe } from './globe';
+import dynamic from 'next/dynamic';
+
+const Globe = dynamic(() => import('@/components/globe'), { ssr: false });
 
 export function HeroBanner() {
   return (

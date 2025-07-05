@@ -13,7 +13,9 @@ const GlobeMesh = () => {
   ]);
 
   useFrame(({ clock }) => {
-    meshRef.current.rotation.y = clock.getElapsedTime() / 6;
+    if(meshRef.current) {
+      meshRef.current.rotation.y = clock.getElapsedTime() / 6;
+    }
   });
 
   return (
@@ -29,7 +31,7 @@ const GlobeMesh = () => {
   );
 };
 
-export const Globe = () => {
+export default function Globe() {
   return (
     <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
       <ambientLight intensity={0.2} />
