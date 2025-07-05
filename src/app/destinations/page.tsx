@@ -9,7 +9,7 @@ export default async function DestinationsPage() {
     id: p.id,
     image: p.images[0] || p.thumbnail,
     name: p.name,
-    tagline: p.tagline
+    tagline: p.city
   }));
 
   return (

@@ -27,7 +27,7 @@ export function PageBanner({ title, items }: PageBannerProps) {
       {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
-          className="w-full h-full"
+          className="absolute inset-0 z-10 w-full h-full"
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
           opts={{
@@ -55,7 +55,7 @@ export function PageBanner({ title, items }: PageBannerProps) {
           </CarouselContent>
         </Carousel>
       )}
-      <div className="absolute inset-0 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center z-20 pointer-events-none">
+      <div className="absolute inset-0 z-20 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center pointer-events-none">
         <h1 className="text-5xl md:text-7xl lg:text-8xl">
           <RunningText text={title} />
         </h1>
