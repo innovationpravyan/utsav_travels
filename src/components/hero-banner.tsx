@@ -4,16 +4,20 @@ import { Button } from './ui/button';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { Skeleton } from './ui/skeleton';
 
-const Globe = dynamic(() => import('@/components/globe'), { ssr: false });
+const Globe = dynamic(() => import('@/components/globe'), { 
+  ssr: false,
+  loading: () => <Skeleton className="h-full w-full bg-black" />
+});
 
 export function HeroBanner() {
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
-      <Suspense fallback={<div className="h-full w-full bg-black" />}>
+      <Suspense fallback={<Skeleton className="h-full w-full bg-black" />}>
         <Globe />
       </Suspense>
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center text-white">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center text-white bg-black/30">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
