@@ -22,7 +22,6 @@ export function PageBanner({ title, items }: PageBannerProps) {
 
   return (
     <section className="relative h-[50vh] w-full overflow-hidden bg-secondary">
-      {/* Carousel for background images */}
       {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
@@ -52,10 +51,10 @@ export function PageBanner({ title, items }: PageBannerProps) {
           </CarouselContent>
         </Carousel>
       )}
-      
-      <div className="relative z-10 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white bg-transparent">
+
+      <div className="relative z-10 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
         <h1 className="text-5xl md:text-7xl lg:text-8xl drop-shadow-2xl">
-          <RunningText text={title} />
+          <RunningText text={title} className="text-white" />
         </h1>
       </div>
     </section>
