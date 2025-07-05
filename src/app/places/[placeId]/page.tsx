@@ -18,8 +18,8 @@ type PlaceDetailPageProps = {
   };
 };
 
-export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
-  const place = getPlaceById(params.placeId);
+export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) {
+  const place = await getPlaceById(params.placeId);
 
   if (!place) {
     notFound();
@@ -30,7 +30,7 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
       {/* Hero Section */}
       <section className="relative h-[60vh] w-full">
         <Image
-          src={place.images[0]}
+          src={place.images[0] || 'https://placehold.co/1200x800'}
           alt={place.name}
           fill
           className="object-cover"
@@ -84,8 +84,8 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {place.highlights.map((highlight) => (
-                      <li key={highlight}>
+                    {place.highlights.map((highlight, index) => (
+                      <li key={index}>
                         <Badge variant="outline" className="text-base py-1 px-3 border-accent text-accent">{highlight}</Badge>
                       </li>
                     ))}
@@ -125,10 +125,11 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
                     <Card>
                         <CardContent className="relative aspect-video p-0 rounded-lg overflow-hidden">
                            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center">
-                               <Image src="https://placehold.co/800x600/e2e8f0/334155?text=Map+Placeholder" alt="Map of the location" fill className="object-cover"/>
+                               <Image src={`https://placehold.co/800x600/e2e8f0/334155?text=Map+of+${place.name.replace(' ','+')}`} alt={`Map of ${place.name}`} fill className="object-cover"/>
                                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
                                     <MapPin className="h-12 w-12 text-white/80 mb-2"/>
                                     <p className="text-white font-bold text-lg">{place.name}</p>
+                                    <p className="text-white text-sm">Lat: {place.location.lat}, Lng: {place.location.lng}</p>
                                </div>
                            </div>
                         </CardContent>

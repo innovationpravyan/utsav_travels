@@ -2,7 +2,7 @@ import { getPackageById } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle, DollarSign } from "lucide-react";
+import { Calendar, CheckCircle, DollarSign, Pin } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -12,8 +12,8 @@ type PackageDetailPageProps = {
   };
 };
 
-export default function PackageDetailPage({ params }: PackageDetailPageProps) {
-  const pkg = getPackageById(params.packageId);
+export default async function PackageDetailPage({ params }: PackageDetailPageProps) {
+  const pkg = await getPackageById(params.packageId);
 
   if (!pkg) {
     notFound();
@@ -24,7 +24,7 @@ export default function PackageDetailPage({ params }: PackageDetailPageProps) {
       {/* Hero Section */}
       <section className="relative h-[50vh] w-full">
         <Image
-          src={pkg.images[0]}
+          src={pkg.images[0] || 'https://placehold.co/1200x800'}
           alt={pkg.name}
           fill
           className="object-cover"
@@ -92,13 +92,21 @@ export default function PackageDetailPage({ params }: PackageDetailPageProps) {
                        <p className="font-bold text-lg">{pkg.duration}</p>
                    </div>
                 </div>
+                <div className="flex items-center gap-4 mb-4 pb-4 border-b">
+                   <Pin className="h-8 w-8 text-accent"/>
+                   <div>
+                       <p className="text-sm text-muted-foreground">Cities</p>
+                       <p className="font-bold text-lg">{pkg.cities.join(', ')}</p>
+                   </div>
+                </div>
                 <div className="flex items-center gap-4 mb-6">
                    <DollarSign className="h-8 w-8 text-accent"/>
                    <div>
-                       <p className="text-sm text-muted-foreground">Starting From</p>
-                       <p className="font-bold text-lg">{pkg.price} / person</p>
+                       <p className="text-sm text-muted-foreground">Price</p>
+                       <p className="font-bold text-lg">{pkg.price}</p>
                    </div>
                 </div>
+
 
                 <h3 className="font-headline text-2xl mb-4">What's Included</h3>
                 <ul className="space-y-3 text-muted-foreground">

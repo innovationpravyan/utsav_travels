@@ -6,9 +6,9 @@ import { getPlaces, getPackages } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-export default function Home() {
-  const featuredPlaces = getPlaces().slice(0, 3);
-  const popularPackages = getPackages().slice(0, 3);
+export default async function Home() {
+  const featuredPlaces = (await getPlaces()).slice(0, 3);
+  const popularPackages = (await getPackages()).slice(0, 3);
 
   return (
     <div className="animate-fade-in">

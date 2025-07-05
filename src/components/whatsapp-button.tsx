@@ -32,14 +32,15 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function WhatsappButton() {
-  const phoneNumber = "1234567890"; // Replace with your business phone number
+  const phoneNumber = "919876543210"; 
+  const message = "Hello! I am interested in exploring the heritage sites of Varanasi, Ayodhya, and Prayagraj. Please provide me with more information about your services.";
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
-            href={`https://wa.me/${phoneNumber}`}
+            href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full bg-background shadow-lg flex items-center justify-center transition-transform hover:scale-110"

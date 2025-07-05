@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { RequestCallDialog } from "./request-call-dialog";
 
 const NAV_LINKS = [
   { href: "/destinations", label: "Destinations" },
@@ -56,13 +57,14 @@ export function Header() {
                    <span className="font-headline text-xl font-bold">Wanderlust 3D</span>
                 </Link>
                 <NavLinks className="flex-col items-start gap-4" />
+                <RequestCallDialog />
               </div>
             </SheetContent>
           </Sheet>
         ) : (
           <div className="flex items-center gap-4">
             <NavLinks />
-            <Button>Book Now</Button>
+            <RequestCallDialog />
           </div>
         )}
       </div>
