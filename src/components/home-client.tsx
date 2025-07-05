@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Link from "next/link";
 import { PlaceCard } from "@/components/place-card";
 import { PackageCard } from "@/components/package-card";
@@ -8,15 +7,7 @@ import { type Place, type Package } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Skeleton } from '@/components/ui/skeleton';
-
-const HeroBanner = dynamic(
-  () => import('@/components/hero-banner').then((mod) => mod.HeroBanner),
-  { 
-    ssr: false,
-    loading: () => <Skeleton className="relative h-screen w-full" /> 
-  }
-);
+import { HeroBanner } from "@/components/hero-banner";
 
 interface HomeClientProps {
   featuredPlaces: Place[];

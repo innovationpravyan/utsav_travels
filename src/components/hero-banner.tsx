@@ -1,5 +1,5 @@
 'use client';
-import { Suspense } from 'react';
+
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -14,9 +14,7 @@ const Globe = dynamic(() => import('@/components/globe'), {
 export function HeroBanner() {
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
-      <Suspense fallback={<Skeleton className="h-full w-full bg-black" />}>
-        <Globe />
-      </Suspense>
+      <Globe />
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center text-white bg-black/30">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
