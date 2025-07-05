@@ -7,8 +7,17 @@ import { type Place, type Package } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { HeroBanner } from '@/components/hero-banner';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import { Skeleton } from "./ui/skeleton";
+
+const HeroBanner = dynamic(
+  () => import('@/components/hero-banner').then(mod => mod.HeroBanner),
+  { 
+    ssr: false,
+    loading: () => <Skeleton className="h-screen w-full bg-black" />
+  }
+);
 
 interface HomeClientProps {
   featuredPlaces: Place[];
