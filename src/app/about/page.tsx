@@ -28,15 +28,15 @@ export default async function AboutPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageBanner title="About Utsav Travels" items={bannerItems} />
+      <PageBanner title="About Wanderlust 3D" items={bannerItems} />
 
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="font-headline text-4xl mb-6">Who We Are</h2>
               <p className="text-lg text-muted-foreground mb-4">
-                Utsav Travels is a premier travel showcase dedicated to unveiling the spiritual, cultural, and historical richness of India's most sacred cities. We were born from a passion for heritage and a desire to connect travelers with the authentic soul of Varanasi, Ayodhya, and Prayagraj.
+                Wanderlust 3D is a premier travel showcase dedicated to unveiling the spiritual, cultural, and historical richness of India's most sacred cities. We were born from a passion for heritage and a desire to connect travelers with the authentic soul of Varanasi, Ayodhya, and Prayagraj.
               </p>
               <p className="text-lg text-muted-foreground">
                 Our initiative focuses on promoting sustainable and immersive tourism, ensuring that every journey is not just a trip, but a profound experience that respects local traditions and supports communities.
@@ -85,7 +85,7 @@ export default async function AboutPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-headline text-center mb-12">Our Core Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="bg-card/60 backdrop-blur-md">
+            <Card className="bg-card/60 backdrop-blur-sm border border-white/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 font-headline text-2xl">
                   <Target className="h-8 w-8 text-accent" />
@@ -96,7 +96,7 @@ export default async function AboutPage() {
                 Our mission is to be the leading platform for heritage tourism in the region, showcasing its spiritual depth to the world. We envision a future where every traveler leaves with a deeper understanding and appreciation of this ancient land.
               </CardContent>
             </Card>
-            <Card className="bg-card/60 backdrop-blur-md">
+            <Card className="bg-card/60 backdrop-blur-sm border border-white/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 font-headline text-2xl">
                   <Heart className="h-8 w-8 text-accent" />
@@ -107,7 +107,7 @@ export default async function AboutPage() {
                 With our deep local expertise, we offer authentic, off-the-beaten-path experiences. Our seamless WhatsApp contact system and commitment to personalized service make planning your spiritual journey effortless and enjoyable.
               </CardContent>
             </Card>
-            <Card className="bg-card/60 backdrop-blur-md">
+            <Card className="bg-card/60 backdrop-blur-sm border border-white/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 font-headline text-2xl">
                   <MapPin className="h-8 w-8 text-accent" />

@@ -38,8 +38,8 @@ export default async function Home() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2" />
-              <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2" />
+              <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2 hidden lg:flex" />
+              <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2 hidden lg:flex" />
             </Carousel>
           </div>
            <div className="text-center mt-12">
@@ -52,7 +52,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-headline text-center mb-4">Popular Packages</h2>
           <p className="text-center max-w-2xl mx-auto text-lg text-muted-foreground mb-12">

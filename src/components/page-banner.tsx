@@ -1,10 +1,8 @@
-
 'use client';
 import * as React from 'react';
 import Autoplay from 'embla-carousel-autoplay';
 import Image from 'next/image';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import { RunningText } from './running-text';
 
 export interface BannerItem {
   id: string;
@@ -23,7 +21,6 @@ export function PageBanner({ title, items }: PageBannerProps) {
 
   return (
     <section className="relative h-[50vh] w-full overflow-hidden bg-secondary">
-      {/* Layer 1: Background Carousel */}
       {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
@@ -43,7 +40,7 @@ export function PageBanner({ title, items }: PageBannerProps) {
                   priority={index === 0}
                   data-ai-hint="travel background"
                 />
-                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute inset-0 bg-black/60" />
                 <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white drop-shadow-lg">
                   <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
                   <p className="text-lg text-white/90">{item.tagline}</p>
@@ -54,13 +51,10 @@ export function PageBanner({ title, items }: PageBannerProps) {
         </Carousel>
       )}
 
-      {/* Layer 2: Main Title Overlay */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center text-center">
-        <div className="container px-4">
-            <h1 className="text-5xl md:text-7xl drop-shadow-2xl">
-              <RunningText text={title} />
-            </h1>
-        </div>
+      <div className="relative z-10 flex h-full items-center justify-center p-4 text-center text-white">
+        <h1 className="text-5xl font-headline font-bold drop-shadow-2xl md:text-7xl">
+          {title}
+        </h1>
       </div>
     </section>
   );

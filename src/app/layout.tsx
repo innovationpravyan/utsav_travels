@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { WhatsappButton } from '@/components/whatsapp-button';
 
 export const metadata: Metadata = {
-  title: 'Utsav Travels',
+  title: 'Wanderlust 3D',
   description: 'Explore the spiritual heritage of Varanasi, Ayodhya, and Prayagraj',
 };
 
@@ -26,7 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
+      <body className={cn('font-body antialiased min-h-screen flex flex-col bg-background')}>
         <Header />
         <main className="flex-grow">{children}</main>
         <Footer />

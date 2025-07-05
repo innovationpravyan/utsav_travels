@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
@@ -9,7 +8,6 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { RunningText } from './running-text';
 
 export function HeroBanner({ places }: { places: Place[] }) {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
@@ -32,18 +30,17 @@ export function HeroBanner({ places }: { places: Place[] }) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-background">
-      {/* Layer 1: Background Carousel */}
       <Carousel
         setApi={setApi}
         plugins={[plugin.current]}
-        className="absolute inset-0 w-full h-full z-0"
+        className="absolute inset-0 z-0"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
         opts={{ loop: true }}
       >
         <CarouselContent className="h-full">
           {places.map((place, index) => (
-            <CarouselItem key={place.id} className="h-full relative">
+            <CarouselItem key={place.id} className="relative h-full">
               <Image
                 src={place.images[0] || place.thumbnail}
                 alt={place.name}
@@ -58,37 +55,35 @@ export function HeroBanner({ places }: { places: Place[] }) {
         </CarouselContent>
       </Carousel>
 
-      {/* Layer 2: Centered Text Overlay */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4">
-          <RunningText text="Discover Sacred" />
+      <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center text-white">
+        <h1 className="text-5xl font-bold drop-shadow-lg md:text-7xl lg:text-8xl">
+          Discover Sacred
           <br />
-          <RunningText text="Destinations" className="font-headline" />
+          <span className="font-headline">Destinations</span>
         </h1>
-        <p className="max-w-3xl mx-auto text-lg md:text-xl text-white/90 drop-shadow-lg">
+        <p className="mx-auto mt-4 max-w-3xl text-lg text-white/90 drop-shadow-lg md:text-xl">
           Embark on a spiritual journey through Varanasi, Prayagraj, and Ayodhya.
           <br className="hidden md:block" />
           Experience the rich heritage and timeless beauty of India.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-8">
-          <Button asChild size="lg" className="text-lg py-7 px-10">
+        <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+          <Button asChild size="lg" className="px-10 py-7 text-lg">
             <Link href="/destinations">Explore Destinations</Link>
           </Button>
           <Button
             asChild
             size="lg"
             variant="outline"
-            className="text-lg py-7 px-10 border-white/50 bg-black/20 hover:bg-white/10 text-white"
+            className="border-white/50 bg-black/20 px-10 py-7 text-lg text-white hover:bg-white/10"
           >
             <Link href="/packages">View Packages</Link>
           </Button>
         </div>
       </div>
 
-      {/* Layer 3: Bottom Info and Controls */}
-      <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center justify-center gap-4 text-white px-4">
+      <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center justify-center gap-4 px-4 text-white">
         {currentPlace && (
-          <p className="text-sm font-medium tracking-wider hidden sm:block drop-shadow-md">
+          <p className="hidden text-sm font-medium tracking-wider drop-shadow-md sm:block">
             Now Showing: {currentPlace.name}, {currentPlace.city}
           </p>
         )}
