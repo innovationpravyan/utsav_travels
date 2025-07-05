@@ -3,7 +3,13 @@
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Globe from '@/components/globe';
+import dynamic from 'next/dynamic';
+import { Skeleton } from './ui/skeleton';
+
+const Globe = dynamic(() => import('@/components/globe'), { 
+  ssr: false,
+  loading: () => <Skeleton className="h-screen w-full bg-black" /> 
+});
 
 export function HeroBanner() {
   return (
