@@ -7,37 +7,20 @@ import { type Place, type Package } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { motion } from 'framer-motion';
+import { MotionDiv } from "@/components/motion-div";
 import { HeroBanner } from "@/components/hero-banner";
-import { Skeleton } from "./ui/skeleton";
 
 interface HomeClientProps {
   featuredPlaces: Place[];
   popularPackages: Package[];
 }
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
-};
-
-
 export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps) {
   return (
     <div className="animate-fade-in">
       <HeroBanner />
 
-      <motion.section 
-        className="py-16 md:py-24 bg-secondary"
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-      >
+      <MotionDiv className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-headline text-center mb-4">Featured Destinations</h2>
           <p className="text-center max-w-2xl mx-auto text-lg text-muted-foreground mb-12">
@@ -67,15 +50,9 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
             </Button>
           </div>
         </div>
-      </motion.section>
+      </MotionDiv>
 
-      <motion.section 
-        className="py-16 md:py-24 bg-background"
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-      >
+      <MotionDiv className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-headline text-center mb-4">Popular Packages</h2>
           <p className="text-center max-w-2xl mx-auto text-lg text-muted-foreground mb-12">
@@ -94,7 +71,7 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
             </Button>
           </div>
         </div>
-      </motion.section>
+      </MotionDiv>
     </div>
   );
 }

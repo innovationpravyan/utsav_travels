@@ -4,30 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { type Package } from "@/lib/data";
 import { Calendar, Tag, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { MotionDiv } from "./motion-div";
 
 interface PackageCardProps {
   pkg: Package;
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" }
-  }
-};
-
 export function PackageCard({ pkg }: PackageCardProps) {
   return (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      className="h-full"
-    >
+    <MotionDiv className="h-full">
       <Link href={`/packages/${pkg.id}`} className="block h-full group">
         <div className="relative h-full w-full overflow-hidden rounded-lg shadow-lg aspect-[4/5] bg-card">
           <Image
@@ -55,13 +40,13 @@ export function PackageCard({ pkg }: PackageCardProps) {
                 </div>
               </div>
               
-              <div className="text-primary font-semibold text-sm flex items-center gap-1 transform-gpu transition-transform duration-300 group-hover:translate-x-1 opacity-0 group-hover:opacity-100">
+              <div className="text-primary font-semibold text-sm flex items-center gap-1 opacity-0 transition-all group-hover:opacity-100 group-hover:gap-2">
                 View Details <ArrowRight className="h-4 w-4"/>
               </div>
             </div>
           </div>
         </div>
       </Link>
-    </motion.div>
+    </MotionDiv>
   );
 }

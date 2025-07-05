@@ -33,7 +33,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
       {/* Hero Section */}
       <section className="relative h-[60vh] w-full">
         <Image
-          src={pkg.images[0] || 'https://placehold.co/1200x800'}
+          src={pkg.images[0] || 'https://placehold.co/1200x800.png'}
           alt={pkg.name}
           fill
           className="object-cover"

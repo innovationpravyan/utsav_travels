@@ -1,18 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Plane, Menu } from "lucide-react";
+import { Plane, Menu, Phone } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { RequestCallDialog } from "./request-call-dialog";
 
 const NAV_LINKS = [
   { href: "/destinations", label: "Destinations" },
   { href: "/packages", label: "Packages" },
   { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Header() {
@@ -57,14 +57,23 @@ export function Header() {
                    <span className="font-headline text-xl font-bold">Utsav Travels</span>
                 </Link>
                 <NavLinks className="flex-col items-start gap-4" />
-                <RequestCallDialog />
+                <Button asChild>
+                  <Link href="/contact" onClick={() => setSheetOpen(false)}>
+                    <Phone className="mr-2 h-4 w-4" />
+                    Request a Call
+                  </Link>
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
         ) : (
           <div className="flex items-center gap-4">
             <NavLinks />
-            <RequestCallDialog />
+             <Button asChild>
+                <Link href="/contact">
+                  Request a Call
+                </Link>
+              </Button>
           </div>
         )}
       </div>

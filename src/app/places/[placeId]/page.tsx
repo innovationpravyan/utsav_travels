@@ -37,7 +37,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
       {/* Hero Section */}
       <section className="relative h-[60vh] w-full">
         <Image
-          src={place.images[0] || 'https://placehold.co/1200x800'}
+          src={place.images[0] || 'https://placehold.co/1200x800.png'}
           alt={place.name}
           fill
           className="object-cover"
@@ -145,7 +145,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                     <Card>
                         <CardContent className="relative aspect-video p-0 rounded-lg overflow-hidden">
                            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center">
-                               <Image src={`https://placehold.co/800x600/e2e8f0/334155?text=Map+of+${place.name.replace(' ','+')}`} alt={`Map of ${place.name}`} fill className="object-cover"/>
+                               <Image src={`https://placehold.co/800x600.png`} alt={`Map of ${place.name}`} fill className="object-cover" data-ai-hint="city map"/>
                                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
                                     <MapPin className="h-12 w-12 text-white/80 mb-2"/>
                                     <p className="text-white font-bold text-lg text-shadow">{place.name}</p>

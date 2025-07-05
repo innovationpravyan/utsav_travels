@@ -1,10 +1,10 @@
 import { Target, Heart, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { getPlaces, getPackages } from '@/lib/data';
 import { PageBanner, type BannerItem } from '@/components/page-banner';
 import Link from 'next/link';
 import { MotionDiv } from '@/components/motion-div';
+import { getPlaces, getPackages } from '@/lib/data';
 
 export default async function AboutPage() {
   const topPlaces = (await getPlaces()).slice(0, 5);
@@ -45,7 +45,7 @@ export default async function AboutPage() {
             </MotionDiv>
             <MotionDiv>
               <Image 
-                src="https://placehold.co/600x400" 
+                src="https://placehold.co/600x400.png" 
                 alt="A collage of travel images" 
                 width={600} 
                 height={400} 
@@ -113,7 +113,7 @@ export default async function AboutPage() {
         <div className="container mx-auto px-4">
            <h2 className="text-4xl md:text-5xl font-headline text-center mb-12">Our Gallery</h2>
            <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {galleryItems.map((item, i) => (
+              {galleryItems.map((item) => (
                 <MotionDiv key={item.id}>
                   <Link href={('city' in item) ? `/places/${item.id}` : `/packages/${item.id}`}>
                       <div className="overflow-hidden rounded-lg relative group">
