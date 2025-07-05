@@ -37,7 +37,7 @@ export default async function AboutPage() {
             <MotionDiv>
               <h2 className="font-headline text-4xl mb-6 text-primary">Who We Are</h2>
               <p className="text-lg text-muted-foreground mb-4">
-                Utsav Travels is a premier travel showcase dedicated to unveiling the spiritual, cultural, and historical richness of India's most sacred cities. We were born from a passion for heritage and a desire to connect travelers with the authentic soul of Varanasi, Ayodhya, and Prayagraj.
+                Utsav Travels is a premier travel showcase dedicated to unveiling the spiritual, cultural, and historical richness of India's most sacred cities. We were born from a passion for heritage and a desire to connect travelers with the authentic soul of Varanasi, Ayodhya, Rishikesh, Kedarnath.
               </p>
               <p className="text-lg text-muted-foreground">
                 Our initiative focuses on promoting sustainable and immersive tourism, ensuring that every journey is not just a trip, but a profound experience that respects local traditions and supports communities.

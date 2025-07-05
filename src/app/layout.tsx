@@ -8,7 +8,7 @@ import { WhatsappButton } from '@/components/whatsapp-button';
 
 export const metadata: Metadata = {
   title: 'Utsav Travels',
-  description: 'Explore the spiritual heritage of Varanasi, Ayodhya, and Prayagraj',
+  description: 'Explore the spiritual heritage of Varanasi, Ayodhya, Rishikesh, Kedarnath',
 };
 
 export default function RootLayout({
@@ -22,7 +22,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&family=Pacifico&display=swap"
           rel="stylesheet"
         />
       </head>

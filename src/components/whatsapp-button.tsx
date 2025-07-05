@@ -33,7 +33,7 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export function WhatsappButton() {
   const phoneNumber = "919876543210"; 
-  const message = "Hello! I am interested in exploring the heritage sites of Varanasi, Ayodhya, and Prayagraj. Please provide me with more information about your services.";
+  const message = "Hello! I am interested in exploring the heritage sites of Varanasi, Ayodhya, Rishikesh, Kedarnath. Please provide me with more information about your services.";
 
   return (
     <TooltipProvider>

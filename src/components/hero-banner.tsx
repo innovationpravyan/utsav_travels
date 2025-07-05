@@ -9,36 +9,36 @@ import { ErrorBoundary } from '@/components/error-boundary';
 // Fix the dynamic import with proper error handling
 const Globe = dynamic(
   () => import('@/components/globe').catch(() => ({ default: () => null })),
-  { 
+  {
     ssr: false,
-    loading: () => <Skeleton className="absolute inset-0 h-full w-full bg-black" />
+    loading: () => <Skeleton className="absolute inset-0 h-full w-full bg-transparent" />
   }
 );
 
 export function HeroBanner() {
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-black">
-      <ErrorBoundary fallback={<div className="absolute inset-0 h-full w-full bg-gradient-to-b from-slate-800 to-black" />}>
-        <Suspense fallback={<Skeleton className="absolute inset-0 h-full w-full bg-black" />}>
+    <section className="relative h-screen w-full overflow-hidden">
+      <ErrorBoundary fallback={<div className="absolute inset-0 h-full w-full bg-transparent" />}>
+        <Suspense fallback={<Skeleton className="absolute inset-0 h-full w-full bg-transparent" />}>
           <Globe />
         </Suspense>
       </ErrorBoundary>
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center text-white bg-black/40">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center text-white">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl md:text-7xl font-headline font-bold text-shadow"
+          className="text-4xl md:text-7xl font-headline font-bold"
         >
           Discover the Spiritual Heritage
         </motion.h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-4 max-w-2xl text-lg md:text-xl text-primary text-shadow"
+          className="mt-4 max-w-2xl text-lg md:text-xl text-primary"
         >
-          of Varanasi, Ayodhya, and Prayagraj
+          of Varanasi, Ayodhya, Rishikesh, Kedarnath
         </motion.p>
       </div>
     </section>
