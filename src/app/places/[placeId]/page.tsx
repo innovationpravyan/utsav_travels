@@ -1,4 +1,4 @@
-import { getPlaceById } from "@/lib/data";
+import { getPlaceById, getPlaces } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import { PlaceCard } from "@/components/place-card";
 
 type PlaceDetailPageProps = {
   params: {
@@ -24,6 +25,11 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
   if (!place) {
     notFound();
   }
+  
+  const allPlaces = await getPlaces();
+  const relatedPlaces = allPlaces.filter(
+    p => p.id !== place.id && (p.city === place.city || p.category === place.category)
+  ).slice(0, 3);
 
   return (
     <div className="animate-fade-in">
@@ -39,8 +45,15 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/30" />
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-end pb-12">
+           <p className="text-lg text-primary drop-shadow-lg">{place.city} • {place.category}</p>
           <h1 className="font-headline text-5xl md:text-7xl font-bold text-white drop-shadow-2xl">{place.name}</h1>
-          <p className="text-xl md:text-2xl mt-2 text-primary drop-shadow-lg">{place.tagline}</p>
+           <div className="flex flex-wrap gap-2 mt-4">
+            {place.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-sm">
+                    {tag}
+                </Badge>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -83,10 +96,10 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
+                   <ul className="space-y-2 list-disc list-inside text-muted-foreground">
                     {place.highlights.map((highlight, index) => (
                       <li key={index}>
-                        <Badge variant="outline" className="text-base py-1 px-3 border-accent text-accent">{highlight}</Badge>
+                        {highlight}
                       </li>
                     ))}
                   </ul>
@@ -110,7 +123,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                             <CarouselItem key={index}>
                                 <Card>
                                 <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
-                                    <Image src={img} alt={`${place.name} gallery image ${index + 1}`} fill className="object-cover" data-ai-hint="travel photography"/>
+                                    <Image src={img} alt={`${place.name} gallery image ${index + 1}`} fill className="object-cover transition-transform hover:scale-105" data-ai-hint="travel photography"/>
                                 </CardContent>
                                 </Card>
                             </CarouselItem>
@@ -138,6 +151,20 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
            </div>
         </div>
       </section>
+      
+      {/* Related Places Section */}
+      {relatedPlaces.length > 0 && (
+        <section className="py-16 bg-secondary">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-headline text-center mb-12">Related Destinations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {relatedPlaces.map((p) => (
+                <PlaceCard key={p.id} place={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
