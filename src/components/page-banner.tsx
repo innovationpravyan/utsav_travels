@@ -18,21 +18,18 @@ interface PageBannerProps {
 }
 
 export function PageBanner({ title, items }: PageBannerProps) {
-  const plugin = React.useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: true })
-  );
+  const plugin = React.useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
 
   return (
     <section className="relative h-[50vh] w-full overflow-hidden bg-secondary">
+      {/* Carousel for background images */}
       {items && items.length > 0 && (
         <Carousel
           plugins={[plugin.current]}
-          className="absolute inset-0 z-0 w-full h-full"
+          className="absolute inset-0 z-0"
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
-          opts={{
-            loop: true,
-          }}
+          opts={{ loop: true }}
         >
           <CarouselContent className="h-full">
             {items.map((item, index) => (
@@ -45,18 +42,21 @@ export function PageBanner({ title, items }: PageBannerProps) {
                   priority={index === 0}
                   data-ai-hint="travel background"
                 />
-                 <div className="absolute inset-0 bg-black/50" />
-                 <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white">
-                    <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
-                    <p className="text-lg text-primary">{item.tagline}</p>
-                 </div>
+                {/* Overlay for each image */}
+                <div className="absolute inset-0 bg-black/50" />
+                {/* Text for each item */}
+                <div className="absolute inset-x-0 bottom-0 z-10 p-8 text-white">
+                  <h3 className="text-3xl font-bold font-headline">{item.name}</h3>
+                  <p className="text-lg text-primary">{item.tagline}</p>
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
         </Carousel>
       )}
-       <div className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm" />
-       <div className="relative z-20 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
+      
+      {/* Centered Title Overlay */}
+      <div className="relative z-10 flex container mx-auto px-4 h-full flex-col justify-center items-center text-center text-white">
         <h1 className="text-5xl md:text-7xl lg:text-8xl">
           <RunningText text={title} />
         </h1>
