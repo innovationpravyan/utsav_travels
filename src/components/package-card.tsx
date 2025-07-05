@@ -14,7 +14,7 @@ export function PackageCard({ pkg }: PackageCardProps) {
   return (
     <InteractiveCard>
       <Link href={`/packages/${pkg.id}`} className="block h-full">
-        <Card className="h-full flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-2xl hover:shadow-accent/20 bg-card">
+        <Card className="h-full flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-2xl hover:shadow-accent/20 bg-card/60 backdrop-blur-md">
           <CardHeader className="p-0">
             <div className="relative h-48 w-full">
               <Image

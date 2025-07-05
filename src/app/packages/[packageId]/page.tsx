@@ -86,7 +86,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
                    {pkg.images.map((img, index) => (
                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                         <div className="p-1">
-                          <Card>
+                          <Card className="bg-card/60 backdrop-blur-md">
                             <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
                                <Image src={img} alt={`${pkg.name} gallery image ${index + 1}`} fill className="object-cover transition-transform hover:scale-105" data-ai-hint="travel photography"/>
                             </CardContent>
@@ -103,7 +103,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
 
           {/* Sidebar */}
           <aside className="lg:col-span-1">
-            <Card className="sticky top-24 shadow-lg">
+            <Card className="sticky top-24 shadow-lg bg-card/60 backdrop-blur-md">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4 mb-4 pb-4 border-b">
                    <Calendar className="h-8 w-8 text-accent"/>

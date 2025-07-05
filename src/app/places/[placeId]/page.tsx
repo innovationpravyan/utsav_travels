@@ -62,7 +62,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
-              <Card>
+              <Card className="bg-card/60 backdrop-blur-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-4xl flex items-center gap-3">
                     <Landmark className="h-8 w-8 text-accent"/>
@@ -74,7 +74,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                 </CardContent>
               </Card>
 
-              <Card className="mt-8">
+              <Card className="mt-8 bg-card/60 backdrop-blur-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-4xl flex items-center gap-3">
                     <BookOpen className="h-8 w-8 text-accent"/>
@@ -88,7 +88,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
             </div>
 
             <aside className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 bg-card/60 backdrop-blur-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-3xl flex items-center gap-3">
                     <Star className="h-7 w-7 text-primary"/>
@@ -121,7 +121,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                         <CarouselContent>
                         {place.images.map((img, index) => (
                             <CarouselItem key={index}>
-                                <Card>
+                                <Card className="bg-card/60 backdrop-blur-md">
                                 <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
                                     <Image src={img} alt={`${place.name} gallery image ${index + 1}`} fill className="object-cover transition-transform hover:scale-105" data-ai-hint="travel photography"/>
                                 </CardContent>
@@ -135,7 +135,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                 </div>
                 <div>
                     <h3 className="font-headline text-3xl mb-4">Location</h3>
-                    <Card>
+                    <Card className="bg-card/60 backdrop-blur-md">
                         <CardContent className="relative aspect-video p-0 rounded-lg overflow-hidden">
                            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center">
                                <Image src={`https://placehold.co/800x600/e2e8f0/334155?text=Map+of+${place.name.replace(' ','+')}`} alt={`Map of ${place.name}`} fill className="object-cover"/>
