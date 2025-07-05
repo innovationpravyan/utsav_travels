@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { RunningText } from './running-text';
 
 export function HeroBanner({ places }: { places: Place[] }) {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
@@ -58,7 +57,7 @@ export function HeroBanner({ places }: { places: Place[] }) {
         </CarouselContent>
       </Carousel>
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4 bg-transparent">
         <h1 className="font-headline text-5xl md:text-7xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
             <span className={cn(
               "font-headline font-bold drop-shadow-2xl",
@@ -70,12 +69,12 @@ export function HeroBanner({ places }: { places: Place[] }) {
               "animate-text-shimmer bg-gradient-to-r from-primary via-amber-300 to-primary bg-[200%_auto] bg-clip-text text-transparent"
             )}>Destinations</span>
         </h1>
-        <p className="max-w-3xl mx-auto text-lg md:text-xl text-white/90 mb-8 drop-shadow-lg">
+        <p className="max-w-3xl mx-auto text-lg md:text-xl text-white drop-shadow-lg">
           Embark on a spiritual journey through Varanasi, Prayagraj, and Ayodhya.
           <br className="hidden md:block" />
           Experience the rich heritage and timeless beauty of India.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <Button asChild size="lg" className="text-lg py-7 px-10">
             <Link href="/destinations">Explore Destinations</Link>
           </Button>
@@ -86,7 +85,7 @@ export function HeroBanner({ places }: { places: Place[] }) {
       </div>
       
       <div className="absolute bottom-8 left-0 right-0 z-10 flex items-center justify-center gap-4 text-white px-4">
-        {currentPlace && <p className="text-sm font-medium tracking-wider hidden sm:block">Experience {currentPlace.tagline}</p>}
+        {currentPlace && <p className="text-sm font-medium tracking-wider hidden sm:block drop-shadow-md">Experience {currentPlace.tagline}</p>}
         <div className="flex items-center gap-3">
           {places.map((_, index) => (
             <button
