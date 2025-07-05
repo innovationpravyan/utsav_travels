@@ -1,9 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Enable static export for Firebase Hosting
-  output: 'export',
-
   // TypeScript build ignores (only for development convenience)
   typescript: {
     ignoreBuildErrors: true,
