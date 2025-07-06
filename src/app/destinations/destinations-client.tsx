@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { type Place } from '@/lib/data';
 import { PlaceCard } from '@/components/place-card';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ import { MotionDiv, StaggerContainer } from '@/components/motion-div';
  * - Responsive grid layout
  * - Enhanced accessibility
  * - Smooth animations
+ * - SSR-safe window access
  */
 
 export function DestinationsClient({ places }: { places: Place[] }) {
@@ -32,6 +33,31 @@ export function DestinationsClient({ places }: { places: Place[] }) {
   const [selectedCity, setSelectedCity] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Handle client-side hydration and window access
+  useEffect(() => {
+    setIsClient(true);
+    
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    
+    return () => {
+      window.removeEventListener('resize', checkDesktop);
+    };
+  }, []);
+
+  // Auto-hide mobile filters on desktop
+  useEffect(() => {
+    if (isDesktop && showMobileFilters) {
+      setShowMobileFilters(false);
+    }
+  }, [isDesktop, showMobileFilters]);
 
   // Extract unique cities and categories
   const cities = useMemo(() => ['all', ...Array.from(new Set(places.map(p => p.city)))], [places]);
@@ -73,6 +99,9 @@ export function DestinationsClient({ places }: { places: Place[] }) {
     return count;
   }, [searchQuery, selectedCity, selectedCategory]);
 
+  // Determine if filters should be shown
+  const shouldShowFilters = isDesktop || showMobileFilters;
+
   return (
     <div className="space-y-6">
       {/* Mobile Filter Toggle Button */}
@@ -96,8 +125,8 @@ export function DestinationsClient({ places }: { places: Place[] }) {
       <MotionDiv
         initial={{ height: 0, opacity: 0 }}
         animate={{ 
-          height: showMobileFilters || window.innerWidth >= 1024 ? 'auto' : 0,
-          opacity: showMobileFilters || window.innerWidth >= 1024 ? 1 : 0
+          height: shouldShowFilters ? 'auto' : 0,
+          opacity: shouldShowFilters ? 1 : 0
         }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className="overflow-hidden lg:!h-auto lg:!opacity-100"
@@ -273,22 +302,6 @@ export function DestinationsClient({ places }: { places: Place[] }) {
           </div>
         </MotionDiv>
       )}
-
-      {/* Auto-hide mobile filters after selection */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            if (typeof window !== 'undefined') {
-              const hideFiltersOnDesktop = () => {
-                if (window.innerWidth >= 1024) {
-                  document.querySelector('[data-mobile-filters]')?.style.setProperty('display', 'none');
-                }
-              };
-              window.addEventListener('resize', hideFiltersOnDesktop);
-            }
-          `
-        }}
-      />
     </div>
   );
 }
