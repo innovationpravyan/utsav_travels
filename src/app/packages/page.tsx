@@ -1,5 +1,7 @@
+// src/app/packages/page.tsx
+
 import { getPackages } from '@/lib/data';
-import { PageBanner, type BannerItem } from '@/components/page-banner';
+import { PackagesVideoHero } from '@/components/video-hero-banner';
 import { PackagesClient } from './packages-client';
 import { ParallaxSection } from '@/components/ui/parallax-section';
 import { FloatingElements, ParticleSystem } from '@/components/ui/floating-elements';
@@ -11,13 +13,6 @@ import { Suspense } from 'react';
 export default async function PackagesPage() {
   try {
     const allPackages = await getPackages();
-    
-    const bannerItems: BannerItem[] = allPackages.slice(0, 5).map(p => ({
-      id: p.id,
-      image: p.images?.[0] || p.thumbnail || '/placeholder-image.jpg',
-      name: p.name || 'Unknown Package',
-      tagline: p.duration || 'Duration not specified'
-    }));
 
     // Calculate package statistics
     const totalCities = [...new Set(allPackages.flatMap(p => p.cities))].length;
@@ -60,17 +55,15 @@ export default async function PackagesPage() {
 
     return (
       <div className="animate-fade-in overflow-hidden">
-        {/* Enhanced Hero Banner */}
-        <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse" />}>
-          <PageBanner 
-            title="Curated Travel Packages" 
-            subtitle="Journeys Crafted for the Soul"
-            description="Experience India's spiritual heritage through our carefully designed packages"
-            items={bannerItems}
-            variant="cinematic"
-            height="90vh"
-            showStats
-            showFloatingElements
+        {/* Video Hero Banner */}
+        <Suspense fallback={
+          <div className="h-[90vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+            <div className="text-white text-xl animate-pulse">Loading packages...</div>
+          </div>
+        }>
+          <PackagesVideoHero 
+            videoSrc="/videos/packages-hero.webm"
+            fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
           />
         </Suspense>
 

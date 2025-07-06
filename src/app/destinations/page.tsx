@@ -1,21 +1,17 @@
+// src/app/destinations/page.tsx
+
 import { getPlaces } from '@/lib/data';
-import { PageBanner, type BannerItem } from '@/components/page-banner';
+import { DestinationsVideoHero } from '@/components/video-hero-banner';
 import { DestinationsClient } from './destinations-client';
 import { ParallaxSection } from '@/components/ui/parallax-section';
-import { FloatingElements } from '@/components/ui/floating-elements';
+import { FloatingElements, ParticleSystem } from '@/components/ui/floating-elements';
 import { MotionDiv, StaggerContainer } from '@/components/motion-div';
 import { GlassCard, InteractiveGlassCard } from '@/components/ui/glass-card';
 import { MapPin, Compass, Star, Globe, Mountain, Camera } from 'lucide-react';
+import { Suspense } from 'react';
 
 export default async function DestinationsPage() {
   const allPlaces = await getPlaces();
-  
-  const bannerItems: BannerItem[] = allPlaces.slice(0, 5).map(p => ({
-    id: p.id,
-    image: p.images[0] || p.thumbnail,
-    name: p.name,
-    tagline: p.city
-  }));
 
   // Get unique cities and categories for stats
   const cities = [...new Set(allPlaces.map(p => p.city))];
@@ -30,17 +26,17 @@ export default async function DestinationsPage() {
 
   return (
     <div className="animate-fade-in overflow-hidden">
-      {/* Enhanced Page Banner with Parallax */}
-      <PageBanner 
-        title="Explore Sacred Destinations" 
-        subtitle="Journey Through India's Spiritual Heritage"
-        description="Discover ancient temples, sacred ghats, and spiritual sites across India's most revered cities"
-        items={bannerItems}
-        variant="dramatic"
-        height="85vh"
-        showStats
-        showFloatingElements
-      />
+      {/* Video Hero Banner */}
+      <Suspense fallback={
+        <div className="h-[85vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          <div className="text-white text-xl animate-pulse">Loading destinations...</div>
+        </div>
+      }>
+        <DestinationsVideoHero 
+          videoSrc="/videos/destinations-hero.webm"
+          fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
+        />
+      </Suspense>
 
       {/* Statistics Section with Advanced Animations */}
       <ParallaxSection

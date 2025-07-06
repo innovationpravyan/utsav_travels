@@ -1,3 +1,5 @@
+// src/app/places/[placeId]/page.tsx
+
 import { getPlaceById, getPlaces } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -13,6 +15,9 @@ import {
 } from "@/components/ui/carousel"
 import { PlaceCard } from "@/components/place-card";
 import { MotionDiv } from "@/components/motion-div";
+import { VideoHeroBanner } from "@/components/video-hero-banner";
+import { VIDEO_SOURCES, PLACEHOLDER_VIDEOS } from "@/types/hero";
+import { Suspense } from 'react';
 
 type PlaceDetailPageProps = {
   params: {
@@ -41,31 +46,51 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
     p => p.id !== place.id && (p.city === place.city || p.category === place.category)
   ).slice(0, 3);
 
+  // Get place-specific video or fallback
+  const getPlaceVideo = (placeName: string) => {
+    const normalizedName = placeName.toLowerCase();
+    if (normalizedName.includes('varanasi')) return VIDEO_SOURCES.places.varanasi.webm;
+    if (normalizedName.includes('ayodhya')) return VIDEO_SOURCES.places.ayodhya.webm;
+    if (normalizedName.includes('rishikesh')) return VIDEO_SOURCES.places.rishikesh.webm;
+    if (normalizedName.includes('kedarnath')) return VIDEO_SOURCES.places.kedarnath.webm;
+    return PLACEHOLDER_VIDEOS.temple; // Default fallback
+  };
+
   return (
     <div className="animate-fade-in">
-      {/* Hero Section */}
-      <section className="relative h-[60vh] w-full">
-        <Image
-          src={place.images[0] || 'https://placehold.co/1200x800.png'}
-          alt={place.name}
-          fill
-          className="object-cover"
-          priority
-          data-ai-hint="travel destination"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-end pb-12 text-white">
-           <p className="text-lg text-accent text-shadow">{place.city} • {place.category}</p>
-          <h1 className="font-headline text-5xl md:text-7xl font-bold text-shadow">{place.name}</h1>
-           <div className="flex flex-wrap gap-2 mt-4">
-            {place.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="backdrop-blur-sm bg-black/30 text-white border-white/20">
-                    {tag}
-                </Badge>
-            ))}
-          </div>
+      {/* Video Hero Section */}
+      <Suspense fallback={
+        <div className="h-[60vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          <div className="text-white text-xl animate-pulse">Loading {place.name}...</div>
         </div>
-      </section>
+      }>
+        <VideoHeroBanner
+          videoSrc={getPlaceVideo(place.name)}
+          fallbackImage={place.images[0] || 'https://placehold.co/1200x800.png'}
+          title={place.name}
+          subtitle={`${place.city} • ${place.category}`}
+          height="60vh"
+          overlayDarkness={0.5}
+          showWhatsApp={false}
+        >
+          {/* Custom overlay content */}
+          <div className="relative z-30 text-center max-w-4xl mx-auto px-4">
+            <div className="mb-4">
+              <span className="text-lg text-accent font-medium">{place.city} • {place.category}</span>
+            </div>
+            <h1 className="font-headline text-5xl md:text-7xl font-bold text-white mb-6 text-shadow-lg">
+              {place.name}
+            </h1>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {place.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="backdrop-blur-sm bg-black/30 text-white border-white/20 hover:bg-black/40 transition-colors">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </VideoHeroBanner>
+      </Suspense>
 
       {/* Content Section */}
       <section className="py-16 md:py-24 bg-secondary">

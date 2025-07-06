@@ -1,32 +1,20 @@
+// src/app/about/page.tsx
+
 import { Target, Heart, MapPin, Users, Award, Clock, Sparkles, Globe, Mountain, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { PageBanner, type BannerItem } from '@/components/page-banner';
+import { AboutVideoHero } from '@/components/video-hero-banner';
 import Link from 'next/link';
 import { MotionDiv, StaggerContainer, ParallaxDiv } from '@/components/motion-div';
 import { getPlaces, getPackages } from '@/lib/data';
 import { ParallaxSection, ParallaxContent } from '@/components/ui/parallax-section';
 import { GlassCard, InteractiveGlassCard, FloatingGlassCard } from '@/components/ui/glass-card';
 import { FloatingElements } from '@/components/ui/floating-elements';
+import { Suspense } from 'react';
 
 export default async function AboutPage() {
   const topPlaces = (await getPlaces()).slice(0, 5);
   const topPackages = (await getPackages()).slice(0, 5);
-  
-  const bannerPlaces: BannerItem[] = topPlaces.slice(0,3).map(p => ({
-    id: p.id,
-    image: p.images[0] || p.thumbnail,
-    name: p.name,
-    tagline: p.city
-  }));
-  const bannerPackages: BannerItem[] = topPackages.slice(0,2).map(p => ({
-    id: p.id,
-    image: p.images[0] || p.thumbnail,
-    name: p.name,
-    tagline: p.duration
-  }));
-
-  const bannerItems = [...bannerPlaces, ...bannerPackages].sort(() => 0.5 - Math.random());
   
   const galleryItems = [...topPlaces, ...topPackages].sort(() => 0.5 - Math.random()).slice(0, 10);
 
@@ -96,17 +84,17 @@ export default async function AboutPage() {
 
   return (
     <div className="animate-fade-in">
-      {/* Enhanced Page Banner */}
-      <PageBanner 
-        title="About Utsav Travels" 
-        subtitle="Your Gateway to Spiritual India"
-        description="Discover the profound heritage and sacred wisdom of India's most revered destinations"
-        items={bannerItems}
-        variant="dramatic"
-        height="80vh"
-        showStats
-        showFloatingElements
-      />
+      {/* Video Hero Banner */}
+      <Suspense fallback={
+        <div className="h-[80vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          <div className="text-white text-xl animate-pulse">Loading about us...</div>
+        </div>
+      }>
+        <AboutVideoHero 
+          videoSrc="/videos/about-hero.webm"
+          fallbackImage="https://images.pexels.com/photos/3401403/pexels-photo-3401403.jpeg?w=1920&h=1080&fit=crop"
+        />
+      </Suspense>
 
       {/* Who We Are Section with Parallax */}
       <ParallaxSection

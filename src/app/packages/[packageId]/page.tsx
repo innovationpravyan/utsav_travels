@@ -1,3 +1,5 @@
+// src/app/packages/[packageId]/page.tsx
+
 import { getPackageById, getPackages } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -8,7 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PackageCard } from "@/components/package-card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MotionDiv } from "@/components/motion-div";
-
+import { VideoHeroBanner } from "@/components/video-hero-banner";
+import { PLACEHOLDER_VIDEOS } from "@/types/hero";
+import { Suspense } from 'react';
 
 type PackageDetailPageProps = {
   params: {
@@ -37,32 +41,59 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
     p => p.id !== pkg.id && (p.cities.some(c => pkg.cities.includes(c)) || p.tags.some(t => pkg.tags.includes(t)))
   ).slice(0, 3);
 
+  // Get package-specific video based on type/tags
+  const getPackageVideo = (packageTags: string[], packageName: string) => {
+    const normalizedName = packageName.toLowerCase();
+    const normalizedTags = packageTags.map(tag => tag.toLowerCase());
+    
+    if (normalizedTags.includes('spiritual') || normalizedName.includes('spiritual')) {
+      return PLACEHOLDER_VIDEOS.spiritual;
+    }
+    if (normalizedTags.includes('adventure') || normalizedName.includes('trek')) {
+      return PLACEHOLDER_VIDEOS.journey;
+    }
+    if (normalizedTags.includes('heritage') || normalizedName.includes('heritage')) {
+      return PLACEHOLDER_VIDEOS.temple;
+    }
+    return PLACEHOLDER_VIDEOS.nature; // Default fallback
+  };
+
   return (
     <div className="animate-fade-in">
-      {/* Hero Section */}
-      <section className="relative h-[60vh] w-full">
-        <Image
-          src={pkg.images[0] || 'https://placehold.co/1200x800.png'}
-          alt={pkg.name}
-          fill
-          className="object-cover"
-          priority
-          data-ai-hint="travel landscape"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-end pb-12 text-white">
-          <p className="text-lg text-accent text-shadow">{pkg.cities.join(', ')}</p>
-          <h1 className="font-headline text-5xl md:text-7xl font-bold text-shadow">{pkg.name}</h1>
-          <p className="text-xl md:text-2xl mt-2 text-primary text-shadow">{pkg.tagline}</p>
-          <div className="flex flex-wrap gap-2 mt-4">
-            {pkg.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="backdrop-blur-sm bg-black/30 text-white border-white/20">
-                    {tag}
-                </Badge>
-            ))}
-          </div>
+      {/* Video Hero Section */}
+      <Suspense fallback={
+        <div className="h-[60vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          <div className="text-white text-xl animate-pulse">Loading {pkg.name}...</div>
         </div>
-      </section>
+      }>
+        <VideoHeroBanner
+          videoSrc={getPackageVideo(pkg.tags, pkg.name)}
+          fallbackImage={pkg.images[0] || 'https://placehold.co/1200x800.png'}
+          title={pkg.name}
+          subtitle={pkg.tagline}
+          height="60vh"
+          overlayDarkness={0.5}
+          showWhatsApp={false}
+        >
+          {/* Custom overlay content */}
+          <div className="relative z-30 text-center max-w-4xl mx-auto px-4">
+            <div className="mb-4">
+              <span className="text-lg text-accent font-medium">{pkg.cities.join(', ')}</span>
+            </div>
+            <h1 className="font-headline text-5xl md:text-7xl font-bold text-white mb-4 text-shadow-lg">
+              {pkg.name}
+            </h1>
+            <p className="text-xl md:text-2xl text-primary mb-6 text-shadow">{pkg.tagline}</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {pkg.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="backdrop-blur-sm bg-black/30 text-white border-white/20 hover:bg-black/40 transition-colors">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </VideoHeroBanner>
+      </Suspense>
 
       {/* Details Section */}
       <section className="py-16 md:py-24 bg-secondary">

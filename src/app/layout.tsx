@@ -5,6 +5,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { WhatsappButton } from '@/components/whatsapp-button';
+import { AnimatedGuide } from '@/components/animated-guide';
 
 export const metadata: Metadata = {
   title: 'Utsav Travels',
@@ -31,6 +32,7 @@ export default function RootLayout({
         <main className="flex-grow">{children}</main>
         <Footer />
         <WhatsappButton />
+        <AnimatedGuide />
         <Toaster />
       </body>
     </html>

@@ -1,5 +1,7 @@
 'use client';
 
+// src/components/home-client.tsx
+
 import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { PlaceCard } from "@/components/place-card";
@@ -9,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, MapPin, Star, Users, Calendar, Award, Globe } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { MotionDiv, StaggerContainer } from "@/components/motion-div";
-import { HeroBanner } from "@/components/hero-banner";
 import { GlassCard } from "@/components/ui/glass-card";
 import { motion, useInView } from "framer-motion";
 import { cn } from '@/lib/utils';
@@ -401,7 +402,7 @@ const TestimonialsSection = () => {
 };
 
 /**
- * Main Home Client Component
+ * Main Home Client Component (without Hero Banner - now handled by parent)
  */
 export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -418,17 +419,6 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       )}>
         
-        {/* Hero Section */}
-        <Suspense fallback={
-          <div className="h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-            <MotionDiv preset="pulse">
-              <Sparkles className="w-16 h-16 text-white animate-spin" />
-            </MotionDiv>
-          </div>
-        }>
-          <HeroBanner />
-        </Suspense>
-
         {/* Statistics Section */}
         <StatsSection />
 
@@ -493,5 +483,3 @@ export function HomeClient({ featuredPlaces, popularPackages }: HomeClientProps)
     </div>
   );
 }
-
-/* removed custom useRef - using React's useRef instead */
