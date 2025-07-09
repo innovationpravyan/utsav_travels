@@ -10,12 +10,6 @@ import { Suspense } from 'react';
 import {AnimatedGuide} from "@/components/animated-guide";
 
 // Optimized font loading configuration
-const fontConfig = {
-    display: 'swap',
-    preload: true,
-    fallback: 'system-ui, -apple-system, sans-serif'
-};
-
 // Enhanced metadata configuration
 export const metadata: Metadata = {
     title: {
