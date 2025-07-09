@@ -56,7 +56,7 @@ const NavLinks = memo(({ className, mobile = false, onLinkClick }: NavLinksProps
                             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black rounded-md",
                             mobile ? "flex items-center gap-3 text-lg py-3 px-2" : "hover:scale-105"
                         )}
-                        onClick={onLinkClick!}
+                        onClick={onLinkClick}
                         aria-label={`Navigate to ${link.label} - ${link.description}`}
                     >
                         {mobile && <link.icon className="w-5 h-5 text-primary" />}
@@ -351,3 +351,22 @@ export function Header() {
 }
 
 // Hook for header state (if needed by other components)
+export function useHeaderState() {
+    const [headerHeight, setHeaderHeight] = useState(64); // 4rem default
+
+    useEffect(() => {
+        const updateHeaderHeight = () => {
+            const header = document.querySelector('header');
+            if (header) {
+                setHeaderHeight(header.offsetHeight);
+            }
+        };
+
+        updateHeaderHeight();
+        window.addEventListener('resize', updateHeaderHeight);
+
+        return () => window.removeEventListener('resize', updateHeaderHeight);
+    }, []);
+
+    return { headerHeight };
+}

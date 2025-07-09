@@ -22,7 +22,7 @@ export function Guide() {
     const contactOptions = [
         {
             icon: Phone,
-            label: "Call Us",
+            label: "Call Us now",
             value: "+91 98765 43210",
             href: "tel:+919876543210",
             color: "text-blue-400"
