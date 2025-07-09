@@ -37,12 +37,12 @@ export interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: number;
-  context?: Record<string, any>;
-  error?: Error;
-  userId?: string;
-  sessionId?: string;
-  url?: string;
-  userAgent?: string;
+  context?: Record<string, any> | undefined;
+  error?: Error | undefined;
+  userId?: string | undefined;
+  sessionId?: string | undefined;
+  url?: string | undefined;
+  userAgent?: string | undefined;
 }
 
 /**
@@ -530,8 +530,8 @@ class Logger {
       logsByLevel,
       sessionDuration: Date.now() - (this.performanceMarks.get('session_start') || Date.now()),
       bufferSize: this.buffer.length,
-      oldestLog: isFinite(oldestTimestamp) ? new Date(oldestTimestamp) : undefined,
-      newestLog: isFinite(newestTimestamp) ? new Date(newestTimestamp) : undefined,
+      oldestLog: new Date(oldestTimestamp),
+      newestLog: new Date(newestTimestamp),
     };
   }
 }

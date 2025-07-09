@@ -173,8 +173,8 @@ export function useParallax(config: ParallaxConfig = {}) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting);
-        if (entry.isIntersecting) {
+        setIsInView(entry!.isIntersecting);
+        if (entry!.isIntersecting) {
           updateTransform();
         }
       },
@@ -275,8 +275,8 @@ export function useMultiLayerParallax(layers: Array<{ speed: number; id: string 
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting);
-        if (entry.isIntersecting) {
+        setIsInView(entry!.isIntersecting);
+        if (entry!.isIntersecting) {
           updateAllLayers();
         }
       },
