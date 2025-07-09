@@ -10,7 +10,7 @@ import {Button} from '@/components/ui/button';
 import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
-import {useSafeWindow} from "@/components/three-utils";
+import {useSafeWindow} from "@/lib/three-utils";
 
 
 export function DestinationsClient({places}: { places: Place[] }) {

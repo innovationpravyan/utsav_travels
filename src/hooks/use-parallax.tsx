@@ -67,8 +67,8 @@ export function useParallax(config: ParallaxConfig = {}) {
   });
 
   const [isInView, setIsInView] = useState(false);
-  const lastScrollY = useRef(0);
-  const lastScrollX = useRef(0);
+  useRef(0);
+  useRef(0);
   const animationFrame = useRef<number>();
 
   const easingFunction = customEasing || easingFunctions[easing];
@@ -204,14 +204,6 @@ export function useParallax(config: ParallaxConfig = {}) {
     isInView,
   };
 }
-
-/**
- * Simple parallax hook for basic vertical movement
- */
-export function useSimpleParallax(speed: number = -0.5) {
-  return useParallax({ speed, direction: 'vertical' });
-}
-
 /**
  * Multi-layer parallax hook for complex scenes
  */
@@ -305,161 +297,5 @@ export function useMultiLayerParallax(layers: Array<{ speed: number; id: string 
     containerRef,
     getLayerProps,
     isInView,
-  };
-}
-
-/**
- * Mouse parallax hook for interactive effects
- */
-export function useMouseParallax(sensitivity: number = 0.1, centerOnLeave: boolean = true) {
-  const elementRef = useRef<HTMLElement>(null);
-  const [transform, setTransform] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    const element = elementRef.current;
-    if (!element) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = element.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      
-      const deltaX = (e.clientX - centerX) * sensitivity;
-      const deltaY = (e.clientY - centerY) * sensitivity;
-      
-      setTransform({ x: deltaX, y: deltaY });
-    };
-
-    const handleMouseEnter = () => {
-      setIsHovered(true);
-    };
-
-    const handleMouseLeave = () => {
-      setIsHovered(false);
-      if (centerOnLeave) {
-        setTransform({ x: 0, y: 0 });
-      }
-    };
-
-    element.addEventListener('mousemove', handleMouseMove);
-    element.addEventListener('mouseenter', handleMouseEnter);
-    element.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      element.removeEventListener('mousemove', handleMouseMove);
-      element.removeEventListener('mouseenter', handleMouseEnter);
-      element.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [sensitivity, centerOnLeave]);
-
-  return {
-    ref: elementRef,
-    transform,
-    isHovered,
-    style: {
-      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      transition: isHovered ? 'none' : 'transform 0.3s ease-out',
-      willChange: 'transform',
-    },
-  };
-}
-
-/**
- * Gyroscope parallax hook for mobile devices
- */
-export function useGyroscopeParallax(sensitivity: number = 0.5) {
-  const [transform, setTransform] = useState({ x: 0, y: 0 });
-  const [isSupported, setIsSupported] = useState(false);
-
-  useEffect(() => {
-    // Check if device motion is supported
-    if (typeof window !== 'undefined' && 'DeviceMotionEvent' in window) {
-      setIsSupported(true);
-
-      const handleDeviceMotion = (e: DeviceMotionEvent) => {
-        if (e.accelerationIncludingGravity) {
-          const { x, y } = e.accelerationIncludingGravity;
-          if (x !== null && y !== null) {
-            setTransform({
-              x: x * sensitivity * 10,
-              y: y * sensitivity * 10,
-            });
-          }
-        }
-      };
-
-      window.addEventListener('devicemotion', handleDeviceMotion);
-
-      return () => {
-        window.removeEventListener('devicemotion', handleDeviceMotion);
-      };
-    }
-  }, [sensitivity]);
-
-  return {
-    transform,
-    isSupported,
-    style: {
-      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      transition: 'transform 0.1s ease-out',
-      willChange: 'transform',
-    },
-  };
-}
-
-/**
- * Scroll velocity parallax hook
- */
-export function useVelocityParallax(multiplier: number = 0.1) {
-  const elementRef = useRef<HTMLElement>(null);
-  const [velocity, setVelocity] = useState(0);
-  const [position, setPosition] = useState(0);
-  const lastScrollY = useRef(0);
-  const lastTime = useRef(Date.now());
-
-  useEffect(() => {
-    let ticking = false;
-
-    const updateVelocity = () => {
-      const currentTime = Date.now();
-      const currentScrollY = window.scrollY;
-      
-      const deltaTime = currentTime - lastTime.current;
-      const deltaScroll = currentScrollY - lastScrollY.current;
-      
-      if (deltaTime > 0) {
-        const currentVelocity = deltaScroll / deltaTime;
-        setVelocity(currentVelocity);
-        setPosition(prev => prev + currentVelocity * multiplier);
-      }
-
-      lastScrollY.current = currentScrollY;
-      lastTime.current = currentTime;
-      ticking = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(updateVelocity);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [multiplier]);
-
-  return {
-    ref: elementRef,
-    velocity,
-    position,
-    style: {
-      transform: `translateY(${position}px)`,
-      willChange: 'transform',
-    },
   };
 }

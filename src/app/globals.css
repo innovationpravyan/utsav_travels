@@ -34,15 +34,20 @@
 
   html {
     scroll-behavior: smooth;
+    font-synthesis: none;
+    text-rendering: optimizeSpeed;
   }
 
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Optimized scrollbar - simplified */
+  /* Optimized scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -62,18 +67,18 @@
 }
 
 @layer utilities {
-  /* Faster spacing system */
+  /* Performance-first spacing */
   .section-padding {
-    padding-top: clamp(3rem, 6vh, 5rem);
-    padding-bottom: clamp(3rem, 6vh, 5rem);
+    padding-top: clamp(2rem, 5vh, 4rem);
+    padding-bottom: clamp(2rem, 5vh, 4rem);
   }
 
   .section-padding-sm {
-    padding-top: clamp(1.5rem, 3vh, 2.5rem);
-    padding-bottom: clamp(1.5rem, 3vh, 2.5rem);
+    padding-top: clamp(1rem, 2vh, 2rem);
+    padding-bottom: clamp(1rem, 2vh, 2rem);
   }
 
-  /* Optimized text effects */
+  /* GPU-accelerated text effects */
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
@@ -96,13 +101,12 @@
     background-clip: text;
   }
 
-  /* Optimized glass effects - reduced complexity */
+  /* Optimized glass effects */
   .glass-subtle {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
 
   .glass-card {
@@ -110,7 +114,6 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 
   .glass-strong {
@@ -118,7 +121,6 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   }
 
   .glass-nav {
@@ -128,16 +130,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* Fast hover states */
-  .hover-scale {
-    transition: transform 0.2s ease;
-  }
-
-  .hover-scale:hover {
-    transform: scale(1.05);
-  }
-
-  /* Instant animations */
+  /* Performance animations */
   .animate-fade-in {
     animation: fade-in 0.3s ease-out forwards;
   }
@@ -159,18 +152,6 @@
     transition: all 0.2s ease;
   }
 
-  /* Animation delays - minimal for instant loading */
-  .animation-delay-100 { animation-delay: 50ms; }
-  .animation-delay-200 { animation-delay: 100ms; }
-  .animation-delay-300 { animation-delay: 150ms; }
-  .animation-delay-400 { animation-delay: 200ms; }
-  .animation-delay-500 { animation-delay: 250ms; }
-  .animation-delay-600 { animation-delay: 300ms; }
-  .animation-delay-700 { animation-delay: 350ms; }
-  .animation-delay-800 { animation-delay: 400ms; }
-  .animation-delay-1000 { animation-delay: 500ms; }
-  .animation-delay-2000 { animation-delay: 1000ms; }
-
   /* GPU acceleration */
   .transform-gpu {
     transform: translateZ(0);
@@ -181,9 +162,26 @@
   .bg-gradient-radial {
     background: radial-gradient(circle, var(--tw-gradient-stops));
   }
+
+  /* Performance utilities */
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-size {
+    contain: size;
+  }
+
+  .contain-style {
+    contain: style;
+  }
 }
 
-/* Essential keyframe animations - faster durations */
+/* Essential keyframes */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -217,7 +215,61 @@
   }
 }
 
-/* Disable animations for better performance on request */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* Animation utility classes */
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background-size: 200% 100%;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Animation delays */
+.animation-delay-100 { animation-delay: 0.1s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+.animation-delay-500 { animation-delay: 0.5s; }
+.animation-delay-1000 { animation-delay: 1s; }
+.animation-delay-2000 { animation-delay: 2s; }
+
+/* Accessibility and performance */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -229,11 +281,11 @@
   }
 }
 
-/* Mobile optimizations - disable heavy effects */
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .section-padding {
-    padding-top: clamp(2rem, 4vh, 3rem);
-    padding-bottom: clamp(2rem, 4vh, 3rem);
+    padding-top: clamp(1.5rem, 3vh, 2.5rem);
+    padding-bottom: clamp(1.5rem, 3vh, 2.5rem);
   }
 
   /* Reduce glass effects on mobile */
@@ -261,5 +313,15 @@
   .glass-strong {
     background: rgba(0, 0, 0, 0.8);
     border: 2px solid rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* Print styles */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
 }

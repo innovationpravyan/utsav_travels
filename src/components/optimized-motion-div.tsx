@@ -1,8 +1,8 @@
 'use client';
 
-import {forwardRef, ReactNode, useEffect, useRef, useState} from 'react';
+import React, {forwardRef, ReactNode, useEffect, useRef, useState} from 'react';
 import {cn} from '@/lib/utils';
-import {useThreeInView} from './three-utils';
+import {useThreeInView} from '@/lib/three-utils';
 
 export type OptimizedAnimationPreset =
     | 'fadeIn'
@@ -262,7 +262,6 @@ export const ThreeMotionDiv = forwardRef<HTMLDivElement, {
 ThreeMotionDiv.displayName = 'ThreeMotionDiv';
 
 // Backward compatibility exports
-export const MotionDiv = OptimizedMotionDiv;
 export const FadeInDiv = forwardRef<HTMLDivElement, Omit<OptimizedMotionProps, 'preset'>>((props, ref) =>
     <OptimizedMotionDiv ref={ref} preset="fadeIn" {...props} />
 );

@@ -2,110 +2,186 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import {type Package} from "@/lib/data";
-import {ArrowRight, Clock, DollarSign, MapPin, Sparkles, Star, Users} from "lucide-react";
-import React, {useCallback, useRef, useState} from "react";
-import {cn} from "@/lib/utils";
-import {useThreeInView} from './three-utils';
+import { ArrowRight, Clock, DollarSign, MapPin, Sparkles, Star, Users, Calendar, Award } from "lucide-react";
+import React, { useCallback, useRef, useState, memo } from "react";
+import { cn } from "@/lib/utils";
+import { useThreeInView } from '@/utils/three-utils';
+import { usePerformancePreference } from '@/hooks/use-mobile';
+
+// Types for data safety
+interface Package {
+    id: string;
+    name: string;
+    tagline: string;
+    description: string;
+    duration: string;
+    cities: string[];
+    price: string;
+    thumbnail: string;
+    images: string[];
+    tags: string[];
+    highlights: string[];
+    inclusions: string[];
+    itinerary: any[];
+}
 
 interface OptimizedPackageCardProps {
     pkg: Package;
     index?: number;
-    variant?: 'default' | 'compact' | 'featured' | 'minimal' | 'premium';
+    variant?: 'default' | 'compact' | 'featured' | 'minimal' | 'premium' | 'hero';
     showAnimation?: boolean;
+    priority?: boolean;
+    className?: string;
+    onClick?: () => void;
 }
 
-export function OptimizedPackageCard({
-                                         pkg,
-                                         index = 0,
-                                         variant = 'default',
-                                         showAnimation = true
-                                     }: OptimizedPackageCardProps) {
+// Memoized package card component for performance
+export const OptimizedPackageCard = memo(({
+                                              pkg,
+                                              index = 0,
+                                              variant = 'default',
+                                              showAnimation = true,
+                                              priority = false,
+                                              className,
+                                              onClick
+                                          }: OptimizedPackageCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
-    const {ref: inViewRef, isInView} = useThreeInView(0.05);
+    const { ref: inViewRef, isInView } = useThreeInView(0.05);
+    const { shouldReduceMotion, shouldReduceEffects } = usePerformancePreference();
 
-    // Safe package object with defaults
+    // Safe package object with comprehensive defaults
     const safePackageProps = {
-        id: pkg?.id || 'unknown',
+        id: pkg?.id || `package-${index}`,
         name: pkg?.name || 'Unknown Package',
         tagline: pkg?.tagline || 'Discover new places',
-        description: pkg?.description || '',
+        description: pkg?.description || 'An amazing travel experience awaits you.',
         duration: pkg?.duration || '3 Days',
-        cities: pkg?.cities || [],
+        cities: Array.isArray(pkg?.cities) ? pkg.cities.slice(0, 3) : ['Unknown City'],
         price: pkg?.price || 'Contact for pricing',
-        thumbnail: pkg?.thumbnail || 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?w=600&h=400',
-        images: pkg?.images || [],
-        tags: pkg?.tags || [],
-        highlights: pkg?.highlights || [],
-        inclusions: pkg?.inclusions || [],
-        itinerary: pkg?.itinerary || []
+        thumbnail: pkg?.thumbnail || '/images/placeholder-package.jpg',
+        images: Array.isArray(pkg?.images) ? pkg.images : [],
+        tags: Array.isArray(pkg?.tags) ? pkg.tags.slice(0, 4) : [],
+        highlights: Array.isArray(pkg?.highlights) ? pkg.highlights : [],
+        inclusions: Array.isArray(pkg?.inclusions) ? pkg.inclusions : [],
+        itinerary: Array.isArray(pkg?.itinerary) ? pkg.itinerary : []
     };
 
+    // Mouse interaction handlers with performance optimization
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (!cardRef.current) return;
+        if (!cardRef.current || shouldReduceMotion || shouldReduceEffects) return;
 
         const rect = cardRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        const rotateX = ((e.clientY - centerY) / rect.height) * 5;
-        const rotateY = ((centerX - e.clientX) / rect.width) * 5;
+        const rotateX = ((e.clientY - centerY) / rect.height) * 6;
+        const rotateY = ((centerX - e.clientX) / rect.width) * 6;
 
         cardRef.current.style.setProperty('--rotate-x', `${rotateX}deg`);
         cardRef.current.style.setProperty('--rotate-y', `${rotateY}deg`);
-    }, []);
+    }, [shouldReduceMotion, shouldReduceEffects]);
 
     const handleMouseLeave = useCallback(() => {
         setIsHovered(false);
-        if (cardRef.current) {
+        if (cardRef.current && !shouldReduceMotion) {
             cardRef.current.style.setProperty('--rotate-x', '0deg');
             cardRef.current.style.setProperty('--rotate-y', '0deg');
         }
-    }, []);
+    }, [shouldReduceMotion]);
 
     const handleMouseEnter = useCallback(() => {
-        setIsHovered(true);
+        if (!shouldReduceEffects) {
+            setIsHovered(true);
+        }
+    }, [shouldReduceEffects]);
+
+    // Image handlers
+    const handleImageLoad = useCallback(() => {
+        setImageLoaded(true);
+        setImageError(false);
     }, []);
 
+    const handleImageError = useCallback(() => {
+        setImageError(true);
+        setImageLoaded(false);
+    }, []);
+
+    // Variant styles configuration
     const variantStyles = {
         default: {
             container: 'aspect-[4/5]',
-            title: 'text-2xl',
+            title: 'text-xl md:text-2xl',
             subtitle: 'text-sm',
+            padding: 'p-6'
         },
         compact: {
             container: 'aspect-[3/4]',
-            title: 'text-xl',
+            title: 'text-lg md:text-xl',
             subtitle: 'text-xs',
+            padding: 'p-4'
         },
         featured: {
             container: 'aspect-[16/9] md:col-span-2',
-            title: 'text-3xl md:text-4xl',
+            title: 'text-2xl md:text-3xl',
             subtitle: 'text-base',
+            padding: 'p-8'
         },
         minimal: {
             container: 'aspect-[5/4]',
-            title: 'text-lg',
+            title: 'text-base md:text-lg',
             subtitle: 'text-xs',
+            padding: 'p-4'
         },
         premium: {
             container: 'aspect-[4/5]',
-            title: 'text-2xl',
+            title: 'text-xl md:text-2xl',
             subtitle: 'text-sm',
+            padding: 'p-6'
         },
+        hero: {
+            container: 'aspect-[21/9] md:col-span-3',
+            title: 'text-3xl md:text-4xl',
+            subtitle: 'text-lg',
+            padding: 'p-12'
+        }
     };
 
     const styles = variantStyles[variant];
+
+    // Price extraction and formatting
     const priceMatch = safePackageProps.price.match(/[\d,]+/);
     const priceNumber = priceMatch ? priceMatch[0] : safePackageProps.price;
+    const currency = safePackageProps.price.includes('₹') ? '₹' : '$';
+
+    // Click handler with analytics
+    const handleClick = useCallback(() => {
+        onClick?.();
+
+        // Analytics tracking (optional)
+        if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'package_card_click', {
+                package_id: safePackageProps.id,
+                package_name: safePackageProps.name,
+                variant,
+                index,
+                price: safePackageProps.price
+            });
+        }
+    }, [onClick, safePackageProps.id, safePackageProps.name, safePackageProps.price, variant, index]);
+
+    // Generate rating and review count
+    const rating = 4.7 + (Math.random() * 0.3);
+    const reviewCount = Math.floor(Math.random() * 200) + 50;
 
     return (
         <div
             className={cn(
                 "h-full group",
-                showAnimation && isInView && "animate-fade-in"
+                showAnimation && isInView && "animate-fade-in",
+                className
             )}
             ref={(node) => {
                 cardRef.current = node;
@@ -114,13 +190,18 @@ export function OptimizedPackageCard({
                 }
             }}
         >
-            <Link href={`/packages/${safePackageProps.id}`} className="block h-full">
-                <div
+            <Link
+                href={`/packages/${safePackageProps.id}`}
+                className="block h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black rounded-3xl"
+                onClick={handleClick}
+                aria-label={`View ${safePackageProps.name} package details - ${safePackageProps.duration} tour`}
+            >
+                <article
                     className={cn(
                         'relative h-full w-full overflow-hidden rounded-3xl cursor-pointer',
                         'transition-all duration-300 ease-out',
-                        'hover:scale-[1.02]',
-                        '[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))]',
+                        !shouldReduceEffects && 'hover:scale-[1.02]',
+                        !shouldReduceMotion && '[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))]',
                         styles.container
                     )}
                     onMouseMove={handleMouseMove}
@@ -141,25 +222,36 @@ export function OptimizedPackageCard({
                         {/* Background Image */}
                         <div className={cn(
                             "absolute inset-0 transition-transform duration-500",
-                            isHovered ? "scale-110" : "scale-100"
+                            isHovered && !shouldReduceEffects ? "scale-110" : "scale-100"
                         )}>
-                            <Image
-                                src={safePackageProps.thumbnail}
-                                alt={`Image of ${safePackageProps.name}`}
-                                fill
-                                className={cn(
-                                    "object-cover transition-all duration-500",
-                                    imageLoaded ? "scale-100 opacity-100" : "scale-110 opacity-0"
-                                )}
-                                onLoad={() => setImageLoaded(true)}
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                priority={index < 3}
-                                quality={80}
-                            />
+                            {!imageError ? (
+                                <Image
+                                    src={safePackageProps.thumbnail}
+                                    alt={`${safePackageProps.name} tour package`}
+                                    fill
+                                    className={cn(
+                                        "object-cover transition-all duration-500",
+                                        imageLoaded ? "scale-100 opacity-100" : "scale-110 opacity-0"
+                                    )}
+                                    onLoad={handleImageLoad}
+                                    onError={handleImageError}
+                                    sizes={
+                                        variant === 'featured' ? "(max-width: 768px) 100vw, 66vw" :
+                                            variant === 'hero' ? "(max-width: 768px) 100vw, 75vw" :
+                                                "(max-width: 768px) 100vw, 33vw"
+                                    }
+                                    priority={priority || index < 3}
+                                    quality={75}
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                                    <Calendar className="w-12 h-12 text-white/30" />
+                                </div>
+                            )}
                         </div>
 
                         {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"/>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
                         {/* Hover Glass Effect */}
                         <div className={cn(
@@ -167,152 +259,219 @@ export function OptimizedPackageCard({
                             variant === 'premium'
                                 ? "bg-gradient-to-br from-yellow-400/10 via-transparent to-orange-500/10"
                                 : "bg-white/5 backdrop-blur-sm",
-                            isHovered ? "opacity-100" : "opacity-0"
-                        )}/>
+                            isHovered && !shouldReduceEffects ? "opacity-100" : "opacity-0"
+                        )} />
 
-                        {/* Content Overlay */}
-                        <div className="absolute inset-0 flex flex-col justify-between p-6">
-
-                            {/* Top Section */}
-                            <div className="flex justify-between items-start">
-                                <div className="glass-subtle rounded-full px-3 py-1.5 backdrop-blur-sm">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="h-3 w-3 text-blue-400"/>
-                                        <span className="text-white/90 text-xs font-medium">
-                                            {safePackageProps.duration}
-                                        </span>
-                                    </div>
+                        {/* Top Section - Duration and Premium Badge */}
+                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
+                            <div className="glass-subtle rounded-full px-3 py-1.5 backdrop-blur-sm">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-3 w-3 text-blue-400" />
+                                    <span className="text-white/90 text-xs font-medium">
+                    {safePackageProps.duration}
+                  </span>
                                 </div>
-
-                                {variant === 'premium' && (
-                                    <div
-                                        className="glass-strong rounded-full px-3 py-1.5 bg-gradient-to-r from-yellow-400/30 to-orange-500/30 backdrop-blur-sm">
-                                        <div className="flex items-center gap-1">
-                                            <Sparkles className="h-3 w-3 text-yellow-400 fill-current"/>
-                                            <span className="text-yellow-200 text-xs font-bold">PREMIUM</span>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
 
-                            {/* Main Content */}
-                            <div className="space-y-4">
-                                <h3 className={cn(
-                                    "font-bold text-white text-shadow-lg leading-tight",
-                                    styles.title
-                                )}>
-                                    {safePackageProps.name}
-                                </h3>
+                            {variant === 'premium' && (
+                                <div className="glass-strong rounded-full px-3 py-1.5 bg-gradient-to-r from-yellow-400/30 to-orange-500/30 backdrop-blur-sm">
+                                    <div className="flex items-center gap-1">
+                                        <Sparkles className="h-3 w-3 text-yellow-400 fill-current" />
+                                        <span className="text-yellow-200 text-xs font-bold">PREMIUM</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-                                <p className={cn(
-                                    "text-accent/90 font-medium text-shadow",
-                                    styles.subtitle
-                                )}>
-                                    {safePackageProps.tagline}
-                                </p>
+                        {/* Main Content */}
+                        <div className={cn("absolute bottom-0 left-0 right-0 z-20", styles.padding)}>
+                            {/* Package Title */}
+                            <h3 className={cn(
+                                "font-bold text-white text-shadow-lg leading-tight mb-3",
+                                styles.title
+                            )}>
+                                {safePackageProps.name}
+                            </h3>
+
+                            {/* Tagline */}
+                            <p className={cn(
+                                "text-accent/90 font-medium text-shadow mb-4",
+                                styles.subtitle
+                            )}>
+                                {safePackageProps.tagline}
+                            </p>
+
+                            {/* Cities */}
+                            <div className={cn(
+                                "flex items-center gap-2 text-white/80 mb-4",
+                                styles.subtitle
+                            )}>
+                                <MapPin className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                                <span className="font-medium truncate">
+                  {safePackageProps.cities.length > 2
+                      ? `${safePackageProps.cities.slice(0, 2).join(', ')} +${safePackageProps.cities.length - 2}`
+                      : safePackageProps.cities.join(', ')
+                  }
+                </span>
+                            </div>
+
+                            {/* Package Stats */}
+                            {variant !== 'minimal' && (
+                                <div className={cn("flex items-center gap-4 text-white/70 mb-4", styles.subtitle)}>
+                                    <div className="flex items-center gap-1">
+                                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                                        <span className="text-xs">{rating.toFixed(1)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Users className="h-3 w-3 text-blue-400" />
+                                        <span className="text-xs">{reviewCount} reviews</span>
+                                    </div>
+                                    {variant === 'featured' && (
+                                        <div className="flex items-center gap-1">
+                                            <Award className="h-3 w-3 text-purple-400" />
+                                            <span className="text-xs">Bestseller</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Tags for featured variants */}
+                            {(variant === 'featured' || variant === 'hero') && safePackageProps.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {safePackageProps.tags.slice(0, 3).map((tag) => (
+                                        <span
+                                            key={tag}
+                                            className="px-2 py-1 glass-subtle rounded-full text-xs text-white/80 backdrop-blur-sm"
+                                        >
+                      {tag}
+                    </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Price & CTA */}
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="h-4 w-4 text-green-400" />
+                                        <span className={cn("text-green-400 font-bold", styles.subtitle)}>
+                      {priceNumber !== safePackageProps.price ? `${currency}${priceNumber}` : safePackageProps.price}
+                    </span>
+                                    </div>
+                                    {variant !== 'minimal' && (
+                                        <span className="text-white/60 text-xs">per person</span>
+                                    )}
+                                </div>
 
                                 <div className={cn(
-                                    "flex items-center gap-2 text-white/80",
-                                    styles.subtitle
+                                    "flex items-center gap-2 text-accent font-semibold transition-all duration-200",
+                                    isHovered && !shouldReduceEffects ? "opacity-100 translate-x-0" : "opacity-70 -translate-x-2"
                                 )}>
-                                    <MapPin className="h-4 w-4 text-emerald-400"/>
-                                    <span className="font-medium">
-                                        {safePackageProps.cities.length > 2
-                                            ? `${safePackageProps.cities.slice(0, 2).join(', ')} +${safePackageProps.cities.length - 2}`
-                                            : safePackageProps.cities.join(', ')
-                                        }
-                                    </span>
-                                </div>
-
-                                {/* Package Stats */}
-                                {variant !== 'minimal' && (
-                                    <div className={cn("flex items-center gap-4 text-white/70", styles.subtitle)}>
-                                        <div className="flex items-center gap-1">
-                                            <Star className="h-3 w-3 text-yellow-400 fill-current"/>
-                                            <span className="text-xs">4.9</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Users className="h-3 w-3 text-blue-400"/>
-                                            <span className="text-xs">
-                                                {Math.floor(Math.random() * 50) + 10} trips
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Tags */}
-                                {variant === 'featured' && safePackageProps.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1">
-                                        {safePackageProps.tags.slice(0, 3).map((tag) => (
-                                            <span
-                                                key={tag}
-                                                className="px-2 py-1 glass-subtle rounded-full text-xs text-white/80 backdrop-blur-sm"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Price & Action */}
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <DollarSign className="h-4 w-4 text-green-400"/>
-                                            <span className={cn("text-green-400 font-bold", styles.subtitle)}>
-                                                {safePackageProps.price}
-                                            </span>
-                                        </div>
-                                        {variant !== 'minimal' && (
-                                            <span className="text-white/60 text-xs">per person</span>
-                                        )}
-                                    </div>
-
-                                    <div className={cn(
-                                        "flex items-center gap-2 text-accent font-semibold transition-all duration-200",
-                                        isHovered ? "opacity-100 translate-x-0" : "opacity-70 -translate-x-2"
-                                    )}>
-                                        <span className={cn("text-gradient font-semibold", styles.subtitle)}>
-                                            Book Now
-                                        </span>
-                                        <ArrowRight className={cn(
-                                            "h-4 w-4 transition-transform duration-200",
-                                            isHovered && "translate-x-1"
-                                        )}/>
-                                    </div>
+                  <span className={cn("text-gradient font-semibold", styles.subtitle)}>
+                    {variant === 'hero' ? 'Explore Package' : 'Book Now'}
+                  </span>
+                                    <ArrowRight className={cn(
+                                        "h-4 w-4 transition-transform duration-200",
+                                        isHovered && !shouldReduceEffects && "translate-x-1"
+                                    )} />
                                 </div>
                             </div>
+
+                            {/* Floating highlights for hero variant */}
+                            {variant === 'hero' && safePackageProps.highlights.length > 0 && (
+                                <div className="mt-6 space-y-2">
+                                    {safePackageProps.highlights.slice(0, 2).map((highlight, i) => (
+                                        <div key={i} className="flex items-center gap-2 text-white/80 text-sm">
+                                            <Star className="h-3 w-3 text-yellow-400 fill-current flex-shrink-0" />
+                                            <span>{highlight}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Floating Price Indicator */}
                         <div className={cn(
                             "absolute top-1/2 right-4 transform -translate-y-1/2 pointer-events-none transition-all duration-300",
-                            isHovered ? "opacity-100 scale-100 translate-x-0" : "opacity-0 scale-75 translate-x-4"
+                            isHovered && !shouldReduceEffects ? "opacity-100 scale-100 translate-x-0" : "opacity-0 scale-75 translate-x-4"
                         )}>
                             <div className="glass-strong p-3 text-center rounded-xl backdrop-blur-lg">
                                 <div className="text-white font-bold text-lg">{priceNumber}</div>
-                                <div className="text-white/70 text-xs">Starting</div>
+                                <div className="text-white/70 text-xs">Starting from</div>
                             </div>
                         </div>
 
+                        {/* Bestseller Badge */}
+                        {index === 0 && variant !== 'minimal' && (
+                            <div className="absolute top-6 left-6 transform -rotate-12 z-30">
+                                <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                    BESTSELLER
+                                </div>
+                            </div>
+                        )}
+
                         {/* Loading State */}
-                        {!imageLoaded && (
+                        {!imageLoaded && !imageError && (
                             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900">
-                                <div
-                                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"/>
-                                <div className="absolute bottom-6 left-6 right-6 space-y-3">
-                                    <div className="h-6 bg-white/20 rounded mb-2 animate-pulse"/>
-                                    <div className="h-4 bg-white/10 rounded w-3/4 animate-pulse"/>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                                <div className={cn("absolute bottom-0 left-0 right-0", styles.padding)}>
+                                    <div className={cn("h-6 bg-white/20 rounded mb-2 animate-pulse",
+                                        variant === 'featured' ? 'h-8' : 'h-6')} />
+                                    <div className="h-4 bg-white/10 rounded w-3/4 mb-3 animate-pulse" />
                                     <div className="flex justify-between items-center">
-                                        <div className="h-5 bg-white/15 rounded w-20 animate-pulse"/>
-                                        <div className="h-4 bg-white/10 rounded w-16 animate-pulse"/>
+                                        <div className="h-5 bg-white/15 rounded w-20 animate-pulse" />
+                                        <div className="h-4 bg-white/10 rounded w-16 animate-pulse" />
                                     </div>
                                 </div>
                             </div>
                         )}
+
+                        {/* Accessibility enhancement */}
+                        <div className="sr-only">
+                            <p>Package: {safePackageProps.name}</p>
+                            <p>Duration: {safePackageProps.duration}</p>
+                            <p>Cities: {safePackageProps.cities.join(', ')}</p>
+                            <p>Price: {safePackageProps.price}</p>
+                            <p>Description: {safePackageProps.tagline}</p>
+                        </div>
                     </div>
-                </div>
+                </article>
             </Link>
         </div>
     );
-}
+});
+
+OptimizedPackageCard.displayName = 'OptimizedPackageCard';
+
+// Skeleton loader for package cards
+export const PackageCardSkeleton = memo(({ variant = 'default' }: { variant?: string }) => {
+    const variantStyles = {
+        default: 'aspect-[4/5]',
+        compact: 'aspect-[3/4]',
+        featured: 'aspect-[16/9] md:col-span-2',
+        minimal: 'aspect-[5/4]',
+        premium: 'aspect-[4/5]',
+        hero: 'aspect-[21/9] md:col-span-3'
+    };
+
+    return (
+        <div className={cn("rounded-3xl overflow-hidden bg-white/5 animate-pulse", variantStyles[variant as keyof typeof variantStyles])}>
+            <div className="h-full bg-gradient-to-br from-slate-800 to-slate-900 relative">
+                <div className="absolute top-4 left-4 right-4 flex justify-between">
+                    <div className="h-6 w-16 bg-white/10 rounded-full animate-pulse" />
+                    <div className="h-6 w-6 bg-white/10 rounded-full animate-pulse" />
+                </div>
+                <div className="absolute bottom-6 left-6 right-6 space-y-3">
+                    <div className="h-6 bg-white/20 rounded animate-pulse" />
+                    <div className="h-4 bg-white/10 rounded w-3/4 animate-pulse" />
+                    <div className="flex justify-between items-center">
+                        <div className="h-5 bg-white/15 rounded w-20 animate-pulse" />
+                        <div className="h-4 bg-white/10 rounded w-16 animate-pulse" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+PackageCardSkeleton.displayName = 'PackageCardSkeleton';

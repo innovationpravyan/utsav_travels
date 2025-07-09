@@ -10,8 +10,8 @@ import { Suspense } from 'react';
 
 export default async function OptimizedDestinationsPage() {
   let allPlaces: any[] = [];
-  let cities: string[] = [];
-  let categories: string[] = [];
+  let cities: string[];
+  let categories: string[];
 
   try {
     allPlaces = await getPlaces();

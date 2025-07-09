@@ -3,10 +3,8 @@ import {
   getFirestore,
   type Firestore,
   connectFirestoreEmulator,
-  enableNetwork,
-  disableNetwork,
   terminate,
-  clearIndexedDbPersistence,
+
 } from "firebase/firestore";
 import { getAuth, type Auth } from "firebase/auth";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
@@ -68,8 +66,7 @@ function validateFirebaseConfig(config: FirebaseConfig): void {
     if (!config[field as keyof FirebaseConfig]) {
       throw new AppError(
         `Firebase configuration missing required field: ${field}`,
-        "FIREBASE_CONFIG_ERROR",
-        500
+        "FIREBASE_CONFIG_ERROR"
       );
     }
   }
@@ -78,16 +75,14 @@ function validateFirebaseConfig(config: FirebaseConfig): void {
   if (!config.apiKey.startsWith("AIza")) {
     throw new AppError(
       "Invalid Firebase API key format",
-      "FIREBASE_CONFIG_ERROR",
-      500
+      "FIREBASE_CONFIG_ERROR"
     );
   }
 
   if (!config.projectId.match(/^[a-z0-9-]+$/)) {
     throw new AppError(
       "Invalid Firebase project ID format",
-      "FIREBASE_CONFIG_ERROR",
-      500
+      "FIREBASE_CONFIG_ERROR"
     );
   }
 }
@@ -128,8 +123,7 @@ function initializeFirebaseApp(): FirebaseApp {
     console.error("❌ Failed to initialize Firebase app:", error);
     throw new AppError(
       "Failed to initialize Firebase application",
-      "FIREBASE_INIT_ERROR",
-      500
+      "FIREBASE_INIT_ERROR"
     );
   }
 }
@@ -164,8 +158,7 @@ function initializeFirestore(app: FirebaseApp): Firestore {
     console.error("❌ Failed to initialize Firestore:", error);
     throw new AppError(
       "Failed to initialize Firestore database",
-      "FIRESTORE_INIT_ERROR",
-      500
+      "FIRESTORE_INIT_ERROR"
     );
   }
 }
@@ -289,42 +282,6 @@ export class FirebaseManager {
       throw error;
     }
   }
-
-  async enableOfflineSupport(): Promise<void> {
-    if (!this.services) {
-      await this.getServices();
-    }
-
-    try {
-      await enableNetwork(this.services!.db);
-      console.log("🌐 Firestore network enabled");
-    } catch (error) {
-      console.warn("⚠️ Failed to enable Firestore network:", error);
-    }
-  }
-
-  async disableOfflineSupport(): Promise<void> {
-    if (!this.services) return;
-
-    try {
-      await disableNetwork(this.services.db);
-      console.log("📴 Firestore network disabled");
-    } catch (error) {
-      console.warn("⚠️ Failed to disable Firestore network:", error);
-    }
-  }
-
-  async clearCache(): Promise<void> {
-    if (!this.services) return;
-
-    try {
-      await clearIndexedDbPersistence(this.services.db);
-      console.log("🧹 Firestore cache cleared");
-    } catch (error) {
-      console.warn("⚠️ Failed to clear Firestore cache:", error);
-    }
-  }
-
   async terminate(): Promise<void> {
     if (!this.services) return;
 
@@ -338,12 +295,6 @@ export class FirebaseManager {
       console.error("❌ Failed to terminate Firebase services:", error);
     }
   }
-
-  getConnectionState(): "connected" | "disconnected" | "connecting" {
-    if (!this.services) return "disconnected";
-    if (this.isInitialized) return "connected";
-    return "connecting";
-  }
 }
 
 // Create singleton instance
@@ -355,41 +306,10 @@ const firebaseManager = FirebaseManager.getInstance();
 export async function getFirebaseServices(): Promise<FirebaseServices> {
   return firebaseManager.getServices();
 }
-
-/**
- * Export individual services for convenience
- */
-export const getFirebaseApp = async (): Promise<FirebaseApp> => {
-  const services = await getFirebaseServices();
-  return services.app;
-};
-
 export const getFirebaseDb = async (): Promise<Firestore> => {
   const services = await getFirebaseServices();
   return services.db;
 };
-
-export const getFirebaseAuth = async (): Promise<Auth> => {
-  const services = await getFirebaseServices();
-  return services.auth;
-};
-
-export const getFirebaseStorage = async (): Promise<FirebaseStorage> => {
-  const services = await getFirebaseServices();
-  return services.storage;
-};
-
-export const getFirebaseAnalytics = async (): Promise<Analytics | null> => {
-  const services = await getFirebaseServices();
-  return services.analytics;
-};
-
-export const getFirebasePerformance =
-  async (): Promise<FirebasePerformance | null> => {
-    const services = await getFirebaseServices();
-    return services.performance;
-  };
-
 /**
  * Legacy exports for backward compatibility
  */
@@ -414,11 +334,7 @@ export { legacyApp as app, legacyDb as db };
  */
 export const firebase = {
   manager: firebaseManager,
-  enableOffline: () => firebaseManager.enableOfflineSupport(),
-  disableOffline: () => firebaseManager.disableOfflineSupport(),
-  clearCache: () => firebaseManager.clearCache(),
   terminate: () => firebaseManager.terminate(),
-  getConnectionState: () => firebaseManager.getConnectionState(),
 };
 
 /**

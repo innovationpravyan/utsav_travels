@@ -144,7 +144,7 @@ function PlaceDetailLoading() {
 
 // Helper function to get place-specific video
 function getPlaceVideo(placeName?: string): string {
-    if (!placeName || typeof placeName !== 'string') {
+    if (!placeName) {
         return PLACEHOLDER_VIDEOS.temple;
     }
 

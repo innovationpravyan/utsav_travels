@@ -1,172 +1,223 @@
-import { MetadataRoute } from 'next';
-import { getPlaces, getPackages } from '@/lib/data';
+import {MetadataRoute} from 'next';
 
 /**
- * Dynamic Sitemap Generation
- * 
- * This file generates a comprehensive sitemap for better SEO.
- * It includes all static pages and dynamically generated content.
- * 
- * Features:
- * - Dynamic place and package URLs
- * - Proper priority and change frequency
- * - Last modification dates
- * - Mobile-friendly URLs
+ * Production-ready Dynamic Sitemap Generation
+ * Optimized for SEO, performance, and maintainability
  */
 
+// Types for better type safety
+interface SitemapEntry {
+    url: string;
+    lastModified: Date;
+    changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+    priority: number;
+    images?: string[];
+}
+
+interface Place {
+    id: string;
+    name: string;
+    city: string;
+    thumbnail?: string;
+    images?: string[];
+    updatedAt?: string;
+}
+
+interface Package {
+    id: string;
+    name: string;
+    thumbnail?: string;
+    images?: string[];
+    updatedAt?: string;
+}
+
+// Safe data fetching with fallbacks
+async function safeGetPlaces(): Promise<Place[]> {
+    try {
+        // Dynamic import to avoid build issues
+        const {getPlaces} = await import('@/lib/data');
+        const places = await getPlaces();
+        return Array.isArray(places) ? places : [];
+    } catch (error) {
+        console.warn('Failed to fetch places for sitemap:', error);
+        return [];
+    }
+}
+
+async function safeGetPackages(): Promise<Package[]> {
+    try {
+        const {getPackages} = await import('@/lib/data');
+        const packages = await getPackages();
+        return Array.isArray(packages) ? packages : [];
+    } catch (error) {
+        console.warn('Failed to fetch packages for sitemap:', error);
+        return [];
+    }
+}
+
+// Generate sitemap with error handling
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://utsavtravels.com';
-  const currentDate = new Date();
-  
-  // Static pages with their priorities and change frequencies
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/places`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/packages`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-  ];
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://utsavtravels.com';
+    const currentDate = new Date();
 
-  try {
-    // Fetch dynamic content
-    const [places, packages] = await Promise.all([
-      getPlaces(),
-      getPackages(),
-    ]);
-
-    // Generate place URLs
-    const placePages: MetadataRoute.Sitemap = places.map((place) => ({
-      url: `${baseUrl}/places/${place.id}`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    }));
-
-    // Generate package URLs
-    const packagePages: MetadataRoute.Sitemap = packages.map((pkg) => ({
-      url: `${baseUrl}/packages/${pkg.id}`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    }));
-
-    // Combine all pages
-    return [
-      ...staticPages,
-      ...placePages,
-      ...packagePages,
+    // Static pages with SEO priorities
+    const staticPages: SitemapEntry[] = [
+        {
+            url: baseUrl,
+            lastModified: currentDate,
+            changeFrequency: 'daily',
+            priority: 1.0,
+        },
+        {
+            url: `${baseUrl}/about`,
+            lastModified: currentDate,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/contact`,
+            lastModified: currentDate,
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/places`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/packages`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/destinations`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.85,
+        },
+        {
+            url: `${baseUrl}/blog`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/privacy-policy`,
+            lastModified: currentDate,
+            changeFrequency: 'yearly',
+            priority: 0.3,
+        },
+        {
+            url: `${baseUrl}/terms-of-service`,
+            lastModified: currentDate,
+            changeFrequency: 'yearly',
+            priority: 0.3,
+        },
+        {
+            url: `${baseUrl}/sitemap.xml`,
+            lastModified: currentDate,
+            changeFrequency: 'daily',
+            priority: 0.2,
+        }
     ];
-  } catch (error) {
-    console.error('Error generating sitemap:', error);
-    
-    // Return static pages only if dynamic content fails
-    return staticPages;
-  }
-}
 
-/**
- * Generate additional sitemaps for better organization
- * These can be called separately if needed
- */
+    try {
+        // Fetch dynamic content with timeout
+        const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
 
-// Places sitemap
-export async function generatePlacesSitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://utsavtravels.com';
-  const currentDate = new Date();
-  
-  try {
-    const places = await getPlaces();
-    
-    return places.map((place) => ({
-      url: `${baseUrl}/places/${place.id}`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-      images: place.images,
-    }));
-  } catch (error) {
-    console.error('Error generating places sitemap:', error);
-    return [];
-  }
-}
+        const [places, packages] = await Promise.race([
+            Promise.all([safeGetPlaces(), safeGetPackages()]),
+            timeoutPromise
+        ]);
 
-// Packages sitemap
-export async function generatePackagesSitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://utsavtravels.com';
-  const currentDate = new Date();
-  
-  try {
-    const packages = await getPackages();
-    
-    return packages.map((pkg) => ({
-      url: `${baseUrl}/packages/${pkg.id}`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      images: pkg.images,
-    }));
-  } catch (error) {
-    console.error('Error generating packages sitemap:', error);
-    return [];
-  }
-}
+        // Generate place URLs with images
+        const placePages: SitemapEntry[] = places.map((place) => {
+            const images = [];
+            if (place.thumbnail) images.push(place.thumbnail);
+            if (place.images) images.push(...place.images.slice(0, 5)); // Limit to 5 images
 
-// City-based sitemap organization
-export async function generateCitySitemaps(): Promise<Record<string, MetadataRoute.Sitemap>> {
-  const baseUrl = 'https://utsavtravels.com';
-  const currentDate = new Date();
-  
-  try {
-    const places = await getPlaces();
-    const citySitemaps: Record<string, MetadataRoute.Sitemap> = {};
-    
-    // Group places by city
-    const placesByCity = places.reduce((acc, place) => {
-      if (!acc[place.city]) {
-        acc[place.city] = [];
-      }
-      acc[place.city].push(place);
-      return acc;
-    }, {} as Record<string, typeof places>);
-    
-    // Create sitemap for each city
-    Object.entries(placesByCity).forEach(([city, cityPlaces]) => {
-      citySitemaps[city.toLowerCase()] = cityPlaces.map((place) => ({
-        url: `${baseUrl}/places/${place.id}`,
-        lastModified: currentDate,
-        changeFrequency: 'monthly' as const,
-        priority: 0.8,
-      }));
-    });
-    
-    return citySitemaps;
-  } catch (error) {
-    console.error('Error generating city sitemaps:', error);
-    return {};
-  }
+            return {
+                url: `${baseUrl}/places/${place.id}`,
+                lastModified: place.updatedAt ? new Date(place.updatedAt) : currentDate,
+                changeFrequency: 'monthly' as const,
+                priority: 0.8,
+                images: images.filter(Boolean)
+            };
+        });
+
+        // Generate package URLs with images
+        const packagePages: SitemapEntry[] = packages.map((pkg) => {
+            const images = [];
+            if (pkg.thumbnail) images.push(pkg.thumbnail);
+            if (pkg.images) images.push(...pkg.images.slice(0, 5));
+
+            return {
+                url: `${baseUrl}/packages/${pkg.id}`,
+                lastModified: pkg.updatedAt ? new Date(pkg.updatedAt) : currentDate,
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+                images: images.filter(Boolean)
+            };
+        });
+
+        // Generate city-specific pages
+        const cities = [...new Set(places.map(place => place.city).filter(Boolean))];
+        const cityPages: SitemapEntry[] = cities.map(city => ({
+            url: `${baseUrl}/places/city/${encodeURIComponent(city.toLowerCase())}`,
+            lastModified: currentDate,
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+        }));
+
+        // Generate category pages
+        const categories = [
+            'temples',
+            'pilgrimage-sites',
+            'yoga-retreats',
+            'spiritual-tours',
+            'heritage-sites',
+            'meditation-centers'
+        ];
+
+        const categoryPages: SitemapEntry[] = categories.map(category => ({
+            url: `${baseUrl}/category/${category}`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+        }));
+
+        // Combine all pages
+        const allPages = [
+            ...staticPages,
+            ...placePages,
+            ...packagePages,
+            ...cityPages,
+            ...categoryPages
+        ];
+
+        // Convert to MetadataRoute.Sitemap format
+        return allPages.map(page => ({
+            url: page.url,
+            lastModified: page.lastModified,
+            changeFrequency: page.changeFrequency,
+            priority: page.priority,
+            ...(page.images && page.images.length > 0 && {images: page.images})
+        }));
+
+    } catch (error) {
+        console.error('Error generating dynamic sitemap:', error);
+
+        // Return static pages only if dynamic content fails
+        return staticPages.map(page => ({
+            url: page.url,
+            lastModified: page.lastModified,
+            changeFrequency: page.changeFrequency,
+            priority: page.priority
+        }));
+    }
 }

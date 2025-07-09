@@ -8,13 +8,9 @@ import {
   orderBy, 
   limit, 
   startAfter,
-  type DocumentData, 
   type QueryDocumentSnapshot,
   type Query,
-  type DocumentSnapshot,
-  onSnapshot,
-  enableNetwork,
-  disableNetwork
+  type DocumentSnapshot
 } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 import { AppError, safeAsync, env, storage } from './utils';
@@ -64,13 +60,7 @@ const PackageSchema = z.object({
   inclusions: z.array(z.string()),
   tags: z.array(z.string()),
 });
-
-/**
- * TypeScript interfaces
- */
-export type Location = z.infer<typeof LocationSchema>;
 export type Place = z.infer<typeof PlaceSchema>;
-export type ItineraryDay = z.infer<typeof ItineraryDaySchema>;
 export type Package = z.infer<typeof PackageSchema>;
 
 /**
@@ -83,13 +73,6 @@ export interface ApiResponse<T> {
   timestamp: number;
   cached?: boolean;
 }
-
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  hasMore: boolean;
-  lastDoc?: any;
-  total?: number;
-}
-
 /**
  * Query options interface
  */
@@ -168,19 +151,6 @@ class CacheManager {
       keys.forEach(key => localStorage.removeItem(key));
     }
   }
-  
-  invalidate(pattern: string): void {
-    const keysToDelete = Array.from(this.cache.keys()).filter(key => 
-      key.includes(pattern)
-    );
-    
-    keysToDelete.forEach(key => {
-      this.cache.delete(key);
-      if (env.isClient) {
-        storage.remove(`cache_${key}`);
-      }
-    });
-  }
 }
 
 const cacheManager = new CacheManager();
@@ -191,7 +161,7 @@ const cacheManager = new CacheManager();
 const placeConverter = (doc: QueryDocumentSnapshot | DocumentSnapshot): Place => {
   const data = doc.data();
   if (!data) {
-    throw new AppError(`Document ${doc.id} has no data`, 'DOCUMENT_ERROR', 404);
+    throw new AppError(`Document ${doc.id} has no data`, 'DOCUMENT_ERROR');
   }
   
   try {
@@ -216,8 +186,7 @@ const placeConverter = (doc: QueryDocumentSnapshot | DocumentSnapshot): Place =>
     console.error(`Error converting place document ${doc.id}:`, error);
     throw new AppError(
       `Invalid place data for document ${doc.id}`,
-      'VALIDATION_ERROR',
-      400
+      'VALIDATION_ERROR'
     );
   }
 };
@@ -225,7 +194,7 @@ const placeConverter = (doc: QueryDocumentSnapshot | DocumentSnapshot): Place =>
 const packageConverter = (doc: QueryDocumentSnapshot | DocumentSnapshot): Package => {
   const data = doc.data();
   if (!data) {
-    throw new AppError(`Document ${doc.id} has no data`, 'DOCUMENT_ERROR', 404);
+    throw new AppError(`Document ${doc.id} has no data`, 'DOCUMENT_ERROR');
   }
   
   try {
@@ -259,8 +228,7 @@ const packageConverter = (doc: QueryDocumentSnapshot | DocumentSnapshot): Packag
     console.error(`Error converting package document ${doc.id}:`, error);
     throw new AppError(
       `Invalid package data for document ${doc.id}`,
-      'VALIDATION_ERROR',
-      400
+      'VALIDATION_ERROR'
     );
   }
 };
@@ -342,8 +310,7 @@ async function fetchCollection<T>(
     console.error(`Error fetching ${collectionName}:`, error);
     throw new AppError(
       `Failed to fetch ${collectionName}`,
-      'FETCH_ERROR',
-      500
+      'FETCH_ERROR'
     );
   }
   
@@ -404,8 +371,7 @@ async function fetchDocument<T>(
     console.error(`Error fetching ${collectionName}/${documentId}:`, error);
     throw new AppError(
       `Failed to fetch document ${documentId}`,
-      'FETCH_ERROR',
-      500
+      'FETCH_ERROR'
     );
   }
   
@@ -435,53 +401,12 @@ export const placesApi = {
     const response = await fetchCollection('places', placeConverter, options);
     return response.data;
   },
-  
-  /**
-   * Get places with pagination
-   */
-  async getPaginated(options: QueryOptions & FilterOptions = {}): Promise<PaginatedResponse<Place>> {
-    const response = await fetchCollection('places', placeConverter, options);
-    
-    return {
-      ...response,
-      hasMore: response.data.length === (options.limit || 20),
-    };
-  },
-  
   /**
    * Get place by ID
    */
   async getById(id: string, options: QueryOptions = {}): Promise<Place | null> {
     const response = await fetchDocument('places', id, placeConverter, options);
     return response.data;
-  },
-  
-  /**
-   * Get places by city
-   */
-  async getByCity(city: string, options: QueryOptions = {}): Promise<Place[]> {
-    return this.getAll({ ...options, city });
-  },
-  
-  /**
-   * Get places by category
-   */
-  async getByCategory(category: string, options: QueryOptions = {}): Promise<Place[]> {
-    return this.getAll({ ...options, category });
-  },
-  
-  /**
-   * Search places by tags
-   */
-  async searchByTags(tags: string[], options: QueryOptions = {}): Promise<Place[]> {
-    return this.getAll({ ...options, tags });
-  },
-  
-  /**
-   * Get featured places
-   */
-  async getFeatured(count: number = 5, options: QueryOptions = {}): Promise<Place[]> {
-    return this.getAll({ ...options, limit: count, orderBy: 'name' });
   }
 };
 
@@ -496,50 +421,12 @@ export const packagesApi = {
     const response = await fetchCollection('packages', packageConverter, options);
     return response.data;
   },
-  
-  /**
-   * Get packages with pagination
-   */
-  async getPaginated(options: QueryOptions & FilterOptions = {}): Promise<PaginatedResponse<Package>> {
-    const response = await fetchCollection('packages', packageConverter, options);
-    
-    return {
-      ...response,
-      hasMore: response.data.length === (options.limit || 20),
-    };
-  },
-  
   /**
    * Get package by ID
    */
   async getById(id: string, options: QueryOptions = {}): Promise<Package | null> {
     const response = await fetchDocument('packages', id, packageConverter, options);
     return response.data;
-  },
-  
-  /**
-   * Get packages by cities
-   */
-  async getByCities(cities: string[], options: QueryOptions = {}): Promise<Package[]> {
-    // Firestore doesn't support array-contains-any with arrays, so we'll fetch all and filter
-    const allPackages = await this.getAll(options);
-    return allPackages.filter(pkg => 
-      cities.some(city => pkg.cities.includes(city))
-    );
-  },
-  
-  /**
-   * Search packages by tags
-   */
-  async searchByTags(tags: string[], options: QueryOptions = {}): Promise<Package[]> {
-    return this.getAll({ ...options, tags });
-  },
-  
-  /**
-   * Get popular packages
-   */
-  async getPopular(count: number = 3, options: QueryOptions = {}): Promise<Package[]> {
-    return this.getAll({ ...options, limit: count, orderBy: 'name' });
   }
 };
 
@@ -568,132 +455,12 @@ export async function getPackageById(id: string): Promise<Package | undefined> {
  * Real-time data subscriptions
  */
 export const subscriptions = {
-  /**
-   * Subscribe to places collection changes
-   */
-  subscribePlaces(callback: (places: Place[]) => void): () => void {
-    let unsubscribe: (() => void) | null = null;
-    
-    (async () => {
-      try {
-        const db = await getFirebaseDb();
-        const q = query(collection(db, 'places'), orderBy('name'));
-        
-        unsubscribe = onSnapshot(q, (snapshot) => {
-          try {
-            const places = snapshot.docs.map(placeConverter);
-            callback(places);
-            
-            // Update cache
-            cacheManager.set('places_realtime', places);
-          } catch (error) {
-            console.error('Error processing places subscription:', error);
-          }
-        }, (error) => {
-          console.error('Places subscription error:', error);
-        });
-      } catch (error) {
-        console.error('Failed to setup places subscription:', error);
-      }
-    })();
-    
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  },
-  
-  /**
-   * Subscribe to packages collection changes
-   */
-  subscribePackages(callback: (packages: Package[]) => void): () => void {
-    let unsubscribe: (() => void) | null = null;
-    
-    (async () => {
-      try {
-        const db = await getFirebaseDb();
-        const q = query(collection(db, 'packages'), orderBy('name'));
-        
-        unsubscribe = onSnapshot(q, (snapshot) => {
-          try {
-            const packages = snapshot.docs.map(packageConverter);
-            callback(packages);
-            
-            // Update cache
-            cacheManager.set('packages_realtime', packages);
-          } catch (error) {
-            console.error('Error processing packages subscription:', error);
-          }
-        }, (error) => {
-          console.error('Packages subscription error:', error);
-        });
-      } catch (error) {
-        console.error('Failed to setup packages subscription:', error);
-      }
-    })();
-    
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }
 };
 
 /**
  * Data utilities
  */
 export const dataUtils = {
-  /**
-   * Clear all cached data
-   */
-  clearCache: () => cacheManager.clear(),
-  
-  /**
-   * Invalidate cache by pattern
-   */
-  invalidateCache: (pattern: string) => cacheManager.invalidate(pattern),
-  
-  /**
-   * Prefetch data for offline usage
-   */
-  async prefetchData(): Promise<void> {
-    const [placesError] = await safeAsync(() => placesApi.getAll({ useCache: true }));
-    const [packagesError] = await safeAsync(() => packagesApi.getAll({ useCache: true }));
-    
-    if (placesError) {
-      console.warn('Failed to prefetch places:', placesError);
-    }
-    
-    if (packagesError) {
-      console.warn('Failed to prefetch packages:', packagesError);
-    }
-  },
-  
-  /**
-   * Health check for data connectivity
-   */
-  async healthCheck(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; message: string }> {
-    const [error] = await safeAsync(async () => {
-      const db = await getFirebaseDb();
-      // Try to read a single document to test connectivity
-      const testDoc = doc(db, 'places', 'test');
-      await getDoc(testDoc);
-    });
-    
-    if (error) {
-      return {
-        status: 'unhealthy',
-        message: `Database connection failed: ${error.message}`
-      };
-    }
-    
-    return {
-      status: 'healthy',
-      message: 'Database connection is working properly'
-    };
-  }
 };
 
 /**
