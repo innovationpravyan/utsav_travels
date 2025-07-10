@@ -279,10 +279,9 @@ export default function RootLayout({
             <WhatsappButton />
         </Suspense>
 
-        <Suspense>
-            <AnimatedGuide />
-        </Suspense>
-
+        {/*<Suspense>*/}
+        {/*    <AnimatedGuide />*/}
+        {/*</Suspense>*/}
         <Suspense>
             <Guide />
         </Suspense>
