@@ -1,8 +1,8 @@
 'use client';
 
 import React, {forwardRef, ReactNode, useEffect, useRef, useState} from 'react';
-import {cn} from '@/lib/utils';
-import {useThreeInView} from '@/lib/three-utils';
+import {cn} from '@/utils/utils';
+import {useThreeInView} from '@/utils/three-utils';
 
 export type OptimizedAnimationPreset =
     | 'fadeIn'

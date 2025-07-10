@@ -14,7 +14,7 @@ import {
   COMPANY_MILESTONES,
   PLACEHOLDERS,
   COMPANY_INFO
-} from '@/lib/utils';
+} from '@/utils/utils';
 
 export default async function OptimizedAboutPage() {
   // Optimized data loading with error handling

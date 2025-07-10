@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParallax } from '@/hooks/use-parallax';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 
 /**
  * Floating element types

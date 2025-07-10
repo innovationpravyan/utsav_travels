@@ -5,7 +5,13 @@ import {OptimizedHomeClient} from "@/components/optimized-home-client";
 import {HeroVideoCarousel} from "@/components/hero-video-carousel";
 import {Suspense} from 'react';
 import {Metadata} from 'next';
-import {BUSINESS_CONFIG, COMPANY_INFO, DEFAULT_METADATA, SITE_CONFIG,} from "@/lib/utils";
+import {
+    BUSINESS_CONFIG,
+    COMPANY_INFO,
+    DEFAULT_METADATA,
+    SITE_CONFIG,
+    SOCIAL_MEDIA
+} from "@/utils/utils";
 
 // Enhanced SEO metadata using constants
 export const metadata: Metadata = {
@@ -188,11 +194,11 @@ export default async function OptimizedHomePage() {
                             "geoRadius": "1000"
                         },
                         "sameAs": [
-                            COMPANY_INFO.social.facebook,
-                            COMPANY_INFO.social.instagram,
-                            COMPANY_INFO.social.twitter,
-                            COMPANY_INFO.social.linkedin,
-                            COMPANY_INFO.social.youtube
+                            SOCIAL_MEDIA.platforms.facebook,
+                            SOCIAL_MEDIA.platforms.instagram,
+                            SOCIAL_MEDIA.platforms.twitter,
+                            SOCIAL_MEDIA.platforms.linkedin,
+                            SOCIAL_MEDIA.platforms.youtube
                         ]
                     })
                 }}
@@ -218,7 +224,7 @@ export default async function OptimizedHomePage() {
                             "name": COMPANY_INFO.name,
                             "url": SITE_CONFIG.url,
                             "logo": `${SITE_CONFIG.url}/logo.png`,
-                            "sameAs": Object.values(COMPANY_INFO.social)
+                            "sameAs": Object.values(SOCIAL_MEDIA.platforms)
                         }
                     })
                 }}

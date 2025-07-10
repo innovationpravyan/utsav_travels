@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Landmark, BookOpen, Star, MapPin, GalleryVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HeroImageBanner } from '@/components/hero-image-banner';
+
 import {
     Carousel,
     CarouselContent,
@@ -15,8 +17,6 @@ import {
 } from "@/components/ui/carousel"
 import { OptimizedPlaceCard } from "@/components/optimized-place-card";
 import { OptimizedMotionDiv } from "@/components/optimized-motion-div";
-import { OptimizedVideoHeroBanner } from "@/components/optimized-video-hero";
-import { PLACEHOLDER_VIDEOS } from "@/components/optimized-video-hero";
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 
@@ -142,20 +142,6 @@ function PlaceDetailLoading() {
     );
 }
 
-// Helper function to get place-specific video
-function getPlaceVideo(placeName?: string): string {
-    if (!placeName) {
-        return PLACEHOLDER_VIDEOS.temple;
-    }
-
-    const normalizedName = placeName.toLowerCase();
-    if (normalizedName.includes('varanasi')) return '/videos/banaras_1.webm';
-    if (normalizedName.includes('ayodhya')) return '/videos/banaras_2.webm';
-    if (normalizedName.includes('rishikesh')) return '/videos/rishikesh.webm';
-    if (normalizedName.includes('kedarnath')) return '/videos/kedarnath.webm';
-    return PLACEHOLDER_VIDEOS.temple;
-}
-
 export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPageProps) {
     const data = await getPlaceData(params.placeId);
 
@@ -167,33 +153,36 @@ export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPa
 
     return (
         <div className="animate-fade-in">
-            {/* Video Hero Section */}
+            {/* Hero Image Banner - Updated to use HeroImageBanner */}
             <Suspense fallback={<PlaceDetailLoading />}>
-                <OptimizedVideoHeroBanner
-                    videoSrc={getPlaceVideo(place.name)}
-                    fallbackImage={place.images[0] || place.thumbnail}
-                    title={place.name}
-                    subtitle={`${place.city} • ${place.category}`}
-                    height="60vh"
-                    overlayDarkness={0.5}
-                >
-                    {/* Custom overlay content */}
-                    <div className="relative z-30 text-center max-w-4xl mx-auto px-4">
-                        <div className="mb-4">
-                            <span className="text-lg text-accent font-medium">{place.city} • {place.category}</span>
-                        </div>
-                        <h1 className="font-headline text-5xl md:text-7xl font-bold text-white mb-6 text-shadow-lg">
-                            {place.name}
-                        </h1>
+                <div className="relative">
+                    <HeroImageBanner
+                        page="destinations"
+                        title={place.name}
+                        subtitle={`${place.city} • ${place.category}`}
+                        description={place.tagline}
+                        imageUrl={place.images?.[0] || place.thumbnail}
+                        height="60vh"
+                        overlayOpacity={0.5}
+                        parallaxEffect={true}
+                        showScrollIndicator={false}
+                    />
+
+                    {/* Custom overlay content for tags */}
+                    <div className="absolute inset-0 z-30 flex items-end justify-center pb-10">
                         <div className="flex flex-wrap gap-2 justify-center">
                             {place.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary" className="backdrop-blur-sm bg-black/30 text-white border-white/20 hover:bg-black/40 transition-colors">
+                                <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="backdrop-blur-sm bg-black/30 text-white border-white/20 hover:bg-black/40 transition-colors"
+                                >
                                     {tag}
                                 </Badge>
                             ))}
                         </div>
                     </div>
-                </OptimizedVideoHeroBanner>
+                </div>
             </Suspense>
 
             {/* Content Section */}

@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCallback, useEffect, useRef, useState, memo } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useOptimizedScroll, useSafeWindow } from "@/utils/three-utils";
 import { usePerformancePreference } from "@/hooks/use-mobile";
 
@@ -14,7 +14,7 @@ import { usePerformancePreference } from "@/hooks/use-mobile";
 import {
     NAV_LINKS,
     COMPANY_INFO
-} from '@/lib/utils';
+} from '@/utils/utils';
 
 // Icon mapping for dynamic icons
 const ICON_MAP = {

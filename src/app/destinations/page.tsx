@@ -1,13 +1,28 @@
 // src/app/destinations/page.tsx
 
 import { getPlaces } from '@/lib/data';
-import { HeroImageBanner } from '@/components/hero-image-banner';
+// import { HeroImageBanner } from '@/components/hero-image-banner';
 import { DestinationsClient } from './destinations-client';
 import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
 import { GlassCard } from '@/components/ui/glass-card';
 import { MapPin, Compass, Star, Globe, Mountain, Camera } from 'lucide-react';
 import { Suspense } from 'react';
-import { DESTINATIONS_CONTENT } from '@/lib/utils';
+import {HeroImageBanner} from "@/components/hero-image-banner";
+
+// Destinations page configuration (inline since removed from utils)
+const DESTINATIONS_CONTENT = {
+  statistics: [
+    { icon: 'MapPin', label: 'Sacred Cities', color: 'text-blue-400' },
+    { icon: 'Compass', label: 'Destinations', color: 'text-green-400' },
+    { icon: 'Star', label: 'Categories', color: 'text-yellow-400' },
+    { icon: 'Globe', label: 'Experiences', value: '1000+', color: 'text-purple-400' }
+  ],
+  ctaText: {
+    title: "Ready to Explore",
+    description: "Let us craft the perfect spiritual journey for you across India's most sacred destinations.",
+    buttonText: "Plan Your Journey"
+  }
+} as const;
 
 export default async function OptimizedDestinationsPage() {
   let allPlaces: any[] = [];

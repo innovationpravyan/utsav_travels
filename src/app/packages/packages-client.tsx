@@ -10,7 +10,7 @@ import {Button} from '@/components/ui/button';
 import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
-import { PLACEHOLDERS } from '@/lib/utils';
+import { PLACEHOLDERS } from '@/utils/utils';
 
 export function PackagesClient({packages}: { packages: Package[] }) {
     const [searchQuery, setSearchQuery] = useState('');

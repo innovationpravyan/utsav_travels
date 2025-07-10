@@ -11,13 +11,13 @@ import { OptimizedMotionDiv, StaggerContainer } from "@/components/optimized-mot
 import { GlassCard } from "@/components/ui/glass-card";
 import { useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import {
     HOMEPAGE_STATS,
     TESTIMONIALS,
     COMPANY_INFO,
     createWhatsAppUrl
-} from "@/lib/utils";
+} from "@/utils/utils";
 
 // Types for data safety
 interface Place {

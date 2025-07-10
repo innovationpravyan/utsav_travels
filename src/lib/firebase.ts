@@ -10,7 +10,7 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
 import { getPerformance, type FirebasePerformance } from "firebase/performance";
-import { AppError, env, FIREBASE_CONFIG, ERROR_MESSAGES } from "./utils";
+import { AppError, env, FIREBASE_CONFIG, ERROR_MESSAGES } from "@/utils/utils";
 
 /**
  * Firebase configuration interface

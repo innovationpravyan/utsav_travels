@@ -7,7 +7,47 @@ import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-mot
 import { GlassCard } from '@/components/ui/glass-card';
 import { Calendar, Clock, MapPin, Star, Users, Award, Compass, Sparkles, Route, Gift } from 'lucide-react';
 import { Suspense } from 'react';
-import { PACKAGES_CONTENT } from '@/lib/utils';
+
+// Packages page configuration (inline since removed from utils)
+const PACKAGES_CONTENT = {
+  statistics: [
+    { icon: 'Gift', label: 'Travel Packages', color: 'text-blue-400' },
+    { icon: 'MapPin', label: 'Cities Covered', color: 'text-green-400' },
+    { icon: 'Calendar', label: 'Avg Duration', color: 'text-yellow-400' },
+    { icon: 'Star', label: 'Customer Rating', value: '4.9/5', color: 'text-purple-400' }
+  ],
+  packageTypes: [
+    {
+      title: 'Spiritual Journeys',
+      description: 'Sacred temple visits and pilgrimage experiences',
+      icon: 'Sparkles',
+      color: 'from-blue-400 to-purple-600',
+      tag: 'spiritual'
+    },
+    {
+      title: 'Adventure Tours',
+      description: 'Trekking, rafting, and Himalayan adventures',
+      icon: 'Route',
+      color: 'from-green-400 to-blue-600',
+      tag: 'adventure'
+    },
+    {
+      title: 'Cultural Heritage',
+      description: 'Explore ancient heritage and cultural sites',
+      icon: 'Award',
+      color: 'from-yellow-400 to-orange-600',
+      tag: 'heritage'
+    }
+  ],
+  ctaText: {
+    title: "Ready for Your Adventure",
+    description: "Let us create the perfect spiritual journey tailored to your dreams and aspirations.",
+    buttons: [
+      { text: "Contact Our Experts", icon: "Users" },
+      { text: "Quick Consultation", icon: "Clock" }
+    ]
+  }
+} as const;
 
 export default async function OptimizedPackagesPage() {
   let allPackages: any[] = [];

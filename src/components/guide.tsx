@@ -2,14 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { X, Phone, MessageCircle, Mail } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { GlassCard } from '@/components/ui/glass-card';
 
 // Import constants from utils
 import {
-    GUIDE_CONTACT_OPTIONS,
-    GUIDE_CONFIG
-} from '@/lib/utils';
+    CONTACT_METHODS,
+    COMPANY_INFO
+} from '@/utils/utils';
+
+// Guide-specific configuration (inline since removed from utils)
+const GUIDE_CONFIG = {
+    showDelay: 5000, // Show after 5 seconds
+    title: "Need Help Planning?",
+    description: "Our travel experts are here to assist",
+    buttonText: "Get Assistance",
+    expandButtonText: "Show Less",
+} as const;
 
 // Icon mapping for dynamic icons
 const ICON_MAP = {
@@ -17,6 +26,28 @@ const ICON_MAP = {
     MessageCircle,
     Mail
 } as const;
+
+// Helper function to get icon component
+const getIconComponent = (iconName: string) => {
+    return ICON_MAP[iconName as keyof typeof ICON_MAP];
+};
+
+// Transform CONTACT_METHODS to guide-friendly format
+const getGuideContactOptions = () => {
+    return CONTACT_METHODS.slice(0, 3).map(method => ({
+        icon: method.icon,
+        label: method.title,
+        value: method.title === 'Call Us' ? COMPANY_INFO.contact.phoneDisplay :
+            method.title === 'WhatsApp' ? 'Chat Now' :
+                method.title === 'Email Us' ? COMPANY_INFO.contact.email :
+                    method.value,
+        href: method.href,
+        color: method.title === 'Call Us' ? 'text-blue-400' :
+            method.title === 'WhatsApp' ? 'text-green-400' :
+                method.title === 'Email Us' ? 'text-purple-400' :
+                    'text-gray-400'
+    }));
+};
 
 export function Guide() {
     const [isVisible, setIsVisible] = useState(false);
@@ -32,9 +63,11 @@ export function Guide() {
 
     if (!isVisible) return null;
 
+    const guideContactOptions = getGuideContactOptions();
+
     return (
         <div className={cn(
-            "fixed bottom-24 left-6 z-40 transition-all duration-500",
+            "fixed bottom-10 right-6 z-40 transition-all duration-500",
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
         )}>
             <GlassCard className="p-4 max-w-sm">
@@ -46,6 +79,7 @@ export function Guide() {
                     <button
                         onClick={() => setIsVisible(false)}
                         className="text-white/50 hover:text-white transition-colors"
+                        aria-label="Close guide"
                     >
                         <X className="w-4 h-4" />
                     </button>
@@ -53,8 +87,8 @@ export function Guide() {
 
                 {isExpanded ? (
                     <div className="space-y-2">
-                        {GUIDE_CONTACT_OPTIONS.map((option) => {
-                            const IconComponent = ICON_MAP[option.icon as keyof typeof ICON_MAP];
+                        {guideContactOptions.map((option) => {
+                            const IconComponent = getIconComponent(option.icon);
                             return (
                                 <a
                                     key={option.label}
@@ -62,6 +96,7 @@ export function Guide() {
                                     target={option.href.startsWith('http') ? '_blank' : '_self'}
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors group"
+                                    aria-label={`${option.label}: ${option.value}`}
                                 >
                                     {IconComponent && (
                                         <IconComponent className={cn(

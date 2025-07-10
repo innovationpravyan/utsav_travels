@@ -1,14 +1,21 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { WhatsappButton } from '@/components/whatsapp-button';
 import { Guide } from '@/components/guide';
 import { Suspense } from 'react';
-import {AnimatedGuide} from "@/components/animated-guide";
-import { COMPANY_INFO, SEO_CONFIG, SITE_CONFIG } from '@/lib/utils';
+import { AnimatedGuide } from "@/components/animated-guide";
+import {
+    COMPANY_INFO,
+    SEO_CONFIG,
+    SITE_CONFIG,
+    ANALYTICS_CONFIG,
+    SOCIAL_MEDIA,
+    BUSINESS_CONFIG
+} from '@/utils/utils';
 
 // Enhanced metadata configuration
 export const metadata: Metadata = {
@@ -82,10 +89,10 @@ export const metadata: Metadata = {
         },
     },
     verification: {
-        google: SITE_CONFIG.verification.google,
-        yandex: SITE_CONFIG.verification.yandex,
+        google: ANALYTICS_CONFIG.verification.google,
+        yandex: ANALYTICS_CONFIG.verification.yandex,
         other: {
-            'msvalidate.01': SITE_CONFIG.verification.bing,
+            'msvalidate.01': ANALYTICS_CONFIG.verification.bing,
         }
     },
     appleWebApp: {
@@ -200,7 +207,7 @@ export default function RootLayout({
                             "@type": "ContactPoint",
                             "telephone": COMPANY_INFO.contact.phone,
                             "contactType": "Customer Service",
-                            "availableLanguage": ["Hindi", "English"],
+                            "availableLanguage": BUSINESS_CONFIG.languages,
                             "areaServed": "IN"
                         },
                         address: {
@@ -210,17 +217,10 @@ export default function RootLayout({
                             "addressCountry": COMPANY_INFO.address.countryCode,
                             "postalCode": COMPANY_INFO.address.postalCode
                         },
-                        sameAs: Object.values(COMPANY_INFO.social),
+                        sameAs: Object.values(SOCIAL_MEDIA.platforms),
                         aggregateRating: SEO_CONFIG.structuredData.aggregateRating,
-                        priceRange: "₹₹",
-                        knowsAbout: [
-                            "Spiritual Tourism",
-                            "Heritage Sites",
-                            "Cultural Tours",
-                            "Pilgrimage Tours",
-                            "Temple Tours",
-                            "Yoga Retreats"
-                        ],
+                        priceRange: BUSINESS_CONFIG.priceRange,
+                        knowsAbout: BUSINESS_CONFIG.services,
                         areaServed: [
                             {
                                 "@type": "State",

@@ -1,19 +1,18 @@
 // src/app/packages/[packageId]/page.tsx
 
-import { getPackageById, getPackages } from "@/lib/data";
-import { notFound } from "next/navigation";
+import {getPackageById, getPackages} from "@/lib/data";
+import {notFound} from "next/navigation";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle, DollarSign, Pin, Info, Star, Map, GalleryVertical } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import { OptimizedPackageCard } from "@/components/optimized-package-card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { OptimizedMotionDiv } from "@/components/optimized-motion-div";
-import { OptimizedVideoHeroBanner } from "@/components/optimized-video-hero";
-import { PLACEHOLDER_VIDEOS } from "@/components/optimized-video-hero";
-import { Suspense } from 'react';
-import { Metadata } from 'next';
+import {Badge} from "@/components/ui/badge";
+import {Calendar, CheckCircle, DollarSign, GalleryVertical, Info, Map, Pin, Star} from "lucide-react";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel";
+import {Card, CardContent} from "@/components/ui/card";
+import {OptimizedPackageCard} from "@/components/optimized-package-card";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import {OptimizedMotionDiv} from "@/components/optimized-motion-div";
+import {HeroImageBanner} from '@/components/hero-image-banner';
+import {Suspense} from 'react';
+import {Metadata} from 'next';
 
 type PackageDetailPageProps = {
     params: {
@@ -22,7 +21,7 @@ type PackageDetailPageProps = {
 };
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: PackageDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({params}: PackageDetailPageProps): Promise<Metadata> {
     try {
         const pkg = await getPackageById(params.packageId);
 
@@ -40,7 +39,12 @@ export async function generateMetadata({ params }: PackageDetailPageProps): Prom
             openGraph: {
                 title: pkg.name || 'Travel Package',
                 description: pkg.tagline || 'Discover amazing destinations',
-                images: [{ url: pkg.thumbnail || '/placeholder.jpg', width: 1200, height: 630, alt: pkg.name || 'Package' }],
+                images: [{
+                    url: pkg.thumbnail || '/placeholder.jpg',
+                    width: 1200,
+                    height: 630,
+                    alt: pkg.name || 'Package'
+                }],
             },
             twitter: {
                 title: pkg.name || 'Travel Package',
@@ -96,9 +100,9 @@ async function getPackageData(packageId: string) {
             highlights: pkg.highlights || ['Amazing destinations', 'Expert guides', 'Comfortable accommodation'],
             inclusions: pkg.inclusions || ['Accommodation', 'Transportation', 'Meals', 'Guide'],
             itinerary: pkg.itinerary || [
-                { day: 1, title: 'Arrival', description: 'Welcome to your spiritual journey' },
-                { day: 2, title: 'Exploration', description: 'Discover sacred places' },
-                { day: 3, title: 'Departure', description: 'Safe travels home' }
+                {day: 1, title: 'Arrival', description: 'Welcome to your spiritual journey'},
+                {day: 2, title: 'Exploration', description: 'Discover sacred places'},
+                {day: 3, title: 'Departure', description: 'Safe travels home'}
             ]
         };
 
@@ -110,7 +114,7 @@ async function getPackageData(packageId: string) {
             ))
             .slice(0, 3);
 
-        return { pkg: safePackage, relatedPackages };
+        return {pkg: safePackage, relatedPackages};
     } catch (error) {
         console.error('Error fetching package data:', error);
         return null;
@@ -121,19 +125,20 @@ async function getPackageData(packageId: string) {
 function PackageDetailLoading() {
     return (
         <div className="animate-fade-in">
-            <div className="h-[60vh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+            <div
+                className="h-[60vh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
                 <div className="text-white text-xl animate-pulse">Loading package details...</div>
             </div>
             <div className="section-padding bg-secondary">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                         <div className="lg:col-span-2 space-y-8">
-                            {Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="h-32 bg-white/10 animate-pulse rounded-lg" />
+                            {Array.from({length: 3}).map((_, i) => (
+                                <div key={i} className="h-32 bg-white/10 animate-pulse rounded-lg"/>
                             ))}
                         </div>
                         <div className="lg:col-span-1">
-                            <div className="h-96 bg-white/10 animate-pulse rounded-lg" />
+                            <div className="h-96 bg-white/10 animate-pulse rounded-lg"/>
                         </div>
                     </div>
                 </div>
@@ -142,66 +147,48 @@ function PackageDetailLoading() {
     );
 }
 
-// Helper function to get package-specific video with safety checks
-function getPackageVideo(packageTags?: string[], packageName?: string): string {
-    if (!packageTags && !packageName) {
-        return PLACEHOLDER_VIDEOS.spiritual;
-    }
-
-    const normalizedName = (packageName || '').toLowerCase();
-    const normalizedTags = (packageTags || []).map(tag => (tag || '').toLowerCase());
-
-    if (normalizedTags.includes('spiritual') || normalizedName.includes('spiritual')) {
-        return PLACEHOLDER_VIDEOS.spiritual;
-    }
-    if (normalizedTags.includes('adventure') || normalizedName.includes('trek')) {
-        return PLACEHOLDER_VIDEOS.journey;
-    }
-    if (normalizedTags.includes('heritage') || normalizedName.includes('heritage')) {
-        return PLACEHOLDER_VIDEOS.temple;
-    }
-    return PLACEHOLDER_VIDEOS.nature;
-}
-
-export default async function OptimizedPackageDetailPage({ params }: PackageDetailPageProps) {
+export default async function OptimizedPackageDetailPage({params}: PackageDetailPageProps) {
     const data = await getPackageData(params.packageId);
 
     if (!data) {
         notFound();
     }
 
-    const { pkg, relatedPackages } = data;
+    const {pkg, relatedPackages} = data;
 
     return (
         <div className="animate-fade-in">
-            {/* Video Hero Section */}
-            <Suspense fallback={<PackageDetailLoading />}>
-                <OptimizedVideoHeroBanner
-                    videoSrc={getPackageVideo(pkg.tags, pkg.name)}
-                    fallbackImage={pkg.images[0] || pkg.thumbnail}
-                    title={pkg.name}
-                    subtitle={pkg.tagline}
-                    height="60vh"
-                    overlayDarkness={0.5}
-                >
-                    {/* Custom overlay content */}
-                    <div className="relative z-30 text-center max-w-4xl mx-auto px-4">
-                        <div className="mb-4">
-                            <span className="text-lg text-accent font-medium">{pkg.cities.join(', ')}</span>
-                        </div>
-                        <h1 className="font-headline text-5xl md:text-7xl font-bold text-white mb-4 text-shadow-lg">
-                            {pkg.name}
-                        </h1>
-                        <p className="text-xl md:text-2xl text-primary mb-6 text-shadow">{pkg.tagline}</p>
+            {/* Hero Image Banner - Updated to use HeroImageBanner */}
+            <Suspense fallback={<PackageDetailLoading/>}>
+                <div className="relative">
+                    <HeroImageBanner
+                        page="packages"
+                        title={pkg.name}
+                        subtitle={pkg.tagline}
+                        description={`${pkg.duration} • ${pkg.cities.join(', ')}`}
+                        imageUrl={pkg.images?.[0] || pkg.thumbnail}
+                        height="60vh"
+                        overlayOpacity={0.5}
+                        parallaxEffect={true}
+                        showScrollIndicator={false}
+                    />
+
+                    {/* Custom overlay content for package details */}
+                    <div className="absolute inset-0 z-30 flex items-end justify-center pb-10">
+
                         <div className="flex flex-wrap gap-2 justify-center">
                             {pkg.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary" className="backdrop-blur-sm bg-black/30 text-white border-white/20 hover:bg-black/40 transition-colors">
+                                <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="backdrop-blur-sm bg-black/30 text-white border-white/20 hover:bg-black/40 transition-colors"
+                                >
                                     {tag}
                                 </Badge>
                             ))}
                         </div>
                     </div>
-                </OptimizedVideoHeroBanner>
+                </div>
             </Suspense>
 
             {/* Details Section */}
@@ -219,7 +206,7 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
 
                         <OptimizedMotionDiv preset="slideUp">
                             <h2 className="font-headline text-4xl mb-6 flex items-center gap-3">
-                                <Map className="h-8 w-8 text-primary" />
+                                <Map className="h-8 w-8 text-primary"/>
                                 Your Adventure Itinerary
                             </h2>
                             <Accordion type="single" collapsible className="w-full bg-card p-4 rounded-lg">
@@ -229,7 +216,8 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
                                         key={item.day}
                                         className={index === pkg.itinerary.length - 1 ? "border-b-0" : ""}
                                     >
-                                        <AccordionTrigger className="text-xl font-headline hover:no-underline text-accent">
+                                        <AccordionTrigger
+                                            className="text-xl font-headline hover:no-underline text-accent">
                                             Day {item.day}: {item.title}
                                         </AccordionTrigger>
                                         <AccordionContent className="text-muted-foreground text-base pl-2 pt-2">
@@ -252,7 +240,8 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
                                             <CarouselItem key={index} className="md:basis-1/2">
                                                 <div className="p-1">
                                                     <Card>
-                                                        <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
+                                                        <CardContent
+                                                            className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
                                                             <Image
                                                                 src={img}
                                                                 alt={`${pkg.name} gallery image ${index + 1}`}
@@ -266,12 +255,13 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
                                             </CarouselItem>
                                         ))}
                                     </CarouselContent>
-                                    <CarouselPrevious />
-                                    <CarouselNext />
+                                    <CarouselPrevious/>
+                                    <CarouselNext/>
                                 </Carousel>
                             ) : (
                                 <Card>
-                                    <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
+                                    <CardContent
+                                        className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
                                         <Image
                                             src={pkg.thumbnail}
                                             alt={pkg.name}
@@ -314,7 +304,7 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
                                     </div>
 
                                     <h3 className="font-headline text-2xl mb-4 flex items-center gap-3">
-                                        <Star className="h-6 w-6 text-accent" />
+                                        <Star className="h-6 w-6 text-accent"/>
                                         Highlights
                                     </h3>
                                     <ul className="space-y-2 list-disc list-inside text-muted-foreground mb-6">
@@ -327,7 +317,7 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
                                     <ul className="space-y-3 text-muted-foreground">
                                         {pkg.inclusions.map((item, index) => (
                                             <li key={index} className="flex items-start gap-3">
-                                                <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                                                <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5"/>
                                                 <span>{item}</span>
                                             </li>
                                         ))}
@@ -346,7 +336,7 @@ export default async function OptimizedPackageDetailPage({ params }: PackageDeta
                         <h2 className="text-4xl font-headline text-center mb-12">Related Packages</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {relatedPackages.map((p, index) => (
-                                <OptimizedPackageCard key={p?.id || index} pkg={p} index={index} showAnimation={false} />
+                                <OptimizedPackageCard key={p?.id || index} pkg={p} index={index} showAnimation={false}/>
                             ))}
                         </div>
                     </div>

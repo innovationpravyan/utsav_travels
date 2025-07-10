@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, memo } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 
 // Types for Three.js objects (avoiding direct imports for SSR safety)
 interface ThreeObjects {

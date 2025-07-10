@@ -2,16 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
 import { GlassCard } from '@/components/ui/glass-card';
 import { useSafeWindow } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
 import {
-    VIDEO_CAROUSEL_CONFIG,
+    MEDIA_CONFIG,
     getVideoCarouselTabs,
     getVideoSource
-} from '@/lib/utils';
+} from '@/utils/utils';
 
 interface VideoCarouselTab {
     id: string;
@@ -48,6 +48,8 @@ export function HeroVideoCarousel({
     const windowObj = useSafeWindow();
     const { shouldReduceEffects } = usePerformancePreference();
 
+    // Access video carousel config from MEDIA_CONFIG
+    const videoCarouselConfig = MEDIA_CONFIG.videoCarouselConfig;
     const tabs = getVideoCarouselTabs();
     const currentVideo = tabs[activeTab];
 
@@ -74,12 +76,12 @@ export function HeroVideoCarousel({
 
     // Auto-play carousel
     useEffect(() => {
-        if (!autoPlay || shouldReduceEffects) return;
+        if (!autoPlay || shouldReduceEffects || !videoCarouselConfig.autoPlay) return;
 
         const startAutoPlay = () => {
             intervalRef.current = setInterval(() => {
                 setActiveTab((prev) => (prev + 1) % tabs.length);
-            }, VIDEO_CAROUSEL_CONFIG.autoPlayInterval);
+            }, videoCarouselConfig.autoPlayInterval);
         };
 
         const stopAutoPlay = () => {
@@ -95,7 +97,7 @@ export function HeroVideoCarousel({
             clearTimeout(timer);
             stopAutoPlay();
         };
-    }, [autoPlay, shouldReduceEffects, tabs.length]);
+    }, [autoPlay, shouldReduceEffects, tabs.length, videoCarouselConfig.autoPlay, videoCarouselConfig.autoPlayInterval]);
 
     // Handle tab change
     const handleTabChange = useCallback((tabIndex: number) => {
@@ -148,16 +150,16 @@ export function HeroVideoCarousel({
     }, []);
 
     const handleCanPlayThrough = useCallback(async () => {
-        if (autoPlay && !shouldReduceEffects && videoRef.current) {
+        if (autoPlay && !shouldReduceEffects && videoRef.current && videoCarouselConfig.autoPlay) {
             try {
-                videoRef.current.muted = true;
+                videoRef.current.muted = videoCarouselConfig.videoSettings.muted;
                 await videoRef.current.play();
                 setIsPlaying(true);
             } catch (error) {
                 console.warn('Auto-play failed:', error);
             }
         }
-    }, [autoPlay, shouldReduceEffects]);
+    }, [autoPlay, shouldReduceEffects, videoCarouselConfig.autoPlay, videoCarouselConfig.videoSettings.muted]);
 
     // Handle user interaction for autoplay
     useEffect(() => {
@@ -191,11 +193,11 @@ export function HeroVideoCarousel({
                         'absolute inset-0 w-full h-full object-cover transition-opacity duration-800',
                         isVideoLoaded ? 'opacity-100' : 'opacity-0'
                     )}
-                    autoPlay={autoPlay && !shouldReduceEffects}
-                    loop
+                    autoPlay={autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay}
+                    loop={videoCarouselConfig.loop}
                     muted={isMuted}
-                    playsInline
-                    preload={shouldReduceEffects ? 'none' : 'metadata'}
+                    playsInline={videoCarouselConfig.videoSettings.playsInline}
+                    preload={shouldReduceEffects ? 'none' : videoCarouselConfig.videoSettings.preload}
                     onLoadedData={handleVideoLoad}
                     onCanPlayThrough={handleCanPlayThrough}
                     onError={handleVideoError}
@@ -281,57 +283,59 @@ export function HeroVideoCarousel({
             </div>
 
             {/* Video Tabs - Bottom Left */}
-            <OptimizedMotionDiv
-                preset="slideUp"
-                delay={1200}
-                className="absolute bottom-8 left-8 z-30"
-            >
-                <div className="flex flex-col gap-3">
-                    {tabs.map((tab, index) => (
-                        <GlassCard
-                            key={tab.id}
-                            className={cn(
-                                "px-6 py-3 cursor-pointer transition-all duration-300 group",
-                                "hover:scale-105 hover:bg-white/20",
-                                activeTab === index
-                                    ? "bg-white/20 border-primary/50 shadow-lg shadow-primary/20"
-                                    : "bg-white/10 hover:bg-white/15"
-                            )}
-                            onClick={() => handleTabChange(index)}
-                        >
-                            <div className="flex items-center gap-3">
-                                {/* Active indicator */}
-                                <div className={cn(
-                                    "w-2 h-2 rounded-full transition-all duration-300",
-                                    activeTab === index ? "bg-primary scale-125" : "bg-white/50"
-                                )} />
+            {videoCarouselConfig.showTabs && (
+                <OptimizedMotionDiv
+                    preset="slideUp"
+                    delay={1200}
+                    className="absolute bottom-8 left-8 z-30"
+                >
+                    <div className="flex flex-col gap-3">
+                        {tabs.map((tab, index) => (
+                            <GlassCard
+                                key={tab.id}
+                                className={cn(
+                                    "px-6 py-3 cursor-pointer transition-all duration-300 group",
+                                    "hover:scale-105 hover:bg-white/20",
+                                    activeTab === index
+                                        ? "bg-white/20 border-primary/50 shadow-lg shadow-primary/20"
+                                        : "bg-white/10 hover:bg-white/15"
+                                )}
+                                onClick={() => handleTabChange(index)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    {/* Active indicator */}
+                                    <div className={cn(
+                                        "w-2 h-2 rounded-full transition-all duration-300",
+                                        activeTab === index ? "bg-primary scale-125" : "bg-white/50"
+                                    )} />
 
-                                <span className={cn(
-                                    "text-sm font-medium transition-colors duration-300",
-                                    activeTab === index ? "text-white" : "text-white/80"
-                                )}>
-                                    {tab.label}
-                                </span>
-                            </div>
-
-                            {/* Progress bar for active tab */}
-                            {activeTab === index && autoPlay && !shouldReduceEffects && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 overflow-hidden">
-                                    <div
-                                        className="h-full bg-primary transition-all duration-100 ease-linear"
-                                        style={{
-                                            animation: `progress ${VIDEO_CAROUSEL_CONFIG.autoPlayInterval}ms linear infinite`
-                                        }}
-                                    />
+                                    <span className={cn(
+                                        "text-sm font-medium transition-colors duration-300",
+                                        activeTab === index ? "text-white" : "text-white/80"
+                                    )}>
+                                        {tab.label}
+                                    </span>
                                 </div>
-                            )}
-                        </GlassCard>
-                    ))}
-                </div>
-            </OptimizedMotionDiv>
+
+                                {/* Progress bar for active tab */}
+                                {activeTab === index && autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 overflow-hidden">
+                                        <div
+                                            className="h-full bg-primary transition-all duration-100 ease-linear"
+                                            style={{
+                                                animation: `progress ${videoCarouselConfig.autoPlayInterval}ms linear infinite`
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </GlassCard>
+                        ))}
+                    </div>
+                </OptimizedMotionDiv>
+            )}
 
             {/* Video Controls - Bottom Right */}
-            {isVideoLoaded && !shouldReduceEffects && (
+            {isVideoLoaded && !shouldReduceEffects && videoCarouselConfig.showControls && (
                 <OptimizedMotionDiv
                     preset="scaleIn"
                     delay={1000}
@@ -340,6 +344,7 @@ export function HeroVideoCarousel({
                     <GlassCard
                         className="p-3 cursor-pointer group hover:scale-110 transition-all duration-200"
                         onClick={handleToggleMute}
+                        aria-label={isMuted ? "Unmute video" : "Mute video"}
                     >
                         {isMuted ? (
                             <VolumeX className="h-5 w-5 text-white group-hover:text-primary transition-colors" />
@@ -351,6 +356,7 @@ export function HeroVideoCarousel({
                     <GlassCard
                         className="p-3 cursor-pointer group hover:scale-110 transition-all duration-200"
                         onClick={handleTogglePlay}
+                        aria-label={isPlaying ? "Pause video" : "Play video"}
                     >
                         {isPlaying ? (
                             <Pause className="h-5 w-5 text-white group-hover:text-primary transition-colors" />

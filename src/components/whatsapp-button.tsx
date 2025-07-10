@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { cn, COMPANY_INFO, WHATSAPP_TEMPLATES, createWhatsAppUrl } from '@/lib/utils';
+import { cn, COMPANY_INFO, WHATSAPP_TEMPLATES, createWhatsAppUrl } from '@/utils/utils';
 
 export function WhatsappButton() {
     const [isVisible, setIsVisible] = useState(false);

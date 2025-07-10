@@ -10,8 +10,8 @@ import {Button} from '@/components/ui/button';
 import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
-import {useSafeWindow} from "@/lib/three-utils";
-import {PLACEHOLDERS} from '@/lib/utils';
+import {useSafeWindow} from "@/utils/three-utils";
+import {PLACEHOLDERS} from '@/utils/utils';
 
 export function DestinationsClient({places}: { places: Place[] }) {
     const [searchQuery, setSearchQuery] = useState('');

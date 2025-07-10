@@ -13,7 +13,7 @@ import {
   type DocumentSnapshot
 } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
-import { AppError, safeAsync, env, storage } from './utils';
+import { AppError, safeAsync, env, storage } from '@/utils/utils';
 import { z } from 'zod';
 
 /**

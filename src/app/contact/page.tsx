@@ -2,7 +2,7 @@ import { ContactForm } from "./contact-form";
 import { OptimizedMotionDiv, StaggerContainer } from "@/components/optimized-motion-div";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Mail, Phone, MapPin, Clock, MessageCircle, Users, Headphones, Star } from "lucide-react";
-import { CONTACT_METHODS, COMPANY_INFO } from "@/lib/utils";
+import { CONTACT_METHODS, COMPANY_INFO } from "@/utils/utils";
 
 // Dynamic icon mapping
 const iconMap = {

@@ -67,7 +67,7 @@
         "./src/hooks/*"
       ],
       "@/utils/*": [
-        "./src/lib/*"
+        "./src/utils/*"
       ],
       "@/app/*": [
         "./src/app/*"

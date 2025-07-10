@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Clock, DollarSign, MapPin, Sparkles, Star, Users, Calendar, Award } from "lucide-react";
 import React, { useCallback, useRef, useState, memo } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
 

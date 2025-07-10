@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
 import { GlassCard } from '@/components/ui/glass-card';
 import { useSafeWindow } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
-import { HERO_IMAGE_CONFIG, getHeroImage, VIDEO_URLS } from '@/lib/utils';
+import { MEDIA_CONFIG, getHeroImage } from '@/utils/utils';
 
 interface HeroImageBannerProps {
     page: 'destinations' | 'packages' | 'about';
@@ -27,11 +27,11 @@ export function HeroImageBanner({
                                     subtitle,
                                     description,
                                     imageUrl,
-                                    height = HERO_IMAGE_CONFIG.height,
-                                    overlayOpacity = HERO_IMAGE_CONFIG.overlayOpacity,
+                                    height = MEDIA_CONFIG.heroImageConfig.height,
+                                    overlayOpacity = MEDIA_CONFIG.heroImageConfig.overlayOpacity,
                                     className,
-                                    showScrollIndicator = HERO_IMAGE_CONFIG.showScrollIndicator,
-                                    parallaxEffect = HERO_IMAGE_CONFIG.parallaxEffect
+                                    showScrollIndicator = MEDIA_CONFIG.heroImageConfig.showScrollIndicator,
+                                    parallaxEffect = MEDIA_CONFIG.heroImageConfig.parallaxEffect
                                 }: HeroImageBannerProps) {
     const [scrollY, setScrollY] = useState(0);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
