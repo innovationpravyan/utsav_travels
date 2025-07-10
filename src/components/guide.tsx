@@ -67,7 +67,7 @@ export function Guide() {
 
     return (
         <div className={cn(
-            "fixed bottom-50 right-6 z-40 transition-all duration-500",
+            "fixed bottom-10 right-6 z-40 transition-all duration-500",
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
         )}>
             <GlassCard className="p-4 max-w-sm">

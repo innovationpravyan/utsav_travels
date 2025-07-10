@@ -49,10 +49,9 @@ export function HeroVideoCarousel({
     const [hasVideoError, setHasVideoError] = useState(false);
     const [scrollY, setScrollY] = useState(0);
     const [userInteracted, setUserInteracted] = useState(false);
-    const [sessionMuteState, setSessionMuteState] = useState(true);
     const [videoProgress, setVideoProgress] = useState(0);
     const [preloadingProgress, setPreloadingProgress] = useState(0);
-    const [attemptedAutoPlay, setAttemptedAutoPlay] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     // Video cache management
     const videoCache = useRef<Map<string, CachedVideo>>(new Map());
@@ -67,17 +66,29 @@ export function HeroVideoCarousel({
     const tabs = getVideoCarouselTabs();
     const currentVideo = tabs[activeTab];
 
+    // Auto-switch to next video when current video ends
+    const handleVideoEnded = useCallback(() => {
+        setVideoProgress(100);
+        if (autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay) {
+            setTimeout(() => {
+                const nextIndex = (activeTab + 1) % tabs.length;
+                setActiveTab(nextIndex);
+            }, 500);
+        }
+    }, [activeTab, tabs.length, autoPlay, shouldReduceEffects, videoCarouselConfig.autoPlay]);
+
     // Create and cache video element
     const createVideoElement = useCallback((video: VideoCarouselTab): HTMLVideoElement => {
         const videoElement = document.createElement('video');
-        videoElement.className = 'absolute inset-0 w-full h-full object-cover transition-opacity duration-800 opacity-0';
-        videoElement.style.webkitTransform = 'translateZ(0)';
+        videoElement.className = 'absolute inset-0 w-full h-full object-cover transition-opacity duration-800';
+        videoElement.style.opacity = '0';
+        videoElement.style.WebkitTransform = 'translateZ(0)';
         videoElement.style.transform = 'translateZ(0)';
         videoElement.autoplay = false;
         videoElement.loop = false;
-        videoElement.muted = sessionMuteState;
-        videoElement.playsInline = videoCarouselConfig.videoSettings.playsInline;
-        videoElement.preload = shouldReduceEffects ? 'none' : 'auto';
+        videoElement.muted = true; // Always start muted for autoplay
+        videoElement.playsInline = true;
+        videoElement.preload = 'auto';
         videoElement.poster = video.thumbnail;
 
         // Add sources
@@ -92,200 +103,272 @@ export function HeroVideoCarousel({
         videoElement.appendChild(mp4Source);
 
         return videoElement;
-    }, [sessionMuteState, shouldReduceEffects, videoCarouselConfig.videoSettings.playsInline]);
+    }, []);
 
-    // Preload videos in background
-    const preloadVideos = useCallback(async () => {
-        if (preloadingRef.current || shouldReduceEffects) return;
-        preloadingRef.current = true;
+    // Setup video event listeners
+    const setupVideoEventListeners = useCallback((videoElement: HTMLVideoElement, cachedVideo: CachedVideo) => {
+        const handleLoadedData = () => {
+            cachedVideo.loaded = true;
+            cachedVideo.error = false;
 
-        const preloadQueue = [];
+            if (videoElement === activeVideoRef.current) {
+                setIsVideoLoaded(true);
+                setHasVideoError(false);
 
-        // Priority order: current, next, previous, then rest
-        const currentIndex = activeTab;
-        const nextIndex = (currentIndex + 1) % tabs.length;
-        const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-
-        // Add current video first
-        if (!videoCache.current.has(currentVideo.id)) {
-            preloadQueue.push(currentVideo);
-        }
-
-        // Add next and previous videos
-        if (!videoCache.current.has(tabs[nextIndex].id)) {
-            preloadQueue.push(tabs[nextIndex]);
-        }
-        if (!videoCache.current.has(tabs[prevIndex].id)) {
-            preloadQueue.push(tabs[prevIndex]);
-        }
-
-        // Add remaining videos
-        tabs.forEach(tab => {
-            if (!videoCache.current.has(tab.id) && !preloadQueue.includes(tab)) {
-                preloadQueue.push(tab);
+                // Auto-play on initial load
+                if (isInitialLoad && autoPlay && !shouldReduceEffects) {
+                    videoElement.play().then(() => {
+                        setIsPlaying(true);
+                        setIsInitialLoad(false);
+                    }).catch((error) => {
+                        console.warn('Autoplay failed:', error);
+                        // Try playing muted
+                        videoElement.muted = true;
+                        videoElement.play().then(() => {
+                            setIsPlaying(true);
+                            setIsInitialLoad(false);
+                        }).catch(console.error);
+                    });
+                }
             }
+        };
+
+        const handleCanPlayThrough = () => {
+            cachedVideo.loaded = true;
+            cachedVideo.error = false;
+
+            if (videoElement === activeVideoRef.current) {
+                setIsVideoLoaded(true);
+                setHasVideoError(false);
+                videoElement.style.opacity = '1';
+            }
+        };
+
+        const handleError = () => {
+            cachedVideo.error = true;
+            cachedVideo.loaded = false;
+
+            if (videoElement === activeVideoRef.current) {
+                setIsVideoLoaded(false);
+                setHasVideoError(true);
+            }
+        };
+
+        const handleTimeUpdate = () => {
+            if (videoElement === activeVideoRef.current && videoElement.duration > 0) {
+                const progress = (videoElement.currentTime / videoElement.duration) * 100;
+                cachedVideo.progress = progress;
+                setVideoProgress(progress);
+            }
+        };
+
+        const handleEnded = () => {
+            if (videoElement === activeVideoRef.current) {
+                handleVideoEnded();
+            }
+        };
+
+        const handlePlay = () => {
+            if (videoElement === activeVideoRef.current) {
+                setIsPlaying(true);
+            }
+        };
+
+        const handlePause = () => {
+            if (videoElement === activeVideoRef.current) {
+                setIsPlaying(false);
+            }
+        };
+
+        videoElement.addEventListener('loadeddata', handleLoadedData);
+        videoElement.addEventListener('canplaythrough', handleCanPlayThrough);
+        videoElement.addEventListener('error', handleError);
+        videoElement.addEventListener('timeupdate', handleTimeUpdate);
+        videoElement.addEventListener('ended', handleEnded);
+        videoElement.addEventListener('play', handlePlay);
+        videoElement.addEventListener('pause', handlePause);
+
+        // Cleanup function
+        return () => {
+            videoElement.removeEventListener('loadeddata', handleLoadedData);
+            videoElement.removeEventListener('canplaythrough', handleCanPlayThrough);
+            videoElement.removeEventListener('error', handleError);
+            videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+            videoElement.removeEventListener('ended', handleEnded);
+            videoElement.removeEventListener('play', handlePlay);
+            videoElement.removeEventListener('pause', handlePause);
+        };
+    }, [autoPlay, shouldReduceEffects, isInitialLoad, handleVideoEnded]);
+
+    // Initialize first video immediately
+    useEffect(() => {
+        if (!containerRef.current || tabs.length === 0) return;
+
+        const firstVideo = tabs[0];
+        const videoElement = createVideoElement(firstVideo);
+        const cachedVideo: CachedVideo = {
+            element: videoElement,
+            loaded: false,
+            error: false,
+            progress: 0
+        };
+
+        // Setup event listeners
+        const cleanup = setupVideoEventListeners(videoElement, cachedVideo);
+
+        // Add to cache and DOM
+        videoCache.current.set(firstVideo.id, cachedVideo);
+        containerRef.current.appendChild(videoElement);
+        activeVideoRef.current = videoElement;
+
+        // Start loading immediately
+        videoElement.load();
+
+        // Show video as soon as possible
+        requestAnimationFrame(() => {
+            videoElement.style.opacity = '1';
         });
 
-        let loadedCount = 0;
-        const totalToLoad = preloadQueue.length;
+        return () => {
+            cleanup();
+        };
+    }, []); // Only run once on mount
 
-        for (const video of preloadQueue) {
-            if (videoCache.current.has(video.id)) continue;
+    // Preload other videos after initial load
+    useEffect(() => {
+        if (!isVideoLoaded || preloadingRef.current || shouldReduceEffects) return;
 
-            try {
-                const videoElement = createVideoElement(video);
+        const preloadVideos = async () => {
+            preloadingRef.current = true;
 
-                const cachedVideo: CachedVideo = {
-                    element: videoElement,
-                    loaded: false,
-                    error: false,
-                    progress: 0
-                };
+            for (let i = 1; i < tabs.length; i++) {
+                const video = tabs[i];
+                if (videoCache.current.has(video.id)) continue;
 
-                videoCache.current.set(video.id, cachedVideo);
+                try {
+                    const videoElement = createVideoElement(video);
+                    const cachedVideo: CachedVideo = {
+                        element: videoElement,
+                        loaded: false,
+                        error: false,
+                        progress: 0
+                    };
 
-                // Set up event listeners
-                videoElement.addEventListener('loadeddata', () => {
-                    cachedVideo.loaded = true;
-                    cachedVideo.error = false;
-                    loadedCount++;
-                    setPreloadingProgress((loadedCount / totalToLoad) * 100);
+                    setupVideoEventListeners(videoElement, cachedVideo);
+                    videoCache.current.set(video.id, cachedVideo);
+                    videoElement.load();
 
-                    // Update state if this is the current video
-                    if (videoElement === activeVideoRef.current) {
-                        setIsVideoLoaded(true);
-                        setHasVideoError(false);
-                    }
-                });
-
-                videoElement.addEventListener('canplaythrough', () => {
-                    cachedVideo.loaded = true;
-                    cachedVideo.error = false;
-
-                    // Update state if this is the current video
-                    if (videoElement === activeVideoRef.current) {
-                        setIsVideoLoaded(true);
-                        setHasVideoError(false);
-                    }
-
-                    // Auto-play if this is the current video and auto-play is enabled
-                    if (videoElement === activeVideoRef.current && autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay) {
-                        videoElement.muted = sessionMuteState;
-                        videoElement.play().then(() => {
-                            setAttemptedAutoPlay(true);
-                        }).catch(console.warn);
-                    }
-                });
-
-                videoElement.addEventListener('error', () => {
-                    cachedVideo.error = true;
-                    cachedVideo.loaded = false;
-                    loadedCount++;
-                    setPreloadingProgress((loadedCount / totalToLoad) * 100);
-
-                    // Update state if this is the current video
-                    if (videoElement === activeVideoRef.current) {
-                        setIsVideoLoaded(false);
-                        setHasVideoError(true);
-                    }
-                });
-
-                videoElement.addEventListener('timeupdate', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        const progress = videoElement.duration > 0
-                            ? (videoElement.currentTime / videoElement.duration) * 100
-                            : 0;
-                        cachedVideo.progress = progress;
-                        setVideoProgress(progress);
-                    }
-                });
-
-                videoElement.addEventListener('ended', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        handleVideoEnded();
-                    }
-                });
-
-                videoElement.addEventListener('play', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        setIsPlaying(true);
-                    }
-                });
-
-                videoElement.addEventListener('pause', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        setIsPlaying(false);
-                    }
-                });
-
-                // Start loading
-                videoElement.load();
-
-                // Small delay to prevent overwhelming the browser
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-            } catch (error) {
-                console.warn(`Failed to preload video ${video.id}:`, error);
-                loadedCount++;
-                setPreloadingProgress((loadedCount / totalToLoad) * 100);
+                    // Small delay between preloads
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                } catch (error) {
+                    console.warn(`Failed to preload video ${video.id}:`, error);
+                }
             }
-        }
 
-        preloadingRef.current = false;
-        setPreloadingProgress(100);
-    }, [activeTab, tabs, currentVideo.id, createVideoElement, shouldReduceEffects]);
+            preloadingRef.current = false;
+            setPreloadingProgress(100);
+        };
 
-    // Switch to cached video
+        preloadVideos();
+    }, [isVideoLoaded, tabs, createVideoElement, setupVideoEventListeners, shouldReduceEffects]);
+
+    // Switch video on tab change
     const switchToVideo = useCallback((videoId: string) => {
         if (!containerRef.current) return;
 
         const cachedVideo = videoCache.current.get(videoId);
-        if (!cachedVideo) return;
+        if (!cachedVideo) {
+            // Create video if not cached
+            const video = tabs.find(t => t.id === videoId);
+            if (!video) return;
+
+            const videoElement = createVideoElement(video);
+            const newCachedVideo: CachedVideo = {
+                element: videoElement,
+                loaded: false,
+                error: false,
+                progress: 0
+            };
+
+            setupVideoEventListeners(videoElement, newCachedVideo);
+            videoCache.current.set(video.id, newCachedVideo);
+            containerRef.current.appendChild(videoElement);
+            videoElement.load();
+            cachedVideo = newCachedVideo;
+        }
 
         // Hide current video
-        if (activeVideoRef.current) {
+        if (activeVideoRef.current && activeVideoRef.current !== cachedVideo.element) {
             activeVideoRef.current.style.opacity = '0';
             activeVideoRef.current.pause();
         }
 
         // Show new video
-        const newVideoElement = cachedVideo.element;
-        activeVideoRef.current = newVideoElement;
+        activeVideoRef.current = cachedVideo.element;
 
-        // Ensure video is in container
-        if (!containerRef.current.contains(newVideoElement)) {
-            containerRef.current.appendChild(newVideoElement);
+        if (!containerRef.current.contains(cachedVideo.element)) {
+            containerRef.current.appendChild(cachedVideo.element);
         }
-
-        // Apply current session settings
-        newVideoElement.muted = sessionMuteState;
-        newVideoElement.volume = sessionMuteState ? 0 : 0.8;
 
         // Update states
         setIsVideoLoaded(cachedVideo.loaded);
         setHasVideoError(cachedVideo.error);
         setVideoProgress(cachedVideo.progress);
-        setIsMuted(sessionMuteState);
 
         // Show video with smooth transition
         requestAnimationFrame(() => {
-            newVideoElement.style.opacity = cachedVideo.loaded ? '1' : '0';
+            cachedVideo.element.style.opacity = '1';
 
             // Auto-play if enabled and loaded
-            if (autoPlay && cachedVideo.loaded && !cachedVideo.error && !shouldReduceEffects && videoCarouselConfig.autoPlay) {
-                newVideoElement.muted = sessionMuteState;
-                newVideoElement.volume = sessionMuteState ? 0 : 0.8;
-                newVideoElement.play().then(() => {
-                    setAttemptedAutoPlay(true);
-                }).catch(console.warn);
+            if (autoPlay && cachedVideo.loaded && !cachedVideo.error) {
+                cachedVideo.element.muted = isMuted;
+                cachedVideo.element.play().catch(console.warn);
             }
         });
+    }, [tabs, createVideoElement, setupVideoEventListeners, autoPlay, isMuted]);
 
-    }, [sessionMuteState, autoPlay]);
+    // Handle tab change
+    const handleTabChange = useCallback((tabIndex: number) => {
+        setActiveTab(tabIndex);
+        const newVideo = tabs[tabIndex];
+        switchToVideo(newVideo.id);
+    }, [tabs, switchToVideo]);
+
+    // Update video when activeTab changes
+    useEffect(() => {
+        if (currentVideo && activeTab !== 0) {
+            switchToVideo(currentVideo.id);
+        }
+    }, [activeTab, currentVideo, switchToVideo]);
+
+    // Video control handlers
+    const handleTogglePlay = useCallback(async () => {
+        if (!activeVideoRef.current) return;
+
+        try {
+            if (isPlaying) {
+                activeVideoRef.current.pause();
+            } else {
+                setUserInteracted(true);
+                await activeVideoRef.current.play();
+            }
+        } catch (error) {
+            console.warn('Video play failed:', error);
+        }
+    }, [isPlaying]);
+
+    const handleToggleMute = useCallback(() => {
+        if (!activeVideoRef.current) return;
+
+        const newMutedState = !isMuted;
+        activeVideoRef.current.muted = newMutedState;
+        activeVideoRef.current.volume = newMutedState ? 0 : 0.8;
+        setIsMuted(newMutedState);
+    }, [isMuted]);
 
     // Handle scroll for parallax effect
     useEffect(() => {
-        if (!windowObj) return;
+        if (!windowObj || shouldReduceEffects) return;
 
         let ticking = false;
         const updateScrollY = () => {
@@ -302,195 +385,37 @@ export function HeroVideoCarousel({
 
         windowObj.addEventListener('scroll', onScroll, { passive: true });
         return () => windowObj.removeEventListener('scroll', onScroll);
-    }, [windowObj]);
+    }, [windowObj, shouldReduceEffects]);
 
-    // Initialize video cache and start preloading
+    // Handle user interaction for browsers that require it
     useEffect(() => {
-        const initializeFirstVideo = async () => {
-            // Get first video from tabs
-            const firstVideo = tabs[0];
-            if (!firstVideo) return;
+        if (userInteracted || !isVideoLoaded) return;
 
-            // Always ensure first video is created and displayed immediately
-            if (!videoCache.current.has(firstVideo.id)) {
-                const videoElement = createVideoElement(firstVideo);
-                const cachedVideo: CachedVideo = {
-                    element: videoElement,
-                    loaded: false,
-                    error: false,
-                    progress: 0
-                };
-                videoCache.current.set(firstVideo.id, cachedVideo);
-
-                // Add event listeners for first video
-                videoElement.addEventListener('loadeddata', () => {
-                    cachedVideo.loaded = true;
-                    cachedVideo.error = false;
-                    if (videoElement === activeVideoRef.current) {
-                        setIsVideoLoaded(true);
-                        setHasVideoError(false);
-                        // Try auto-play when loaded
-                        if (autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay) {
-                            videoElement.muted = sessionMuteState;
-                            videoElement.play().then(() => {
-                                setAttemptedAutoPlay(true);
-                            }).catch(console.warn);
-                        }
-                    }
-                });
-
-                videoElement.addEventListener('error', () => {
-                    cachedVideo.error = true;
-                    cachedVideo.loaded = false;
-                    if (videoElement === activeVideoRef.current) {
-                        setIsVideoLoaded(false);
-                        setHasVideoError(true);
-                    }
-                });
-
-                videoElement.addEventListener('timeupdate', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        const progress = videoElement.duration > 0
-                            ? (videoElement.currentTime / videoElement.duration) * 100
-                            : 0;
-                        cachedVideo.progress = progress;
-                        setVideoProgress(progress);
-                    }
-                });
-
-                videoElement.addEventListener('ended', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        handleVideoEnded();
-                    }
-                });
-
-                videoElement.addEventListener('play', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        setIsPlaying(true);
-                    }
-                });
-
-                videoElement.addEventListener('pause', () => {
-                    if (videoElement === activeVideoRef.current) {
-                        setIsPlaying(false);
-                    }
-                });
-
-                // Add to DOM immediately and make visible
-                if (containerRef.current) {
-                    containerRef.current.appendChild(videoElement);
-                    activeVideoRef.current = videoElement;
-                    videoElement.style.opacity = '1';
-
-                    // Update states
-                    setIsVideoLoaded(false); // Will be set to true when loaded
-                    setHasVideoError(false);
-                    setIsMuted(sessionMuteState);
-                }
-            }
-
-            // Then start preloading other videos
-            setTimeout(() => {
-                preloadVideos();
-            }, 500);
-        };
-
-        initializeFirstVideo();
-    }, [tabs, createVideoElement, sessionMuteState, autoPlay, shouldReduceEffects, videoCarouselConfig.autoPlay, preloadVideos]); // Only run once on mount
-
-    // Handle tab change with instant switching
-    const handleTabChange = useCallback((tabIndex: number) => {
-        setActiveTab(tabIndex);
-        setAttemptedAutoPlay(false); // Reset auto-play attempt for new video
-        const newVideo = tabs[tabIndex];
-        switchToVideo(newVideo.id);
-    }, [tabs, switchToVideo]);
-
-    // Auto-switch to next video when current video ends
-    const handleVideoEnded = useCallback(() => {
-        setVideoProgress(100);
-        if (autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay) {
-            setTimeout(() => {
-                const nextIndex = (activeTab + 1) % tabs.length;
-                handleTabChange(nextIndex);
-            }, 500);
-        }
-    }, [activeTab, tabs.length, autoPlay, shouldReduceEffects, videoCarouselConfig.autoPlay, handleTabChange]);
-
-    // Video control handlers
-    const handleTogglePlay = useCallback(async () => {
-        if (!activeVideoRef.current) return;
-
-        try {
-            if (isPlaying) {
-                activeVideoRef.current.pause();
-            } else {
-                setUserInteracted(true);
-                activeVideoRef.current.muted = sessionMuteState;
-                await activeVideoRef.current.play();
-            }
-        } catch (error) {
-            console.warn('Video play failed:', error);
-        }
-    }, [isPlaying, sessionMuteState]);
-
-    const handleToggleMute = useCallback(() => {
-        if (!activeVideoRef.current) return;
-
-        const newMutedState = !isMuted;
-        activeVideoRef.current.muted = newMutedState;
-        activeVideoRef.current.volume = newMutedState ? 0 : 0.8;
-        setIsMuted(newMutedState);
-        setSessionMuteState(newMutedState);
-    }, [isMuted]);
-
-    // Handle user interaction for autoplay
-    useEffect(() => {
         const handleUserInteraction = () => {
             setUserInteracted(true);
 
-            // Try to auto-play the current video if it hasn't been attempted yet
-            if (!attemptedAutoPlay && activeVideoRef.current && autoPlay && videoCarouselConfig.autoPlay) {
-                const cachedVideo = videoCache.current.get(currentVideo.id);
-                if (cachedVideo && cachedVideo.loaded && !cachedVideo.error) {
-                    activeVideoRef.current.muted = sessionMuteState;
-                    activeVideoRef.current.volume = sessionMuteState ? 0 : 0.8;
-                    activeVideoRef.current.play().catch(console.warn);
-                    setAttemptedAutoPlay(true);
-                }
-            }
-
-            // Handle play/pause if video is paused
-            if (activeVideoRef.current?.paused && isVideoLoaded && !hasVideoError) {
-                handleTogglePlay();
+            if (activeVideoRef.current?.paused && !hasVideoError) {
+                activeVideoRef.current.play().catch(console.warn);
             }
         };
 
-        // Only add listeners if user hasn't interacted yet
-        if (!userInteracted) {
-            document.addEventListener('click', handleUserInteraction, { once: true });
-            document.addEventListener('keydown', handleUserInteraction, { once: true });
-            document.addEventListener('touchstart', handleUserInteraction, { once: true });
-        }
+        const events = ['click', 'touchstart', 'keydown'];
+        events.forEach(event => {
+            document.addEventListener(event, handleUserInteraction, { once: true });
+        });
 
         return () => {
-            document.removeEventListener('click', handleUserInteraction);
-            document.removeEventListener('keydown', handleUserInteraction);
-            document.removeEventListener('touchstart', handleUserInteraction);
+            events.forEach(event => {
+                document.removeEventListener(event, handleUserInteraction);
+            });
         };
-    }, [userInteracted, isVideoLoaded, hasVideoError, handleTogglePlay, attemptedAutoPlay, autoPlay, videoCarouselConfig.autoPlay, currentVideo.id, sessionMuteState]);
-
-    // Initialize current video and ensure first video auto-plays
-    useEffect(() => {
-        if (currentVideo && videoCache.current.has(currentVideo.id)) {
-            switchToVideo(currentVideo.id);
-        }
-    }, [currentVideo.id, switchToVideo]);
+    }, [userInteracted, isVideoLoaded, hasVideoError]);
 
     // Cleanup on unmount
     useEffect(() => {
         return () => {
             videoCache.current.forEach(({ element }) => {
+                element.pause();
                 element.remove();
             });
             videoCache.current.clear();
@@ -513,26 +438,20 @@ export function HeroVideoCarousel({
                 className="absolute inset-0 z-0"
             >
                 {/* Fallback image while video loads */}
-                {(!isVideoLoaded || hasVideoError) && (
+                {(!isVideoLoaded || hasVideoError) && currentVideo && (
                     <div
                         className={cn(
                             "absolute inset-0 bg-cover bg-center transition-opacity duration-300 z-10",
-                            isVideoLoaded ? "opacity-0" : "opacity-100"
+                            isVideoLoaded && !hasVideoError ? "opacity-0" : "opacity-100"
                         )}
                         style={{ backgroundImage: `url(${currentVideo.thumbnail})` }}
                     >
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                             <div className="text-center">
-                                {preloadingProgress < 100 && !isVideoLoaded && (
+                                {!hasVideoError && (
                                     <>
                                         <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-                                        <p className="text-white/80 text-sm mb-2">Loading {currentVideo.label}...</p>
-                                        <div className="w-32 h-1 bg-white/20 rounded-full mx-auto overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary transition-all duration-300"
-                                                style={{ width: `${preloadingProgress}%` }}
-                                            />
-                                        </div>
+                                        <p className="text-white/80 text-sm">Loading video...</p>
                                     </>
                                 )}
                                 {hasVideoError && (
@@ -601,7 +520,7 @@ export function HeroVideoCarousel({
                 </div>
             </div>
 
-            {/* Video Tabs - Responsive positioning */}
+            {/* Video Tabs */}
             {videoCarouselConfig.showTabs && (
                 <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-8 z-40">
                     <OptimizedMotionDiv preset="slideUp" delay={1200}>
@@ -617,14 +536,8 @@ export function HeroVideoCarousel({
                                             : "bg-white/10 hover:bg-white/15"
                                     )}
                                     onClick={() => handleTabChange(index)}
-                                    style={{
-                                        minHeight: '36px',
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
                                 >
                                     <div className="flex items-center gap-2 sm:gap-3">
-                                        {/* Active indicator with cache status */}
                                         <div className={cn(
                                             "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300",
                                             activeTab === index ? "bg-primary scale-125" :
@@ -655,7 +568,7 @@ export function HeroVideoCarousel({
                 </div>
             )}
 
-            {/* Video Controls - Always visible and responsive */}
+            {/* Video Controls */}
             {videoCarouselConfig.showControls && (
                 <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50 flex gap-2 sm:gap-3">
                     <OptimizedMotionDiv preset="scaleIn" delay={1000}>
@@ -663,13 +576,6 @@ export function HeroVideoCarousel({
                             className="p-2 sm:p-3 cursor-pointer group hover:scale-110 active:scale-95 transition-all duration-200 touch-manipulation"
                             onClick={handleToggleMute}
                             aria-label={isMuted ? "Unmute video" : "Mute video"}
-                            style={{
-                                minWidth: '40px',
-                                minHeight: '40px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
                         >
                             {isMuted ? (
                                 <VolumeX className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors" />
@@ -684,13 +590,6 @@ export function HeroVideoCarousel({
                             className="p-2 sm:p-3 cursor-pointer group hover:scale-110 active:scale-95 transition-all duration-200 touch-manipulation"
                             onClick={handleTogglePlay}
                             aria-label={isPlaying ? "Pause video" : "Play video"}
-                            style={{
-                                minWidth: '40px',
-                                minHeight: '40px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
                         >
                             {isPlaying ? (
                                 <Pause className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors" />
@@ -702,7 +601,7 @@ export function HeroVideoCarousel({
                 </div>
             )}
 
-            {/* Video Progress Indicator - Top */}
+            {/* Video Progress Indicator */}
             {isVideoLoaded && videoProgress > 0 && (
                 <div className="absolute top-0 left-0 right-0 z-40 h-1 sm:h-1.5 bg-white/10">
                     <div
@@ -712,61 +611,12 @@ export function HeroVideoCarousel({
                 </div>
             )}
 
-            {/* Cache Status Indicator (Development) */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="absolute top-4 left-4 z-50 bg-black/50 text-white text-xs p-2 rounded">
-                    <div>Cached: {videoCache.current.size}/{tabs.length}</div>
-                    <div>Preloading: {Math.round(preloadingProgress)}%</div>
+            {/* Autoplay notification for users */}
+            {!isPlaying && isVideoLoaded && !userInteracted && (
+                <div className="absolute top-4 right-4 z-50 bg-black/50 text-white text-xs p-2 rounded">
+                    Click anywhere to play video
                 </div>
             )}
-
-            {/* Mobile-specific CSS */}
-            <style jsx>{`
-                @keyframes progress {
-                    from { width: 0%; }
-                    to { width: 100%; }
-                }
-
-                /* Ensure controls are always visible on mobile */
-                @media (max-width: 640px) {
-                    .hero-video-carousel {
-                        -webkit-transform: translateZ(0);
-                        transform: translateZ(0);
-                    }
-
-                    .hero-video-carousel video {
-                        -webkit-transform: translateZ(0);
-                        transform: translateZ(0);
-                    }
-
-                    .hero-video-carousel .glass-card {
-                        backdrop-filter: blur(10px) saturate(150%);
-                        -webkit-backdrop-filter: blur(10px) saturate(150%);
-                    }
-
-                    /* Ensure touch targets are large enough */
-                    .hero-video-carousel button,
-                    .hero-video-carousel .cursor-pointer {
-                        min-width: 44px;
-                        min-height: 44px;
-                    }
-                }
-
-                /* Prevent text selection on mobile */
-                @media (max-width: 768px) {
-                    .hero-video-carousel * {
-                        -webkit-user-select: none;
-                        -moz-user-select: none;
-                        -ms-user-select: none;
-                        user-select: none;
-                        -webkit-touch-callout: none;
-                    }
-
-                    .hero-video-carousel .touch-manipulation {
-                        touch-action: manipulation;
-                    }
-                }
-            `}</style>
         </section>
     );
 }
