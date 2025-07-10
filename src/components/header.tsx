@@ -10,13 +10,19 @@ import { cn } from "@/lib/utils";
 import { useOptimizedScroll, useSafeWindow } from "@/utils/three-utils";
 import { usePerformancePreference } from "@/hooks/use-mobile";
 
-// Navigation links configuration
-const NAV_LINKS = [
-    { href: "/destinations", label: "Destinations", icon: MapPin, description: "Sacred places to visit" },
-    { href: "/packages", label: "Packages", icon: Plane, description: "Curated travel experiences" },
-    { href: "/about", label: "About Us", icon: User, description: "Our story and mission" },
-    { href: "/contact", label: "Contact", icon: Phone, description: "Get in touch with us" },
-] as const;
+// Import constants from utils
+import {
+    NAV_LINKS,
+    COMPANY_INFO
+} from '@/lib/utils';
+
+// Icon mapping for dynamic icons
+const ICON_MAP = {
+    MapPin,
+    Plane,
+    User,
+    Phone
+} as const;
 
 // Types for better type safety
 interface HeaderState {
@@ -38,35 +44,38 @@ const NavLinks = memo(({ className, mobile = false, onLinkClick }: NavLinksProps
 
     return (
         <nav className={cn("flex items-center gap-4 lg:gap-6", className)} role="navigation">
-            {NAV_LINKS.map((link, index) => (
-                <div
-                    key={link.href}
-                    className={cn(
-                        "nav-link-container",
-                        mobile && !shouldReduceMotion && "animate-slide-up",
-                        mobile && shouldReduceMotion && "opacity-100"
-                    )}
-                    style={mobile && !shouldReduceMotion ? { animationDelay: `${index * 100}ms` } : undefined}
-                >
-                    <Link
-                        href={link.href}
+            {NAV_LINKS.map((link, index) => {
+                const IconComponent = ICON_MAP[link.icon as keyof typeof ICON_MAP];
+                return (
+                    <div
+                        key={link.href}
                         className={cn(
-                            "relative group transition-all duration-200",
-                            "text-sm font-medium text-foreground/80 hover:text-foreground",
-                            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black rounded-md",
-                            mobile ? "flex items-center gap-3 text-lg py-3 px-2" : "hover:scale-105"
+                            "nav-link-container",
+                            mobile && !shouldReduceMotion && "animate-slide-up",
+                            mobile && shouldReduceMotion && "opacity-100"
                         )}
-                        onClick={onLinkClick}
-                        aria-label={`Navigate to ${link.label} - ${link.description}`}
+                        style={mobile && !shouldReduceMotion ? { animationDelay: `${index * 100}ms` } : undefined}
                     >
-                        {mobile && <link.icon className="w-5 h-5 text-primary" />}
-                        <span>{link.label}</span>
-                        {!mobile && (
-                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all duration-200 group-hover:w-full" />
-                        )}
-                    </Link>
-                </div>
-            ))}
+                        <Link
+                            href={link.href}
+                            className={cn(
+                                "relative group transition-all duration-200",
+                                "text-sm font-medium text-foreground/80 hover:text-foreground",
+                                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black rounded-md",
+                                mobile ? "flex items-center gap-3 text-lg py-3 px-2" : "hover:scale-105"
+                            )}
+                            onClick={onLinkClick!}
+                            aria-label={`Navigate to ${link.label} - ${link.description}`}
+                        >
+                            {mobile && IconComponent && <IconComponent className="w-5 h-5 text-primary" />}
+                            <span>{link.label}</span>
+                            {!mobile && (
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all duration-200 group-hover:w-full" />
+                            )}
+                        </Link>
+                    </div>
+                );
+            })}
         </nav>
     );
 });
@@ -81,7 +90,7 @@ const Logo = memo(({ mobile = false }: { mobile?: boolean }) => {
         <Link
             href="/"
             className="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black rounded-lg p-1"
-            aria-label="Utsav Travels - Home"
+            aria-label={`${COMPANY_INFO.name} - Home`}
         >
             <div className={cn(
                 "relative transition-transform duration-200",
@@ -94,8 +103,8 @@ const Logo = memo(({ mobile = false }: { mobile?: boolean }) => {
                 mobile ? "text-2xl" : "text-xl",
                 !shouldReduceEffects && "group-hover:scale-105"
             )}>
-        Utsav Travels
-      </span>
+                {COMPANY_INFO.name}
+            </span>
         </Link>
     );
 });
@@ -182,11 +191,11 @@ const MobileMenu = memo(({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
                         <div className="text-center">
                             <p className="text-white/60 text-sm mb-2">Need immediate assistance?</p>
                             <a
-                                href="tel:+919876543210"
+                                href={`tel:${COMPANY_INFO.contact.phone}`}
                                 className="text-primary font-semibold hover:text-accent transition-colors"
                                 onClick={handleLinkClick}
                             >
-                                +91 98765 43210
+                                {COMPANY_INFO.contact.phoneDisplay}
                             </a>
                         </div>
                     </div>

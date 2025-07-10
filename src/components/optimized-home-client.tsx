@@ -12,6 +12,12 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import {
+    HOMEPAGE_STATS,
+    TESTIMONIALS,
+    COMPANY_INFO,
+    createWhatsAppUrl
+} from "@/lib/utils";
 
 // Types for data safety
 interface Place {
@@ -50,18 +56,22 @@ interface OptimizedHomeClientProps {
     popularPackages: Package[];
 }
 
+// Helper function to get icon component
+const getIconComponent = (iconName: string) => {
+    const icons = {
+        MapPin,
+        Users,
+        Calendar,
+        Award,
+    };
+    return icons[iconName as keyof typeof icons] || MapPin;
+};
+
 // Memoized statistics section
 const OptimizedStatsSection = memo(() => {
     const [countersStarted, setCountersStarted] = useState(false);
     const { ref: sectionRef, isInView } = useThreeInView(0.2);
     const { shouldReduceEffects } = usePerformancePreference();
-
-    const stats = [
-        { icon: MapPin, value: 50, suffix: '+', label: 'Sacred Destinations', color: 'text-blue-400' },
-        { icon: Users, value: 10000, suffix: '+', label: 'Happy Travelers', color: 'text-green-400' },
-        { icon: Calendar, value: 5, suffix: '', label: 'Years Experience', color: 'text-yellow-400' },
-        { icon: Award, value: 98, suffix: '%', label: 'Customer Satisfaction', color: 'text-purple-400' },
-    ];
 
     // Optimized counter with reduced motion support
     const OptimizedCounter = memo(({
@@ -108,8 +118,8 @@ const OptimizedStatsSection = memo(() => {
 
         return (
             <span className="text-4xl md:text-5xl font-bold">
-        {count.toLocaleString()}{suffix}
-      </span>
+                {count.toLocaleString()}{suffix}
+            </span>
         );
     });
 
@@ -147,35 +157,38 @@ const OptimizedStatsSection = memo(() => {
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                    {stats.map((stat, index) => (
-                        <OptimizedMotionDiv
-                            key={stat.label}
-                            preset="scaleIn"
-                            delay={index * 100}
-                            hover={!shouldReduceEffects}
-                            className="text-center"
-                        >
-                            <GlassCard className="p-6 md:p-8 group hover:scale-105 transition-all duration-200">
-                                <div className={cn(
-                                    "mx-auto mb-4 p-3 md:p-4 rounded-full w-fit bg-white/10 transition-transform duration-200",
-                                    !shouldReduceEffects && "group-hover:rotate-12"
-                                )}>
-                                    <stat.icon className={cn("h-6 w-6 md:h-8 md:w-8", stat.color)} />
-                                </div>
+                    {HOMEPAGE_STATS.map((stat, index) => {
+                        const IconComponent = getIconComponent(stat.icon);
+                        return (
+                            <OptimizedMotionDiv
+                                key={stat.label}
+                                preset="scaleIn"
+                                delay={index * 100}
+                                hover={!shouldReduceEffects}
+                                className="text-center"
+                            >
+                                <GlassCard className="p-6 md:p-8 group hover:scale-105 transition-all duration-200">
+                                    <div className={cn(
+                                        "mx-auto mb-4 p-3 md:p-4 rounded-full w-fit bg-white/10 transition-transform duration-200",
+                                        !shouldReduceEffects && "group-hover:rotate-12"
+                                    )}>
+                                        <IconComponent className={cn("h-6 w-6 md:h-8 md:w-8", stat.color)} />
+                                    </div>
 
-                                <div className={cn("mb-2", stat.color)}>
-                                    <OptimizedCounter
-                                        value={stat.value}
-                                        suffix={stat.suffix}
-                                        isVisible={countersStarted}
-                                        shouldAnimate={!shouldReduceEffects}
-                                    />
-                                </div>
+                                    <div className={cn("mb-2", stat.color)}>
+                                        <OptimizedCounter
+                                            value={stat.value}
+                                            suffix={stat.suffix}
+                                            isVisible={countersStarted}
+                                            shouldAnimate={!shouldReduceEffects}
+                                        />
+                                    </div>
 
-                                <p className="text-white/70 font-medium text-sm md:text-base">{stat.label}</p>
-                            </GlassCard>
-                        </OptimizedMotionDiv>
-                    ))}
+                                    <p className="text-white/70 font-medium text-sm md:text-base">{stat.label}</p>
+                                </GlassCard>
+                            </OptimizedMotionDiv>
+                        );
+                    })}
                 </div>
             </div>
         </section>
@@ -209,8 +222,8 @@ const OptimizedDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces:
                         <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
                             Sacred
                             <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                Destinations
-              </span>
+                                Destinations
+                            </span>
                         </h2>
                     </OptimizedMotionDiv>
 
@@ -257,11 +270,11 @@ const OptimizedDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces:
 
                 <OptimizedMotionDiv preset="slideUp" delay={800} className="text-center mt-16">
                     <Button asChild className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm hover:from-white/20 hover:to-white/10 text-white border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 px-8 py-6 text-lg rounded-full group">
-                        <Link href="/places">
-              <span className="flex items-center">
-                Explore All Destinations
-                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </span>
+                        <Link href="/destinations">
+                            <span className="flex items-center">
+                                Explore All Destinations
+                                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            </span>
                         </Link>
                     </Button>
                 </OptimizedMotionDiv>
@@ -298,8 +311,8 @@ const OptimizedPackagesSection = memo(({ popularPackages }: { popularPackages: P
                         <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
                             Popular
                             <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                Packages
-              </span>
+                                Packages
+                            </span>
                         </h2>
                     </OptimizedMotionDiv>
 
@@ -339,10 +352,10 @@ const OptimizedPackagesSection = memo(({ popularPackages }: { popularPackages: P
                 <OptimizedMotionDiv preset="slideUp" delay={600} className="text-center mt-16">
                     <Button asChild className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm hover:from-white/20 hover:to-white/10 text-white border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 px-8 py-6 text-lg rounded-full group">
                         <Link href="/packages">
-              <span className="flex items-center">
-                View All Packages
-                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </span>
+                            <span className="flex items-center">
+                                View All Packages
+                                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            </span>
                         </Link>
                     </Button>
                 </OptimizedMotionDiv>
@@ -353,32 +366,8 @@ const OptimizedPackagesSection = memo(({ popularPackages }: { popularPackages: P
 
 OptimizedPackagesSection.displayName = 'OptimizedPackagesSection';
 
-// Memoized testimonials section
+// Memoized testimonials section using constants
 const OptimizedTestimonialsSection = memo(() => {
-    const testimonials = [
-        {
-            name: "Priya Sharma",
-            location: "Mumbai",
-            rating: 5,
-            text: "The spiritual journey to Varanasi was life-changing. Every detail was perfectly organized.",
-            image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100&h=100&fit=crop&crop=face"
-        },
-        {
-            name: "Rajesh Kumar",
-            location: "Delhi",
-            rating: 5,
-            text: "Incredible experience in Rishikesh. The yoga sessions and temple visits were amazing.",
-            image: "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?w=100&h=100&fit=crop&crop=face"
-        },
-        {
-            name: "Anita Patel",
-            location: "Ahmedabad",
-            rating: 5,
-            text: "The Kedarnath trek was challenging but spiritually rewarding. Highly recommended!",
-            image: "https://images.pexels.com/photos/1499327/pexels-photo-1499327.jpeg?w=100&h=100&fit=crop&crop=face"
-        },
-    ];
-
     return (
         <section className="section-padding bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 contain-layout">
             <div className="container mx-auto px-4">
@@ -397,7 +386,7 @@ const OptimizedTestimonialsSection = memo(() => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {testimonials.map((testimonial, index) => (
+                    {TESTIMONIALS.map((testimonial, index) => (
                         <OptimizedMotionDiv
                             key={testimonial.name}
                             preset="slideUp"
@@ -437,7 +426,7 @@ const OptimizedTestimonialsSection = memo(() => {
 
 OptimizedTestimonialsSection.displayName = 'OptimizedTestimonialsSection';
 
-// Final CTA section
+// Final CTA section using constants
 const FinalCTASection = memo(() => {
     return (
         <section className="section-padding bg-gradient-to-br from-black via-slate-900 to-black flex items-center justify-center relative contain-layout">
@@ -467,7 +456,10 @@ const FinalCTASection = memo(() => {
                 <StaggerContainer staggerDelay={200}>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <OptimizedMotionDiv preset="slideUp" delay={600}>
-                            <Button asChild className="bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary text-white px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 group">
+                            <Button
+                                asChild
+                                className="bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary text-white px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 group"
+                            >
                                 <Link href="/contact">
                                     <Phone className="mr-2 w-5 h-5" />
                                     Start Your Journey
@@ -477,10 +469,14 @@ const FinalCTASection = memo(() => {
                         </OptimizedMotionDiv>
 
                         <OptimizedMotionDiv preset="slideUp" delay={800}>
-                            <Button asChild variant="outline" className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 px-8 py-6 text-lg rounded-full transition-all duration-200 group">
-                                <Link href="mailto:info@utsavtravels.com">
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 px-8 py-6 text-lg rounded-full transition-all duration-200 group"
+                            >
+                                <Link href={createWhatsAppUrl("Hi! I'm interested in planning a spiritual journey. Please share more details.")}>
                                     <Mail className="mr-2 w-5 h-5" />
-                                    Email Us
+                                    WhatsApp Us
                                 </Link>
                             </Button>
                         </OptimizedMotionDiv>

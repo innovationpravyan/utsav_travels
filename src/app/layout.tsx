@@ -8,30 +8,19 @@ import { WhatsappButton } from '@/components/whatsapp-button';
 import { Guide } from '@/components/guide';
 import { Suspense } from 'react';
 import {AnimatedGuide} from "@/components/animated-guide";
+import { COMPANY_INFO, SEO_CONFIG, SITE_CONFIG } from '@/lib/utils';
 
-// Optimized font loading configuration
 // Enhanced metadata configuration
 export const metadata: Metadata = {
     title: {
-        default: 'Utsav Travels - Sacred India Tours & Spiritual Journeys',
-        template: '%s | Utsav Travels - Sacred India Tours'
+        default: SEO_CONFIG.defaultTitle,
+        template: SEO_CONFIG.titleTemplate
     },
-    description: 'Discover India\'s spiritual heritage with Utsav Travels. Expert-guided tours to Varanasi, Ayodhya, Rishikesh, Kedarnath and sacred destinations across India.',
-    keywords: [
-        'spiritual tourism India',
-        'Varanasi tours',
-        'Ayodhya travel',
-        'Rishikesh packages',
-        'Kedarnath pilgrimage',
-        'sacred destinations India',
-        'Hindu pilgrimage tours',
-        'spiritual travel packages',
-        'India heritage tours',
-        'temple tours India'
-    ].join(', '),
-    authors: [{ name: 'Utsav Travels', url: 'https://utsavtravels.com' }],
-    creator: 'Utsav Travels',
-    publisher: 'Utsav Travels',
+    description: COMPANY_INFO.description,
+    keywords: SEO_CONFIG.keywords.join(', '),
+    authors: [{ name: COMPANY_INFO.name, url: SITE_CONFIG.url }],
+    creator: COMPANY_INFO.name,
+    publisher: COMPANY_INFO.name,
     category: 'Travel & Tourism',
     classification: 'Spiritual Tourism',
     formatDetection: {
@@ -39,7 +28,7 @@ export const metadata: Metadata = {
         address: false,
         telephone: false,
     },
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://utsavtravels.com'),
+    metadataBase: new URL(SITE_CONFIG.url),
     alternates: {
         canonical: '/',
         languages: {
@@ -48,26 +37,25 @@ export const metadata: Metadata = {
         }
     },
     openGraph: {
-        type: 'website',
-        locale: 'en_IN',
-        alternateLocale: ['hi_IN'],
-        title: 'Utsav Travels - Sacred India Tours & Spiritual Journeys',
-        description: 'Discover India\'s spiritual heritage with expert-guided tours to sacred destinations',
-        url: 'https://utsavtravels.com',
-        siteName: 'Utsav Travels',
+        type: SEO_CONFIG.openGraph.type,
+        locale: SEO_CONFIG.openGraph.locale,
+        title: SEO_CONFIG.defaultTitle,
+        description: COMPANY_INFO.shortDescription,
+        url: SITE_CONFIG.url,
+        siteName: SEO_CONFIG.openGraph.siteName,
         images: [
             {
-                url: '/images/og-image.jpg',
+                url: SEO_CONFIG.openGraph.images.default,
                 width: 1200,
                 height: 630,
-                alt: 'Utsav Travels - Spiritual Tourism India',
+                alt: `${COMPANY_INFO.name} - Spiritual Tourism India`,
                 type: 'image/jpeg'
             },
             {
-                url: '/images/og-square.jpg',
+                url: SEO_CONFIG.openGraph.images.square,
                 width: 1200,
                 height: 1200,
-                alt: 'Utsav Travels Square Logo',
+                alt: `${COMPANY_INFO.name} Square Logo`,
                 type: 'image/jpeg'
             }
         ],
@@ -76,9 +64,9 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         site: '@utsavtravels',
         creator: '@utsavtravels',
-        title: 'Utsav Travels - Sacred India Tours',
-        description: 'Discover India\'s spiritual heritage with expert-guided tours',
-        images: ['/images/twitter-image.jpg'],
+        title: `${COMPANY_INFO.name} - Sacred India Tours`,
+        description: COMPANY_INFO.shortDescription,
+        images: [SEO_CONFIG.openGraph.images.twitter],
     },
     robots: {
         index: true,
@@ -94,18 +82,18 @@ export const metadata: Metadata = {
         },
     },
     verification: {
-        google: process.env.GOOGLE_VERIFICATION,
-        yandex: process.env.YANDEX_VERIFICATION,
+        google: SITE_CONFIG.verification.google,
+        yandex: SITE_CONFIG.verification.yandex,
         other: {
-            'msvalidate.01': process.env.BING_VERIFICATION || '',
+            'msvalidate.01': SITE_CONFIG.verification.bing,
         }
     },
     appleWebApp: {
         capable: true,
         statusBarStyle: 'black-translucent',
-        title: 'Utsav Travels'
+        title: COMPANY_INFO.name
     },
-    applicationName: 'Utsav Travels',
+    applicationName: COMPANY_INFO.name,
     generator: 'Next.js',
     referrer: 'origin-when-cross-origin',
     other: {
@@ -201,46 +189,31 @@ export default function RootLayout({
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "TravelAgency",
-                        "name": "Utsav Travels",
-                        "description": "Premier spiritual heritage tours across India",
-                        "url": "https://utsavtravels.com",
-                        "logo": {
+                        ...SEO_CONFIG.structuredData,
+                        logo: {
                             "@type": "ImageObject",
-                            "url": "https://utsavtravels.com/images/logo.png",
+                            "url": `${SITE_CONFIG.url}/images/logo.png`,
                             "width": 300,
                             "height": 100
                         },
-                        "contactPoint": {
+                        contactPoint: {
                             "@type": "ContactPoint",
-                            "telephone": "+91-98765-43210",
+                            "telephone": COMPANY_INFO.contact.phone,
                             "contactType": "Customer Service",
                             "availableLanguage": ["Hindi", "English"],
                             "areaServed": "IN"
                         },
-                        "address": {
+                        address: {
                             "@type": "PostalAddress",
-                            "addressLocality": "Varanasi",
-                            "addressRegion": "Uttar Pradesh",
-                            "addressCountry": "IN",
-                            "postalCode": "221001"
+                            "addressLocality": COMPANY_INFO.address.city,
+                            "addressRegion": COMPANY_INFO.address.state,
+                            "addressCountry": COMPANY_INFO.address.countryCode,
+                            "postalCode": COMPANY_INFO.address.postalCode
                         },
-                        "sameAs": [
-                            "https://facebook.com/utsavtravels",
-                            "https://instagram.com/utsavtravels",
-                            "https://twitter.com/utsavtravels",
-                            "https://linkedin.com/company/utsavtravels"
-                        ],
-                        "aggregateRating": {
-                            "@type": "AggregateRating",
-                            "ratingValue": "4.9",
-                            "reviewCount": "2847",
-                            "bestRating": "5",
-                            "worstRating": "1"
-                        },
-                        "priceRange": "₹₹",
-                        "knowsAbout": [
+                        sameAs: Object.values(COMPANY_INFO.social),
+                        aggregateRating: SEO_CONFIG.structuredData.aggregateRating,
+                        priceRange: "₹₹",
+                        knowsAbout: [
                             "Spiritual Tourism",
                             "Heritage Sites",
                             "Cultural Tours",
@@ -248,7 +221,7 @@ export default function RootLayout({
                             "Temple Tours",
                             "Yoga Retreats"
                         ],
-                        "areaServed": [
+                        areaServed: [
                             {
                                 "@type": "State",
                                 "name": "Uttar Pradesh"
@@ -265,27 +238,7 @@ export default function RootLayout({
                                 "@type": "State",
                                 "name": "West Bengal"
                             }
-                        ],
-                        "hasOfferCatalog": {
-                            "@type": "OfferCatalog",
-                            "name": "Spiritual Tour Packages",
-                            "itemListElement": [
-                                {
-                                    "@type": "Offer",
-                                    "itemOffered": {
-                                        "@type": "Trip",
-                                        "name": "Varanasi Sacred Tour"
-                                    }
-                                },
-                                {
-                                    "@type": "Offer",
-                                    "itemOffered": {
-                                        "@type": "Trip",
-                                        "name": "Kedarnath Pilgrimage"
-                                    }
-                                }
-                            ]
-                        }
+                        ]
                     })
                 }}
             />

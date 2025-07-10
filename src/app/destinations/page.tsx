@@ -1,12 +1,13 @@
 // src/app/destinations/page.tsx
 
 import { getPlaces } from '@/lib/data';
-import { DestinationsVideoHero } from '@/components/optimized-video-hero';
+import { HeroImageBanner } from '@/components/hero-image-banner';
 import { DestinationsClient } from './destinations-client';
 import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
 import { GlassCard } from '@/components/ui/glass-card';
 import { MapPin, Compass, Star, Globe, Mountain, Camera } from 'lucide-react';
 import { Suspense } from 'react';
+import { DESTINATIONS_CONTENT } from '@/lib/utils';
 
 export default async function OptimizedDestinationsPage() {
   let allPlaces: any[] = [];
@@ -25,24 +26,40 @@ export default async function OptimizedDestinationsPage() {
     categories = [];
   }
 
-  const stats = [
-    { icon: MapPin, label: 'Sacred Cities', value: cities.length.toString(), color: 'text-blue-400' },
-    { icon: Compass, label: 'Destinations', value: allPlaces.length.toString(), color: 'text-green-400' },
-    { icon: Star, label: 'Categories', value: categories.length.toString(), color: 'text-yellow-400' },
-    { icon: Globe, label: 'Experiences', value: '1000+', color: 'text-purple-400' },
-  ];
+  // Helper function to get icon component
+  const getIconComponent = (iconName: string) => {
+    const icons = {
+      MapPin,
+      Compass,
+      Star,
+      Globe,
+    };
+    return icons[iconName as keyof typeof icons] || MapPin;
+  };
+
+  const stats = DESTINATIONS_CONTENT.statistics.map(stat => ({
+    ...stat,
+    value: stat.value || (
+        stat.label === 'Sacred Cities' ? cities.length.toString() :
+            stat.label === 'Destinations' ? allPlaces.length.toString() :
+                stat.label === 'Categories' ? categories.length.toString() :
+                    stat.value
+    )
+  }));
 
   return (
       <div className="animate-fade-in overflow-hidden">
-        {/* Video Hero Banner */}
+        {/* Hero Image Banner */}
         <Suspense fallback={
           <div className="h-[85vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
             <div className="text-white text-xl animate-pulse">Loading destinations...</div>
           </div>
         }>
-          <DestinationsVideoHero
-              videoSrc="/videos/destinations-hero.webm"
-              fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
+          <HeroImageBanner
+              page="destinations"
+              height="85vh"
+              parallaxEffect={true}
+              showScrollIndicator={true}
           />
         </Suspense>
 
@@ -69,25 +86,28 @@ export default async function OptimizedDestinationsPage() {
 
             {/* Animated Statistics Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {stats.map((stat, index) => (
-                  <OptimizedMotionDiv
-                      key={stat.label}
-                      preset="scaleIn"
-                      hover
-                  >
-                    <GlassCard className="text-center p-8 group hover:scale-105 transition-all duration-200">
-                      <div className={`mx-auto mb-4 p-4 rounded-full w-fit bg-white/10 group-hover:scale-110 transition-transform duration-200`}>
-                        <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                      </div>
+              {stats.map((stat, index) => {
+                const IconComponent = getIconComponent(stat.icon);
+                return (
+                    <OptimizedMotionDiv
+                        key={stat.label}
+                        preset="scaleIn"
+                        hover
+                    >
+                      <GlassCard className="text-center p-8 group hover:scale-105 transition-all duration-200">
+                        <div className={`mx-auto mb-4 p-4 rounded-full w-fit bg-white/10 group-hover:scale-110 transition-transform duration-200`}>
+                          <IconComponent className={`h-8 w-8 ${stat.color}`} />
+                        </div>
 
-                      <div className={`text-4xl font-bold mb-2 ${stat.color}`}>
-                        {stat.value}
-                      </div>
+                        <div className={`text-4xl font-bold mb-2 ${stat.color}`}>
+                          {stat.value}
+                        </div>
 
-                      <p className="text-white/70 font-medium">{stat.label}</p>
-                    </GlassCard>
-                  </OptimizedMotionDiv>
-              ))}
+                        <p className="text-white/70 font-medium">{stat.label}</p>
+                      </GlassCard>
+                    </OptimizedMotionDiv>
+                );
+              })}
             </div>
 
             {/* Featured Categories Preview */}
@@ -190,21 +210,21 @@ export default async function OptimizedDestinationsPage() {
 
               <OptimizedMotionDiv preset="slideUp">
                 <h2 className="text-4xl md:text-6xl font-headline font-bold text-white mb-6">
-                  Ready to
-                  <span className="block text-gradient">Explore?</span>
+                  {DESTINATIONS_CONTENT.ctaText.title.split(' ')[0]} {DESTINATIONS_CONTENT.ctaText.title.split(' ')[1]}
+                  <span className="block text-gradient">{DESTINATIONS_CONTENT.ctaText.title.split(' ')[2]}?</span>
                 </h2>
               </OptimizedMotionDiv>
 
               <OptimizedMotionDiv preset="fadeIn">
                 <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-                  Let us craft the perfect spiritual journey for you across India's most sacred destinations.
+                  {DESTINATIONS_CONTENT.ctaText.description}
                 </p>
               </OptimizedMotionDiv>
 
               <OptimizedMotionDiv preset="slideUp">
                 <GlassCard className="inline-block px-12 py-6 cursor-pointer group hover:scale-105 transition-all duration-200">
                 <span className="text-white font-bold text-xl flex items-center gap-3">
-                  Plan Your Journey
+                  {DESTINATIONS_CONTENT.ctaText.buttonText}
                   <MapPin className="h-6 w-6 group-hover:scale-110 transition-transform" />
                 </span>
                 </GlassCard>

@@ -2,52 +2,22 @@ import { ContactForm } from "./contact-form";
 import { OptimizedMotionDiv, StaggerContainer } from "@/components/optimized-motion-div";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Mail, Phone, MapPin, Clock, MessageCircle, Users, Headphones, Star } from "lucide-react";
+import { CONTACT_METHODS, COMPANY_INFO } from "@/lib/utils";
+
+// Dynamic icon mapping
+const iconMap = {
+  Phone,
+  MessageCircle,
+  Mail,
+  MapPin,
+};
 
 export default function OptimizedContactPage() {
-  const contactMethods = [
-    {
-      icon: Phone,
-      title: "Call Us",
-      subtitle: "Speak directly with our travel experts",
-      value: "+91 98765 43210",
-      href: "tel:+919876543210",
-      color: "from-green-400 to-emerald-600",
-      description: "Available 24/7 for immediate assistance"
-    },
-    {
-      icon: MessageCircle,
-      title: "WhatsApp",
-      subtitle: "Quick responses via WhatsApp",
-      value: "Chat with us",
-      href: "https://wa.me/919876543210",
-      color: "from-green-500 to-green-700",
-      description: "Fastest way to get your questions answered"
-    },
-    {
-      icon: Mail,
-      title: "Email Us",
-      subtitle: "Detailed inquiries and planning",
-      value: "info@utsavtravels.com",
-      href: "mailto:info@utsavtravels.com",
-      color: "from-blue-400 to-blue-600",
-      description: "Perfect for detailed trip planning"
-    },
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      subtitle: "Meet us in person",
-      value: "Varanasi, Uttar Pradesh",
-      href: "#",
-      color: "from-purple-400 to-purple-600",
-      description: "Located in the heart of spiritual India"
-    }
-  ];
-
   const stats = [
-    { icon: Users, label: "Happy Travelers", value: "10,000+", color: "text-blue-400" },
-    { icon: Star, label: "Average Rating", value: "4.9/5", color: "text-yellow-400" },
-    { icon: Headphones, label: "Support Hours", value: "24/7", color: "text-green-400" },
-    { icon: Clock, label: "Response Time", value: "< 1 Hour", color: "text-purple-400" },
+    { icon: Users, label: "Happy Travelers", value: COMPANY_INFO.stats.happyTravelers, color: "text-blue-400" },
+    { icon: Star, label: "Average Rating", value: COMPANY_INFO.stats.rating, color: "text-yellow-400" },
+    { icon: Headphones, label: "Support Hours", value: COMPANY_INFO.stats.supportHours, color: "text-green-400" },
+    { icon: Clock, label: "Response Time", value: COMPANY_INFO.stats.responseTime, color: "text-purple-400" },
   ];
 
   const supportFeatures = [
@@ -150,32 +120,36 @@ export default function OptimizedContactPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {contactMethods.map((method, index) => (
-                  <OptimizedMotionDiv
-                      key={method.title}
-                      preset="scaleIn"
-                      hover
-                  >
-                    <a href={method.href} target={method.href.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer">
-                      <GlassCard className="h-full p-8 text-center group cursor-pointer hover:scale-105 transition-all duration-200">
-                        <div className={`mx-auto mb-6 p-4 rounded-full w-fit bg-gradient-to-br ${method.color} bg-opacity-20`}>
-                          <method.icon className="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-200" />
-                        </div>
+              {CONTACT_METHODS.map((method, index) => {
+                const IconComponent = iconMap[method.icon as keyof typeof iconMap];
 
-                        <h3 className="text-xl font-bold text-white mb-2">{method.title}</h3>
-                        <p className="text-white/70 text-sm mb-3">{method.subtitle}</p>
-                        <p className={`font-semibold text-transparent bg-gradient-to-r ${method.color} bg-clip-text mb-3`}>
-                          {method.value}
-                        </p>
-                        <p className="text-white/60 text-xs">{method.description}</p>
+                return (
+                    <OptimizedMotionDiv
+                        key={method.title}
+                        preset="scaleIn"
+                        hover
+                    >
+                      <a href={method.href} target={method.href.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer">
+                        <GlassCard className="h-full p-8 text-center group cursor-pointer hover:scale-105 transition-all duration-200">
+                          <div className={`mx-auto mb-6 p-4 rounded-full w-fit bg-gradient-to-br ${method.color} bg-opacity-20`}>
+                            <IconComponent className="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-200" />
+                          </div>
 
-                        <div className="absolute inset-0 rounded-inherit opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                          <div className={`absolute inset-0 rounded-inherit bg-gradient-to-br ${method.color} opacity-10`} />
-                        </div>
-                      </GlassCard>
-                    </a>
-                  </OptimizedMotionDiv>
-              ))}
+                          <h3 className="text-xl font-bold text-white mb-2">{method.title}</h3>
+                          <p className="text-white/70 text-sm mb-3">{method.subtitle}</p>
+                          <p className={`font-semibold text-transparent bg-gradient-to-r ${method.color} bg-clip-text mb-3`}>
+                            {method.value}
+                          </p>
+                          <p className="text-white/60 text-xs">{method.description}</p>
+
+                          <div className="absolute inset-0 rounded-inherit opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            <div className={`absolute inset-0 rounded-inherit bg-gradient-to-br ${method.color} opacity-10`} />
+                          </div>
+                        </GlassCard>
+                      </a>
+                    </OptimizedMotionDiv>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -218,8 +192,8 @@ export default function OptimizedContactPage() {
                       </GlassCard>
                       <div>
                         <p className="text-white/70 text-sm">Call Us</p>
-                        <a href="tel:+919876543210" className="text-white hover:text-primary transition-colors text-lg font-medium">
-                          +91 98765 43210
+                        <a href={`tel:${COMPANY_INFO.contact.phone}`} className="text-white hover:text-primary transition-colors text-lg font-medium">
+                          {COMPANY_INFO.contact.phoneDisplay}
                         </a>
                       </div>
                     </div>
@@ -230,8 +204,8 @@ export default function OptimizedContactPage() {
                       </GlassCard>
                       <div>
                         <p className="text-white/70 text-sm">Email Us</p>
-                        <a href="mailto:info@utsavtravels.com" className="text-white hover:text-primary transition-colors text-lg font-medium">
-                          info@utsavtravels.com
+                        <a href={`mailto:${COMPANY_INFO.contact.email}`} className="text-white hover:text-primary transition-colors text-lg font-medium">
+                          {COMPANY_INFO.contact.email}
                         </a>
                       </div>
                     </div>

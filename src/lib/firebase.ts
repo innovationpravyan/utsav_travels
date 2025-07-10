@@ -10,7 +10,7 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
 import { getPerformance, type FirebasePerformance } from "firebase/performance";
-import { AppError, env } from "./utils";
+import { AppError, env, FIREBASE_CONFIG, ERROR_MESSAGES } from "./utils";
 
 /**
  * Firebase configuration interface
@@ -24,30 +24,6 @@ interface FirebaseConfig {
   appId: string;
   measurementId?: string;
 }
-
-/**
- * Firebase configuration with validation
- */
-const firebaseConfig: FirebaseConfig = {
-  apiKey:
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    "AIzaSyDbifj2_jatQIx5GNkiDXAOHmAYOCrnzqo",
-  authDomain:
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    "utsavtravels-299d5.firebaseapp.com",
-  projectId:
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "utsavtravels-299d5",
-  storageBucket:
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-    "utsavtravels-299d5.firebasestorage.app",
-  messagingSenderId:
-    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "841887025085",
-  appId:
-    process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
-    "1:841887025085:web:b663dd26817b4aa849f4d4",
-  measurementId:
-    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-8S5PS1SVXG",
-};
 
 /**
  * Validates Firebase configuration
@@ -65,8 +41,8 @@ function validateFirebaseConfig(config: FirebaseConfig): void {
   for (const field of requiredFields) {
     if (!config[field as keyof FirebaseConfig]) {
       throw new AppError(
-        `Firebase configuration missing required field: ${field}`,
-        "FIREBASE_CONFIG_ERROR"
+          `Firebase configuration missing required field: ${field}`,
+          "FIREBASE_CONFIG_ERROR"
       );
     }
   }
@@ -74,15 +50,15 @@ function validateFirebaseConfig(config: FirebaseConfig): void {
   // Validate format
   if (!config.apiKey.startsWith("AIza")) {
     throw new AppError(
-      "Invalid Firebase API key format",
-      "FIREBASE_CONFIG_ERROR"
+        "Invalid Firebase API key format",
+        "FIREBASE_CONFIG_ERROR"
     );
   }
 
   if (!config.projectId.match(/^[a-z0-9-]+$/)) {
     throw new AppError(
-      "Invalid Firebase project ID format",
-      "FIREBASE_CONFIG_ERROR"
+        "Invalid Firebase project ID format",
+        "FIREBASE_CONFIG_ERROR"
     );
   }
 }
@@ -104,7 +80,7 @@ interface FirebaseServices {
  */
 function initializeFirebaseApp(): FirebaseApp {
   try {
-    validateFirebaseConfig(firebaseConfig);
+    validateFirebaseConfig(FIREBASE_CONFIG);
 
     // Check if app already exists
     const existingApps = getApps();
@@ -112,7 +88,7 @@ function initializeFirebaseApp(): FirebaseApp {
       return getApp();
     }
 
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(FIREBASE_CONFIG);
 
     if (env.isDev) {
       console.log("🔥 Firebase app initialized successfully");
@@ -122,8 +98,8 @@ function initializeFirebaseApp(): FirebaseApp {
   } catch (error) {
     console.error("❌ Failed to initialize Firebase app:", error);
     throw new AppError(
-      "Failed to initialize Firebase application",
-      "FIREBASE_INIT_ERROR"
+        ERROR_MESSAGES.firebase.init,
+        "FIREBASE_INIT_ERROR"
     );
   }
 }
@@ -138,15 +114,15 @@ function initializeFirestore(app: FirebaseApp): Firestore {
     // Connect to emulator in development if configured
     if (env.isDev && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true") {
       const emulatorHost =
-        process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST || "localhost";
+          process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST || "localhost";
       const emulatorPort = parseInt(
-        process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_PORT || "8080"
+          process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_PORT || "8080"
       );
 
       try {
         connectFirestoreEmulator(db, emulatorHost, emulatorPort);
         console.log(
-          `🔥 Connected to Firestore emulator at ${emulatorHost}:${emulatorPort}`
+            `🔥 Connected to Firestore emulator at ${emulatorHost}:${emulatorPort}`
         );
       } catch (error) {
         console.warn("⚠️ Failed to connect to Firestore emulator:", error);
@@ -157,8 +133,8 @@ function initializeFirestore(app: FirebaseApp): Firestore {
   } catch (error) {
     console.error("❌ Failed to initialize Firestore:", error);
     throw new AppError(
-      "Failed to initialize Firestore database",
-      "FIRESTORE_INIT_ERROR"
+        ERROR_MESSAGES.firebase.firestore,
+        "FIRESTORE_INIT_ERROR"
     );
   }
 }
@@ -167,9 +143,9 @@ function initializeFirestore(app: FirebaseApp): Firestore {
  * Initialize Firebase Analytics (client-side only)
  */
 async function initializeAnalytics(
-  app: FirebaseApp
+    app: FirebaseApp
 ): Promise<Analytics | null> {
-  if (env.isServer || !firebaseConfig.measurementId) {
+  if (env.isServer || !FIREBASE_CONFIG.measurementId) {
     return null;
   }
 

@@ -69,13 +69,7 @@ const Carousel = React.forwardRef<
             skipSnaps: shouldReduceMotion ? true : opts?.skipSnaps,
         }), [opts, shouldReduceMotion])
 
-        const [carouselRef, api] = useEmblaCarousel(
-            {
-                ...optimizedOpts,
-                axis: orientation === "horizontal" ? "x" : "y",
-            },
-            plugins
-        )
+        const [carouselRef, api] = useEmblaCarousel()
         const [canScrollPrev, setCanScrollPrev] = React.useState(false)
         const [canScrollNext, setCanScrollNext] = React.useState(false)
 
@@ -136,7 +130,6 @@ const Carousel = React.forwardRef<
                 value={{
                     carouselRef,
                     api: api,
-                    opts: optimizedOpts,
                     orientation:
                         orientation || (optimizedOpts?.axis === "y" ? "vertical" : "horizontal"),
                     scrollPrev,

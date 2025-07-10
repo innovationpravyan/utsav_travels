@@ -10,22 +10,23 @@ import {Button} from '@/components/ui/button';
 import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
+import { PLACEHOLDERS } from '@/lib/utils';
 
 export function PackagesClient({packages}: { packages: Package[] }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCity, setSelectedCity] = useState('all');
 
-    // Safe packages with defaults
+    // Safe packages with defaults using constants
     const safePackages = useMemo(() => {
         return packages?.map(pkg => ({
             id: pkg?.id || Math.random().toString(),
-            name: pkg?.name || 'Unknown Package',
-            tagline: pkg?.tagline || 'Discover new places',
+            name: pkg?.name || PLACEHOLDERS.text.unknownPackage,
+            tagline: pkg?.tagline || PLACEHOLDERS.text.defaultTagline,
             description: pkg?.description || '',
-            duration: pkg?.duration || '3 Days',
+            duration: pkg?.duration || PLACEHOLDERS.text.defaultDuration,
             cities: pkg?.cities || [],
-            price: pkg?.price || 'Contact for pricing',
-            thumbnail: pkg?.thumbnail || 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?w=600&h=400',
+            price: pkg?.price || PLACEHOLDERS.text.contactForPricing,
+            thumbnail: pkg?.thumbnail || PLACEHOLDERS.images.package,
             images: pkg?.images || [],
             tags: pkg?.tags || [],
             highlights: pkg?.highlights || [],

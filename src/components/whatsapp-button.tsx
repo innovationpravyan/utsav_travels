@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, COMPANY_INFO, WHATSAPP_TEMPLATES, createWhatsAppUrl } from '@/lib/utils';
 
 export function WhatsappButton() {
     const [isVisible, setIsVisible] = useState(false);
@@ -16,9 +16,7 @@ export function WhatsappButton() {
     }, []);
 
     const handleClick = () => {
-        const phoneNumber = "919876543210";
-        const message = "Hi! I'm interested in your spiritual travel packages.";
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = createWhatsAppUrl(WHATSAPP_TEMPLATES.default);
         window.open(whatsappUrl, '_blank');
     };
 

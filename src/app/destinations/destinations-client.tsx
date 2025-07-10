@@ -11,7 +11,7 @@ import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
 import {useSafeWindow} from "@/lib/three-utils";
-
+import {PLACEHOLDERS} from '@/lib/utils';
 
 export function DestinationsClient({places}: { places: Place[] }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -21,14 +21,14 @@ export function DestinationsClient({places}: { places: Place[] }) {
     const [isDesktop, setIsDesktop] = useState(false);
     const windowObj = useSafeWindow();
 
-    // Safe places with defaults
+    // Safe places with defaults using constants
     const safePlaces = useMemo(() => {
         return places?.map(place => ({
             id: place?.id || Math.random().toString(),
-            name: place?.name || 'Unknown Place',
-            city: place?.city || 'Unknown City',
-            category: place?.category || 'Destination',
-            thumbnail: place?.thumbnail || 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?w=600&h=400',
+            name: place?.name || PLACEHOLDERS.text.unknownPlace,
+            city: place?.city || PLACEHOLDERS.text.unknownCity,
+            category: place?.category || PLACEHOLDERS.text.defaultCategory,
+            thumbnail: place?.thumbnail || PLACEHOLDERS.images.place,
             tagline: place?.tagline || '',
             tags: place?.tags || [],
             images: place?.images || [],

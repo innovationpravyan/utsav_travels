@@ -149,8 +149,8 @@ function getPlaceVideo(placeName?: string): string {
     }
 
     const normalizedName = placeName.toLowerCase();
-    if (normalizedName.includes('varanasi')) return '/videos/varanasi.webm';
-    if (normalizedName.includes('ayodhya')) return '/videos/ayodhya.webm';
+    if (normalizedName.includes('varanasi')) return '/videos/banaras_1.webm';
+    if (normalizedName.includes('ayodhya')) return '/videos/banaras_2.webm';
     if (normalizedName.includes('rishikesh')) return '/videos/rishikesh.webm';
     if (normalizedName.includes('kedarnath')) return '/videos/kedarnath.webm';
     return PLACEHOLDER_VIDEOS.temple;

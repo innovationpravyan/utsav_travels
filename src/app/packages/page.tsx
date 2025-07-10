@@ -1,12 +1,13 @@
 // src/app/packages/page.tsx
 
 import { getPackages } from '@/lib/data';
-import { PackagesVideoHero } from '@/components/optimized-video-hero';
+import { HeroImageBanner } from '@/components/hero-image-banner';
 import { PackagesClient } from './packages-client';
 import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Calendar, Clock, MapPin, Star, Users, Award, Compass, Sparkles, Route, Gift } from 'lucide-react';
 import { Suspense } from 'react';
+import { PACKAGES_CONTENT } from '@/lib/utils';
 
 export default async function OptimizedPackagesPage() {
   let allPackages: any[] = [];
@@ -41,49 +42,51 @@ export default async function OptimizedPackagesPage() {
     );
   }
 
-  const packageStats = [
-    { icon: Gift, label: 'Travel Packages', value: allPackages.length.toString(), color: 'text-blue-400' },
-    { icon: MapPin, label: 'Cities Covered', value: totalCities.toString(), color: 'text-green-400' },
-    { icon: Calendar, label: 'Avg Duration', value: `${Math.round(avgDuration)} Days`, color: 'text-yellow-400' },
-    { icon: Star, label: 'Customer Rating', value: '4.9/5', color: 'text-purple-400' },
-  ];
+  // Helper function to get icon component
+  const getIconComponent = (iconName: string) => {
+    const icons = {
+      Gift,
+      MapPin,
+      Calendar,
+      Star,
+      Sparkles,
+      Route,
+      Award,
+      Users,
+      Clock,
+    };
+    return icons[iconName as keyof typeof icons] || Gift;
+  };
+
+  const packageStats = PACKAGES_CONTENT.statistics.map(stat => ({
+    ...stat,
+    value: stat.value || (
+        stat.label === 'Travel Packages' ? allPackages.length.toString() :
+            stat.label === 'Cities Covered' ? totalCities.toString() :
+                stat.label === 'Avg Duration' ? `${Math.round(avgDuration)} Days` :
+                    stat.value
+    )
+  }));
 
   // Safe featured package types with null checks
-  const packageTypes = [
-    {
-      title: 'Spiritual Journeys',
-      description: 'Sacred temple visits and pilgrimage experiences',
-      icon: Sparkles,
-      color: 'from-blue-400 to-purple-600',
-      packages: allPackages.filter(p => p?.tags?.includes('spiritual') || false).length
-    },
-    {
-      title: 'Adventure Tours',
-      description: 'Trekking, rafting, and Himalayan adventures',
-      icon: Route,
-      color: 'from-green-400 to-blue-600',
-      packages: allPackages.filter(p => p?.tags?.includes('adventure') || false).length
-    },
-    {
-      title: 'Cultural Heritage',
-      description: 'Explore ancient heritage and cultural sites',
-      icon: Award,
-      color: 'from-yellow-400 to-orange-600',
-      packages: allPackages.filter(p => p?.tags?.includes('heritage') || false).length
-    },
-  ];
+  const packageTypes = PACKAGES_CONTENT.packageTypes.map(type => ({
+    ...type,
+    packages: allPackages.filter(p => p?.tags?.includes(type.tag) || false).length
+  }));
 
   return (
       <div className="animate-fade-in overflow-hidden">
-        {/* Video Hero Banner */}
+        {/* Hero Image Banner */}
         <Suspense fallback={
           <div className="h-[90vh] w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
             <div className="text-white text-xl animate-pulse">Loading packages...</div>
           </div>
         }>
-          <PackagesVideoHero
-              videoSrc="/videos/packages-hero.webm"
-              fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
+          <HeroImageBanner
+              page="packages"
+              height="90vh"
+              parallaxEffect={true}
+              showScrollIndicator={true}
           />
         </Suspense>
 
@@ -121,64 +124,70 @@ export default async function OptimizedPackagesPage() {
 
             {/* Animated Statistics Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {packageStats.map((stat, index) => (
-                  <OptimizedMotionDiv
-                      key={stat.label}
-                      preset="scaleIn"
-                      hover
-                  >
-                    <GlassCard className="text-center p-8 group hover:scale-105 transition-all duration-200">
-                      <div className={`mx-auto mb-4 p-4 rounded-full w-fit bg-white/10 group-hover:scale-110 transition-transform duration-200`}>
-                        <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                      </div>
+              {packageStats.map((stat, index) => {
+                const IconComponent = getIconComponent(stat.icon);
+                return (
+                    <OptimizedMotionDiv
+                        key={stat.label}
+                        preset="scaleIn"
+                        hover
+                    >
+                      <GlassCard className="text-center p-8 group hover:scale-105 transition-all duration-200">
+                        <div className={`mx-auto mb-4 p-4 rounded-full w-fit bg-white/10 group-hover:scale-110 transition-transform duration-200`}>
+                          <IconComponent className={`h-8 w-8 ${stat.color}`} />
+                        </div>
 
-                      <div className={`text-4xl font-bold mb-2 ${stat.color}`}>
-                        {stat.value}
-                      </div>
+                        <div className={`text-4xl font-bold mb-2 ${stat.color}`}>
+                          {stat.value}
+                        </div>
 
-                      <p className="text-white/70 font-medium">{stat.label}</p>
+                        <p className="text-white/70 font-medium">{stat.label}</p>
 
-                      <div className="absolute inset-0 rounded-inherit opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                        <div className="absolute inset-0 rounded-inherit bg-gradient-to-br from-white/5 to-transparent" />
-                      </div>
-                    </GlassCard>
-                  </OptimizedMotionDiv>
-              ))}
+                        <div className="absolute inset-0 rounded-inherit opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                          <div className="absolute inset-0 rounded-inherit bg-gradient-to-br from-white/5 to-transparent" />
+                        </div>
+                      </GlassCard>
+                    </OptimizedMotionDiv>
+                );
+              })}
             </div>
 
             {/* Package Types Grid */}
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {packageTypes.map((type, index) => (
-                  <OptimizedMotionDiv
-                      key={type.title}
-                      preset="scaleIn"
-                      hover
-                  >
-                    <GlassCard className="p-8 text-center group overflow-hidden relative">
-                      <div className={`absolute inset-0 bg-gradient-to-br ${type.color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
+              {packageTypes.map((type, index) => {
+                const IconComponent = getIconComponent(type.icon);
+                return (
+                    <OptimizedMotionDiv
+                        key={type.title}
+                        preset="scaleIn"
+                        hover
+                    >
+                      <GlassCard className="p-8 text-center group overflow-hidden relative">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${type.color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
 
-                      <div className="relative z-10">
-                        <div className={`mx-auto mb-6 p-4 rounded-full w-fit bg-gradient-to-br ${type.color} bg-opacity-20`}>
-                          <type.icon className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-200" />
+                        <div className="relative z-10">
+                          <div className={`mx-auto mb-6 p-4 rounded-full w-fit bg-gradient-to-br ${type.color} bg-opacity-20`}>
+                            <IconComponent className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-200" />
+                          </div>
+
+                          <h3 className="text-2xl font-bold text-white mb-4">{type.title}</h3>
+                          <p className="text-white/70 mb-4">{type.description}</p>
+
+                          <div className="flex items-center justify-center gap-2 text-primary">
+                            <Gift className="h-4 w-4" />
+                            <span className="text-sm font-medium">{type.packages} packages available</span>
+                          </div>
                         </div>
 
-                        <h3 className="text-2xl font-bold text-white mb-4">{type.title}</h3>
-                        <p className="text-white/70 mb-4">{type.description}</p>
-
-                        <div className="flex items-center justify-center gap-2 text-primary">
-                          <Gift className="h-4 w-4" />
-                          <span className="text-sm font-medium">{type.packages} packages available</span>
+                        <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute top-4 right-4 w-2 h-2 bg-white/30 rounded-full animate-ping" />
+                          <div className="absolute bottom-6 left-6 w-1 h-1 bg-white/40 rounded-full animate-ping animation-delay-1000" />
+                          <div className="absolute top-1/2 left-4 w-1.5 h-1.5 bg-white/20 rounded-full animate-ping animation-delay-2000" />
                         </div>
-                      </div>
-
-                      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute top-4 right-4 w-2 h-2 bg-white/30 rounded-full animate-ping" />
-                        <div className="absolute bottom-6 left-6 w-1 h-1 bg-white/40 rounded-full animate-ping animation-delay-1000" />
-                        <div className="absolute top-1/2 left-4 w-1.5 h-1.5 bg-white/20 rounded-full animate-ping animation-delay-2000" />
-                      </div>
-                    </GlassCard>
-                  </OptimizedMotionDiv>
-              ))}
+                      </GlassCard>
+                    </OptimizedMotionDiv>
+                );
+              })}
             </StaggerContainer>
           </div>
         </section>
@@ -245,32 +254,30 @@ export default async function OptimizedPackagesPage() {
 
               <OptimizedMotionDiv preset="slideUp">
                 <h2 className="text-4xl md:text-6xl font-headline font-bold text-white mb-6">
-                  Ready for Your
-                  <span className="block text-gradient">Adventure?</span>
+                  {PACKAGES_CONTENT.ctaText.title.split(' ')[0]} {PACKAGES_CONTENT.ctaText.title.split(' ')[1]} {PACKAGES_CONTENT.ctaText.title.split(' ')[2]}
+                  <span className="block text-gradient">{PACKAGES_CONTENT.ctaText.title.split(' ')[3]}?</span>
                 </h2>
               </OptimizedMotionDiv>
 
               <OptimizedMotionDiv preset="fadeIn">
                 <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-                  Let us create the perfect spiritual journey tailored to your dreams and aspirations.
+                  {PACKAGES_CONTENT.ctaText.description}
                 </p>
               </OptimizedMotionDiv>
 
               <OptimizedMotionDiv preset="slideUp">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <GlassCard className="px-8 py-4 cursor-pointer group hover:scale-105 transition-all duration-200">
-                  <span className="text-white font-bold text-lg flex items-center gap-3">
-                    <Users className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    Contact Our Experts
-                  </span>
-                  </GlassCard>
-
-                  <GlassCard className="px-8 py-4 cursor-pointer group hover:scale-105 transition-all duration-200">
-                  <span className="text-white/90 font-medium text-lg flex items-center gap-3">
-                    <Clock className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    Quick Consultation
-                  </span>
-                  </GlassCard>
+                  {PACKAGES_CONTENT.ctaText.buttons.map((button, index) => {
+                    const IconComponent = getIconComponent(button.icon);
+                    return (
+                        <GlassCard key={button.text} className="px-8 py-4 cursor-pointer group hover:scale-105 transition-all duration-200">
+                        <span className={`font-${index === 0 ? 'bold' : 'medium'} text-lg flex items-center gap-3 ${index === 0 ? 'text-white' : 'text-white/90'}`}>
+                          <IconComponent className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          {button.text}
+                        </span>
+                        </GlassCard>
+                    );
+                  })}
                 </div>
               </OptimizedMotionDiv>
             </StaggerContainer>

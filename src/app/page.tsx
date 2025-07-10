@@ -1,32 +1,24 @@
 // src/app/page.tsx
 
-import { getPlaces, getPackages } from "@/lib/data";
-import { OptimizedHomeClient } from "@/components/optimized-home-client";
-import { HomeVideoHero } from "@/components/optimized-video-hero";
-import { Suspense } from 'react';
-import { Metadata } from 'next';
+import {getPackages, getPlaces} from "@/lib/data";
+import {OptimizedHomeClient} from "@/components/optimized-home-client";
+import {HeroVideoCarousel} from "@/components/hero-video-carousel";
+import {Suspense} from 'react';
+import {Metadata} from 'next';
+import {BUSINESS_CONFIG, COMPANY_INFO, DEFAULT_METADATA, SITE_CONFIG,} from "@/lib/utils";
 
-// Enhanced SEO metadata
+// Enhanced SEO metadata using constants
 export const metadata: Metadata = {
-    title: 'Utsav Travels - Discover Sacred India | Spiritual Heritage Tours',
-    description: 'Embark on transformative spiritual journeys through Varanasi, Ayodhya, Rishikesh, and Kedarnath. Expert-guided tours, authentic experiences, and unforgettable memories await.',
-    keywords: 'spiritual tours India, Varanasi pilgrimage, Ayodhya tours, Rishikesh yoga retreat, Kedarnath trek, sacred destinations, heritage tourism, spiritual travel packages',
+    title: DEFAULT_METADATA.title,
+    description: DEFAULT_METADATA.description,
+    keywords: DEFAULT_METADATA.keywords,
     openGraph: {
-        title: 'Utsav Travels - Discover Sacred India',
-        description: 'Embark on transformative spiritual journeys through India\'s most sacred destinations',
-        images: [
-            {
-                url: '/images/home-og.jpg',
-                width: 1200,
-                height: 630,
-                alt: 'Spiritual destinations in India',
-            },
-        ],
+        title: DEFAULT_METADATA.openGraph.title,
+        description: DEFAULT_METADATA.openGraph.description,
     },
     twitter: {
-        title: 'Utsav Travels - Discover Sacred India',
-        description: 'Embark on transformative spiritual journeys through India\'s most sacred destinations',
-        images: ['/images/home-twitter.jpg'],
+        title: DEFAULT_METADATA.twitter.title,
+        description: DEFAULT_METADATA.twitter.description,
     },
 };
 
@@ -67,7 +59,8 @@ function HomeLoadingFallback() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             <div className="h-screen w-full flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <div
+                        className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <div className="text-white text-xl animate-pulse">Loading your spiritual journey...</div>
                 </div>
             </div>
@@ -75,21 +68,30 @@ function HomeLoadingFallback() {
     );
 }
 
+// Hero loading fallback for video carousel
+function HeroLoadingFallback() {
+    return (
+        <div
+            className="h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+            <div className="text-center">
+                <div
+                    className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                <div className="text-white text-2xl font-bold mb-2 animate-pulse">Loading Video Experience</div>
+                <div className="text-white/70 text-lg animate-pulse">Preparing your spiritual journey...</div>
+            </div>
+        </div>
+    );
+}
+
 // Main home page component with error boundaries
 export default async function OptimizedHomePage() {
-    const { featuredPlaces, popularPackages } = await getHomeData();
+    const {featuredPlaces, popularPackages} = await getHomeData();
 
     return (
         <div className="relative">
-            {/* Video Hero Banner */}
-            <Suspense fallback={<HomeLoadingFallback />}>
-                <HomeVideoHero
-                    videoSrc="/videos/home-hero.webm"
-                    fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
-                    title="Discover the Spiritual Heritage"
-                    subtitle="of Varanasi, Ayodhya, Rishikesh, Kedarnath"
-                    description="Embark on transformative journeys through India's most sacred destinations"
-                />
+            {/* Hero Video Carousel */}
+            <Suspense fallback={<HeroLoadingFallback/>}>
+                <HeroVideoCarousel height="100vh" autoPlay={true}/>
             </Suspense>
 
             {/* Main Content */}
@@ -106,73 +108,168 @@ export default async function OptimizedHomePage() {
                 />
             </Suspense>
 
-            {/* Enhanced Schema markup for rich snippets */}
+            {/* Enhanced Schema markup for rich snippets using constants */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "TourOperator",
-                        "name": "Utsav Travels",
-                        "description": "Premier spiritual heritage tours across India's sacred destinations",
-                        "url": "https://utsavtravels.com",
-                        "logo": "https://utsavtravels.com/logo.png",
+                        "name": COMPANY_INFO.name,
+                        "description": COMPANY_INFO.description,
+                        "url": SITE_CONFIG.url,
+                        "logo": `${SITE_CONFIG.url}/logo.png`,
                         "contactPoint": {
                             "@type": "ContactPoint",
-                            "telephone": "+91-98765-43210",
+                            "telephone": COMPANY_INFO.contact.phone,
                             "contactType": "Customer Service",
-                            "availableLanguage": ["Hindi", "English"]
+                            "availableLanguage": BUSINESS_CONFIG.languages,
+                            "hoursAvailable": [{
+                                "@type": "OpeningHoursSpecification",
+                                "opens": "09:00",
+                                "closes": "18:00",
+                                "dayOfWeek": [
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday"
+                                ]
+                            }]
                         },
-                        "areaServed": [
-                            {
-                                "@type": "City",
-                                "name": "Varanasi"
-                            },
-                            {
-                                "@type": "City",
-                                "name": "Ayodhya"
-                            },
-                            {
-                                "@type": "City",
-                                "name": "Rishikesh"
-                            },
-                            {
-                                "@type": "City",
-                                "name": "Kedarnath"
-                            }
-                        ],
+                        "areaServed": BUSINESS_CONFIG.cities.map(city => ({
+                            "@type": "City",
+                            "name": city,
+                            "addressCountry": COMPANY_INFO.address.countryCode
+                        })),
                         "hasOfferCatalog": {
                             "@type": "OfferCatalog",
                             "name": "Spiritual Tour Packages",
+                            "description": "Curated spiritual tourism packages across India's sacred destinations",
                             "itemListElement": popularPackages?.map((pkg, index) => ({
                                 "@type": "Offer",
                                 "position": index + 1,
-                                "name": pkg?.name || "Spiritual Tour",
+                                "name": pkg?.name || "Spiritual Tour Package",
                                 "description": pkg?.tagline || "Discover spiritual destinations",
                                 "price": pkg?.price || "Contact for pricing",
                                 "priceCurrency": "INR",
-                                "availability": "https://schema.org/InStock"
+                                "availability": "https://schema.org/InStock",
+                                "validFrom": new Date().toISOString(),
+                                "category": "Travel Package"
                             })) || []
                         },
                         "aggregateRating": {
                             "@type": "AggregateRating",
                             "ratingValue": "4.9",
-                            "reviewCount": "10000"
+                            "reviewCount": COMPANY_INFO.stats.reviewCount,
+                            "bestRating": "5",
+                            "worstRating": "1"
                         },
-                        "priceRange": "₹₹",
-                        "telephone": "+91-98765-43210",
-                        "email": "info@utsavtravels.com",
+                        "priceRange": BUSINESS_CONFIG.priceRange,
+                        "telephone": COMPANY_INFO.contact.phone,
+                        "email": COMPANY_INFO.contact.email,
                         "address": {
                             "@type": "PostalAddress",
-                            "addressLocality": "Varanasi",
-                            "addressRegion": "Uttar Pradesh",
-                            "addressCountry": "IN"
+                            "addressLocality": COMPANY_INFO.address.city,
+                            "addressRegion": COMPANY_INFO.address.state,
+                            "addressCountry": COMPANY_INFO.address.countryCode,
+                            "postalCode": COMPANY_INFO.address.postalCode
+                        },
+                        "foundingDate": COMPANY_INFO.stats.establishedYear,
+                        "knowsAbout": BUSINESS_CONFIG.services,
+                        "serviceArea": {
+                            "@type": "GeoCircle",
+                            "geoMidpoint": {
+                                "@type": "GeoCoordinates",
+                                "latitude": "25.3176",
+                                "longitude": "82.9739"
+                            },
+                            "geoRadius": "1000"
                         },
                         "sameAs": [
-                            "https://facebook.com/utsavtravels",
-                            "https://instagram.com/utsavtravels",
-                            "https://twitter.com/utsavtravels"
+                            COMPANY_INFO.social.facebook,
+                            COMPANY_INFO.social.instagram,
+                            COMPANY_INFO.social.twitter,
+                            COMPANY_INFO.social.linkedin,
+                            COMPANY_INFO.social.youtube
                         ]
+                    })
+                }}
+            />
+
+            {/* Website Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "WebSite",
+                        "name": COMPANY_INFO.name,
+                        "url": SITE_CONFIG.url,
+                        "description": COMPANY_INFO.description,
+                        "potentialAction": {
+                            "@type": "SearchAction",
+                            "target": `${SITE_CONFIG.url}/search?q={search_term_string}`,
+                            "query-input": "required name=search_term_string"
+                        },
+                        "publisher": {
+                            "@type": "Organization",
+                            "name": COMPANY_INFO.name,
+                            "url": SITE_CONFIG.url,
+                            "logo": `${SITE_CONFIG.url}/logo.png`,
+                            "sameAs": Object.values(COMPANY_INFO.social)
+                        }
+                    })
+                }}
+            />
+
+            {/* LocalBusiness Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "LocalBusiness",
+                        "name": COMPANY_INFO.name,
+                        "description": COMPANY_INFO.description,
+                        "url": SITE_CONFIG.url,
+                        "telephone": COMPANY_INFO.contact.phone,
+                        "email": COMPANY_INFO.contact.email,
+                        "address": {
+                            "@type": "PostalAddress",
+                            "addressLocality": COMPANY_INFO.address.city,
+                            "addressRegion": COMPANY_INFO.address.state,
+                            "addressCountry": COMPANY_INFO.address.country,
+                            "postalCode": COMPANY_INFO.address.postalCode
+                        },
+                        "geo": {
+                            "@type": "GeoCoordinates",
+                            "latitude": "25.3176",
+                            "longitude": "82.9739"
+                        },
+                        "openingHoursSpecification": [{
+                            "@type": "OpeningHoursSpecification",
+                            "dayOfWeek": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday"
+                            ],
+                            "opens": "09:00",
+                            "closes": "18:00"
+                        }],
+                        "aggregateRating": {
+                            "@type": "AggregateRating",
+                            "ratingValue": "4.9",
+                            "reviewCount": COMPANY_INFO.stats.reviewCount
+                        },
+                        "priceRange": BUSINESS_CONFIG.priceRange,
+                        "servesCuisine": "Indian",
+                        "paymentAccepted": "Cash, Credit Card, UPI, Net Banking",
+                        "currenciesAccepted": "INR"
                     })
                 }}
             />

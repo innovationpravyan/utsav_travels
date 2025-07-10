@@ -7,6 +7,7 @@ import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-mot
 import { GlassCard } from '@/components/ui/glass-card';
 import { useSafeWindow, useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
+import { VIDEO_URLS, VIDEO_HERO_CONTENT } from '@/lib/utils';
 
 // Types for better type safety
 export interface VideoControlsProps {
@@ -28,9 +29,9 @@ export interface HeroBannerContentProps {
 }
 
 export interface VideoHeroBannerProps {
-    videoSrc: string;
-    fallbackImage: string;
-    title: string;
+    videoSrc?: string;
+    fallbackImage?: string;
+    title?: string;
     subtitle?: string;
     description?: string;
     overlayDarkness?: number;
@@ -45,21 +46,13 @@ export interface VideoHeroBannerProps {
     quality?: 'low' | 'medium' | 'high';
     onVideoLoad?: () => void;
     onVideoError?: (error: string) => void;
+    pageType?: 'home' | 'about' | 'destinations' | 'packages';
 }
-
-// Safe placeholder videos with comprehensive fallbacks
-export const PLACEHOLDER_VIDEOS = {
-    spiritual: '/videos/spiritual-hero.webm',
-    nature: '/videos/nature-hero.webm',
-    temple: '/videos/temple-hero.webm',
-    journey: '/videos/journey-hero.webm',
-    default: '/videos/default-hero.webm'
-} as const;
 
 // Safe video source helper with quality selection
 function getSafeVideoSource(src?: string, quality: 'low' | 'medium' | 'high' = 'medium'): string {
     if (!src) {
-        return PLACEHOLDER_VIDEOS.spiritual;
+        return VIDEO_URLS.home.primary;
     }
 
     // Add quality suffix if not already present
@@ -82,6 +75,33 @@ function getMP4Source(webmSrc: string): string {
         console.warn('Error converting video source:', error);
         return webmSrc;
     }
+}
+
+// Get safe fallback image
+function getSafeFallbackImage(fallbackImage?: string, pageType: string = 'home'): string {
+    if (fallbackImage) return fallbackImage;
+
+    switch (pageType) {
+        case 'about':
+            return VIDEO_URLS.fallbacks.culture;
+        case 'destinations':
+            return VIDEO_URLS.fallbacks.temple;
+        case 'packages':
+            return VIDEO_URLS.fallbacks.journey;
+        default:
+            return VIDEO_URLS.fallbacks.spiritual;
+    }
+}
+
+// Get content for page type
+function getPageContent(pageType: string = 'home', customContent?: Partial<HeroBannerContentProps>) {
+    const content = VIDEO_HERO_CONTENT[pageType as keyof typeof VIDEO_HERO_CONTENT] || VIDEO_HERO_CONTENT.home;
+
+    return {
+        title: customContent?.title || content.title,
+        subtitle: customContent?.subtitle || content.subtitle,
+        description: customContent?.description || content.description,
+    };
 }
 
 // Optimized video controls component
@@ -311,14 +331,16 @@ export function OptimizedVideoHeroBanner({
                                              preload = 'metadata',
                                              quality = 'medium',
                                              onVideoLoad,
-                                             onVideoError
+                                             onVideoError,
+                                             pageType = 'home'
                                          }: VideoHeroBannerProps) {
-    const [isMuted, setIsMuted] = useState(muted);
-    const [isPlaying, setIsPlaying] = useState(autoplay);
+    const [isMuted, setIsMuted] = useState(true); // Always start muted
+    const [isPlaying, setIsPlaying] = useState(false); // Start as not playing
     const [hasVideoError, setHasVideoError] = useState(false);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [loadingProgress, setLoadingProgress] = useState(0);
+    const [userInteracted, setUserInteracted] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const { ref: containerRef, isInView } = useThreeInView(0.1);
@@ -328,12 +350,58 @@ export function OptimizedVideoHeroBanner({
     const optimalQuality = shouldReduceEffects ? 'low' : quality;
     const safeVideoSrc = getSafeVideoSource(videoSrc, optimalQuality);
     const mp4VideoSrc = getMP4Source(safeVideoSrc);
+    const safeFallbackImage = getSafeFallbackImage(fallbackImage, pageType);
 
-    // Video control handlers
+    // Get content based on page type
+    const pageContent = getPageContent(pageType, { title, subtitle, description });
+
+    // Attempt to play video with better error handling
+    const attemptVideoPlay = useCallback(async () => {
+        if (!videoRef.current || !isVideoLoaded || hasVideoError) return;
+
+        const video = videoRef.current;
+
+        try {
+            // Ensure video is muted for autoplay
+            video.muted = true;
+
+            // Wait for video to be ready
+            if (video.readyState < 3) {
+                await new Promise((resolve) => {
+                    const onCanPlay = () => {
+                        video.removeEventListener('canplaythrough', onCanPlay);
+                        resolve(undefined);
+                    };
+                    video.addEventListener('canplaythrough', onCanPlay);
+                });
+            }
+
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                await playPromise;
+                setIsPlaying(true);
+                setErrorMessage('');
+            }
+        } catch (error: any) {
+            console.warn('Video play failed:', error);
+            if (error.name === 'NotAllowedError') {
+                setErrorMessage('Click to play video');
+                setIsPlaying(false);
+            }
+        }
+    }, [isVideoLoaded, hasVideoError]);
+
+    // Video control handlers with proper sound management
     const handleToggleMute = useCallback(() => {
         if (videoRef.current) {
-            videoRef.current.muted = !isMuted;
-            setIsMuted(!isMuted);
+            const newMutedState = !isMuted;
+            videoRef.current.muted = newMutedState;
+            setIsMuted(newMutedState);
+
+            // Ensure audio context is properly initialized
+            if (!newMutedState) {
+                videoRef.current.volume = 0.8; // Set reasonable volume
+            }
         }
     }, [isMuted]);
 
@@ -342,14 +410,11 @@ export function OptimizedVideoHeroBanner({
             if (isPlaying) {
                 videoRef.current.pause();
             } else {
-                videoRef.current.play().catch((error) => {
-                    console.warn('Video play failed:', error);
-                    setErrorMessage('Autoplay blocked by browser');
-                });
+                setUserInteracted(true);
+                attemptVideoPlay();
             }
-            setIsPlaying(!isPlaying);
         }
-    }, [isPlaying]);
+    }, [isPlaying, attemptVideoPlay]);
 
     // Video event handlers
     const handleVideoLoad = useCallback(() => {
@@ -359,11 +424,36 @@ export function OptimizedVideoHeroBanner({
         onVideoLoad?.();
     }, [onVideoLoad]);
 
+    // Handle when video can play through without buffering
+    const handleCanPlayThrough = useCallback(() => {
+        if (autoplay && !shouldReduceEffects && !userInteracted) {
+            // Try autoplay when video is ready
+            attemptVideoPlay();
+        }
+    }, [autoplay, shouldReduceEffects, userInteracted, attemptVideoPlay]);
+
     const handleVideoError = useCallback((event: any) => {
         const error = event.target?.error;
-        const errorMsg = error?.code === 4
-            ? 'Video format not supported'
-            : 'Failed to load video';
+        let errorMsg = 'Failed to load video';
+
+        if (error) {
+            switch (error.code) {
+                case 1:
+                    errorMsg = 'Video loading was aborted';
+                    break;
+                case 2:
+                    errorMsg = 'Network error occurred';
+                    break;
+                case 3:
+                    errorMsg = 'Video decoding failed';
+                    break;
+                case 4:
+                    errorMsg = 'Video format not supported';
+                    break;
+                default:
+                    errorMsg = 'Unknown video error';
+            }
+        }
 
         console.warn('Video error:', errorMsg, error);
         setHasVideoError(true);
@@ -380,30 +470,52 @@ export function OptimizedVideoHeroBanner({
         }
     }, []);
 
-    // Intersection observer effect for autoplay
+    // Handle video play/pause state changes
+    const handleVideoPlay = useCallback(() => {
+        setIsPlaying(true);
+    }, []);
+
+    const handleVideoPause = useCallback(() => {
+        setIsPlaying(false);
+    }, []);
+
+    // Auto-attempt play when video loads and is in view
     useEffect(() => {
-        if (!videoRef.current || shouldReduceEffects) return;
-
-        const video = videoRef.current;
-
-        if (isInView && autoplay && isVideoLoaded && !hasVideoError) {
-            video.play().catch((error) => {
-                console.warn('Autoplay failed:', error);
-                setErrorMessage('Autoplay requires user interaction');
-            });
-        } else if (!isInView) {
-            video.pause();
+        if (isInView && isVideoLoaded && !hasVideoError && autoplay && !shouldReduceEffects && !userInteracted) {
+            const timer = setTimeout(attemptVideoPlay, 300);
+            return () => clearTimeout(timer);
         }
-    }, [isInView, autoplay, isVideoLoaded, hasVideoError, shouldReduceEffects]);
+    }, [isInView, isVideoLoaded, hasVideoError, autoplay, shouldReduceEffects, userInteracted, attemptVideoPlay]);
+
+    // Handle user interaction to enable autoplay
+    useEffect(() => {
+        const handleUserInteraction = () => {
+            setUserInteracted(true);
+            if (videoRef.current?.paused && isVideoLoaded && !hasVideoError) {
+                attemptVideoPlay();
+            }
+        };
+
+        // Listen for any page interaction
+        document.addEventListener('click', handleUserInteraction, { once: true });
+        document.addEventListener('keydown', handleUserInteraction, { once: true });
+        document.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+        return () => {
+            document.removeEventListener('click', handleUserInteraction);
+            document.removeEventListener('keydown', handleUserInteraction);
+            document.removeEventListener('touchstart', handleUserInteraction);
+        };
+    }, [isVideoLoaded, hasVideoError, attemptVideoPlay]);
 
     // Fallback for video errors
     if (hasVideoError) {
         return (
             <VideoErrorFallback
-                fallbackImage={fallbackImage}
-                title={title}
-                subtitle={subtitle}
-                description={description}
+                fallbackImage={safeFallbackImage}
+                title={pageContent.title}
+                subtitle={pageContent.subtitle}
+                description={pageContent.description}
                 height={height}
                 error={errorMessage}
             />
@@ -428,14 +540,17 @@ export function OptimizedVideoHeroBanner({
                     )}
                     autoPlay={autoplay && !shouldReduceEffects}
                     loop={loop}
-                    muted={muted}
+                    muted={isMuted}
                     playsInline
                     preload={shouldReduceEffects ? 'none' : preload}
                     onLoadedData={handleVideoLoad}
                     onError={handleVideoError}
                     onProgress={handleVideoProgress}
+                    onPlay={handleVideoPlay}
+                    onPause={handleVideoPause}
                     aria-hidden="true"
-                    poster={fallbackImage}
+                    poster={safeFallbackImage}
+                    controls={false}
                 >
                     <source src={safeVideoSrc} type="video/webm" />
                     <source src={mp4VideoSrc} type="video/mp4" />
@@ -446,7 +561,7 @@ export function OptimizedVideoHeroBanner({
                 {!isVideoLoaded && (
                     <div
                         className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${fallbackImage})` }}
+                        style={{ backgroundImage: `url(${safeFallbackImage})` }}
                     >
                         {/* Loading indicator */}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -470,12 +585,27 @@ export function OptimizedVideoHeroBanner({
             <div className="relative z-20 h-full flex items-center justify-center">
                 {children || (
                     <OptimizedHeroBannerContent
-                        title={title}
-                        subtitle={subtitle}
-                        description={description}
+                        title={pageContent.title}
+                        subtitle={pageContent.subtitle}
+                        description={pageContent.description}
                     />
                 )}
             </div>
+
+            {/* Play Button Overlay for blocked autoplay */}
+            {isVideoLoaded && !isPlaying && errorMessage.includes('Click to play') && (
+                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20">
+                    <OptimizedMotionDiv preset="scaleIn" className="text-center">
+                        <GlassCard
+                            className="p-8 cursor-pointer group hover:scale-110 transition-all duration-200"
+                            onClick={handleTogglePlay}
+                        >
+                            <Play className="w-16 h-16 text-white mx-auto mb-4 group-hover:text-primary transition-colors" />
+                            <p className="text-white text-lg">Click to Play Video</p>
+                        </GlassCard>
+                    </OptimizedMotionDiv>
+                </div>
+            )}
 
             {/* Video Controls */}
             {showControls && isVideoLoaded && !shouldReduceEffects && (
@@ -494,48 +624,32 @@ export function OptimizedVideoHeroBanner({
 // Preset components for different use cases
 export const HomeVideoHero = (props: Partial<VideoHeroBannerProps>) => (
     <OptimizedVideoHeroBanner
-        videoSrc={PLACEHOLDER_VIDEOS.spiritual}
-        title="Discover the Spiritual Heritage"
-        subtitle="of Varanasi, Ayodhya, Rishikesh, Kedarnath"
-        description="Embark on transformative journeys through India's most sacred destinations"
+        pageType="home"
         height="100vh"
-        fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
         {...props}
     />
 );
 
 export const AboutVideoHero = (props: Partial<VideoHeroBannerProps>) => (
     <OptimizedVideoHeroBanner
-        videoSrc={PLACEHOLDER_VIDEOS.nature}
-        title="About Utsav Travels"
-        subtitle="Your Gateway to Spiritual India"
-        description="Connecting travelers with the authentic soul of sacred destinations"
+        pageType="about"
         height="80vh"
-        fallbackImage="https://images.pexels.com/photos/3401403/pexels-photo-3401403.jpeg?w=1920&h=1080&fit=crop"
         {...props}
     />
 );
 
 export const DestinationsVideoHero = (props: Partial<VideoHeroBannerProps>) => (
     <OptimizedVideoHeroBanner
-        videoSrc={PLACEHOLDER_VIDEOS.temple}
-        title="Explore Sacred Destinations"
-        subtitle="Journey Through India's Spiritual Heritage"
-        description="Discover ancient temples, sacred ghats, and spiritual sites"
+        pageType="destinations"
         height="85vh"
-        fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
         {...props}
     />
 );
 
 export const PackagesVideoHero = (props: Partial<VideoHeroBannerProps>) => (
     <OptimizedVideoHeroBanner
-        videoSrc={PLACEHOLDER_VIDEOS.journey}
-        title="Curated Travel Packages"
-        subtitle="Journeys Crafted for the Soul"
-        description="Experience India's spiritual heritage through our carefully designed packages"
+        pageType="packages"
         height="90vh"
-        fallbackImage="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
         {...props}
     />
 );
