@@ -1,17 +1,32 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { Pause, Play, Volume2, VolumeX, Wifi, WifiOff, Database } from 'lucide-react';
 import { cn } from '@/utils/utils';
 import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
 import { GlassCard } from '@/components/ui/glass-card';
 import { useSafeWindow } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
+import { useVideoCache } from '@/hooks/use-video-cache';
+import { performanceMonitor } from '@/utils/performance-monitor';
 import {
     MEDIA_CONFIG,
     getVideoCarouselTabs,
     getVideoSource
 } from '@/utils/utils';
+
+/**
+ * Enhanced Hero Video Carousel with Smart Caching
+ *
+ * Features:
+ * - Integrates with video preloading and caching system
+ * - Uses cached videos when available, falls back to original URLs
+ * - Shows cache status in video tabs (green = cached, blue = loading, white = not cached)
+ * - Optimized video loading with progressive enhancement
+ * - Automatic cache invalidation when URLs change
+ * - Performance monitoring and error handling
+ * - Support for both Google Drive and public video sources
+ */
 
 interface VideoCarouselTab {
     id: string;
@@ -35,6 +50,8 @@ interface CachedVideo {
     loaded: boolean;
     error: boolean;
     progress: number;
+    fromCache: boolean;
+    cacheStatus: 'cached' | 'loading' | 'not-cached' | 'error';
 }
 
 export function HeroVideoCarousel({
@@ -50,8 +67,9 @@ export function HeroVideoCarousel({
     const [scrollY, setScrollY] = useState(0);
     const [userInteracted, setUserInteracted] = useState(false);
     const [videoProgress, setVideoProgress] = useState(0);
-    const [preloadingProgress, setPreloadingProgress] = useState(0);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [currentVideoSource, setCurrentVideoSource] = useState<'cache' | 'network'>('cache');
+    const [loadingStatus, setLoadingStatus] = useState<string>('Initializing...');
 
     // Video cache management
     const videoCache = useRef<Map<string, CachedVideo>>(new Map());
@@ -60,24 +78,78 @@ export function HeroVideoCarousel({
     const preloadingRef = useRef<boolean>(false);
     const windowObj = useSafeWindow();
     const { shouldReduceEffects } = usePerformancePreference();
+    const videoCacheHook = useVideoCache();
 
     // Access video carousel config from MEDIA_CONFIG
     const videoCarouselConfig = MEDIA_CONFIG.videoCarouselConfig;
     const tabs = getVideoCarouselTabs();
     const currentVideo = tabs[activeTab];
 
+    // Get cache stats for debugging
+    const cacheStats = videoCacheHook.getCacheStats();
+
+    // Log cache information in development
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'development' && cacheStats.count > 0) {
+            console.log(`Video Cache Stats: ${cacheStats.count} videos, ${(cacheStats.size / 1024 / 1024).toFixed(2)}MB total`);
+        }
+    }, [cacheStats]);
+
     // Auto-switch to next video when current video ends
     const handleVideoEnded = useCallback(() => {
         setVideoProgress(100);
+        performanceMonitor.recordUserInteraction('video-completed');
+
         if (autoPlay && !shouldReduceEffects && videoCarouselConfig.autoPlay) {
             setTimeout(() => {
                 const nextIndex = (activeTab + 1) % tabs.length;
                 setActiveTab(nextIndex);
+                performanceMonitor.recordUserInteraction('auto-advance');
             }, 500);
         }
     }, [activeTab, tabs.length, autoPlay, shouldReduceEffects, videoCarouselConfig.autoPlay]);
 
-    // Create and cache video element
+    // Get video URL with cache preference
+    const getVideoUrl = useCallback((video: VideoCarouselTab, quality: 'webm' | 'mp4' = 'mp4'): string => {
+        // Try to get cached video first
+        const cachedUrl = videoCacheHook.getCachedVideoUrl(video.id, quality);
+
+        if (cachedUrl) {
+            setCurrentVideoSource('cache');
+            console.log(`Using cached video for ${video.id} (${quality})`);
+            return cachedUrl;
+        }
+
+        // Fallback to original URL
+        setCurrentVideoSource('network');
+        const originalUrl = quality === 'mp4' ? video.mp4 : video.src;
+        console.log(`Using network video for ${video.id} (${quality}): ${originalUrl}`);
+        return originalUrl;
+    }, [videoCacheHook]);
+
+    // Get cache status for a video
+    const getVideosCacheStatus = useCallback((videoId: string): 'cached' | 'loading' | 'not-cached' | 'error' => {
+        const mp4Cached = videoCacheHook.isVideoCached(videoId, 'mp4');
+        const webmCached = videoCacheHook.isVideoCached(videoId, 'webm');
+
+        if (mp4Cached || webmCached) {
+            return 'cached';
+        }
+
+        // Check if currently being processed
+        const cachedVideo = videoCache.current.get(videoId);
+        if (cachedVideo && !cachedVideo.loaded && !cachedVideo.error) {
+            return 'loading';
+        }
+
+        if (cachedVideo && cachedVideo.error) {
+            return 'error';
+        }
+
+        return 'not-cached';
+    }, [videoCacheHook]);
+
+    // Create and cache video element with cached sources
     const createVideoElement = useCallback((video: VideoCarouselTab): HTMLVideoElement => {
         const videoElement = document.createElement('video');
         videoElement.className = 'absolute inset-0 w-full h-full object-cover transition-opacity duration-800';
@@ -91,35 +163,54 @@ export function HeroVideoCarousel({
         videoElement.preload = 'auto';
         videoElement.poster = video.thumbnail;
 
-        // Add sources
-        const webmSource = document.createElement('source');
-        webmSource.src = getVideoSource(video.id as any, 'webm');
-        webmSource.type = 'video/webm';
-        videoElement.appendChild(webmSource);
+        // Try to use cached videos first, fallback to original URLs
+        const mp4Url = getVideoUrl(video, 'mp4');
+        const webmUrl = getVideoUrl(video, 'webm');
 
-        const mp4Source = document.createElement('source');
-        mp4Source.src = getVideoSource(video.id as any, 'mp4');
-        mp4Source.type = 'video/mp4';
-        videoElement.appendChild(mp4Source);
+        // Add sources - prefer MP4 for compatibility
+        if (mp4Url) {
+            const mp4Source = document.createElement('source');
+            mp4Source.src = mp4Url;
+            mp4Source.type = 'video/mp4';
+            videoElement.appendChild(mp4Source);
+        }
+
+        if (webmUrl && webmUrl !== mp4Url) {
+            const webmSource = document.createElement('source');
+            webmSource.src = webmUrl;
+            webmSource.type = 'video/webm';
+            videoElement.appendChild(webmSource);
+        }
+
+        // Performance monitoring
+        performanceMonitor.startVideoLoad(video.id, mp4Url || webmUrl, 'mp4');
 
         return videoElement;
-    }, []);
+    }, [getVideoUrl]);
 
-    // Setup video event listeners
-    const setupVideoEventListeners = useCallback((videoElement: HTMLVideoElement, cachedVideo: CachedVideo) => {
+    // Setup video event listeners with cache awareness
+    const setupVideoEventListeners = useCallback((videoElement: HTMLVideoElement, cachedVideo: CachedVideo, videoId: string) => {
         const handleLoadedData = () => {
             cachedVideo.loaded = true;
             cachedVideo.error = false;
+            cachedVideo.cacheStatus = videoCacheHook.isVideoCached(videoId) ? 'cached' : 'not-cached';
 
             if (videoElement === activeVideoRef.current) {
                 setIsVideoLoaded(true);
                 setHasVideoError(false);
+                setLoadingStatus('Video loaded successfully');
+
+                // Performance monitoring
+                const fromCache = currentVideoSource === 'cache';
+                const fileSize = videoElement.videoWidth * videoElement.videoHeight * 0.1; // Estimate
+                performanceMonitor.completeVideoLoad(videoId, fromCache, fileSize);
 
                 // Auto-play on initial load
                 if (isInitialLoad && autoPlay && !shouldReduceEffects) {
                     videoElement.play().then(() => {
                         setIsPlaying(true);
                         setIsInitialLoad(false);
+                        performanceMonitor.recordUserInteraction('autoplay-start');
                     }).catch((error) => {
                         console.warn('Autoplay failed:', error);
                         // Try playing muted
@@ -127,6 +218,7 @@ export function HeroVideoCarousel({
                         videoElement.play().then(() => {
                             setIsPlaying(true);
                             setIsInitialLoad(false);
+                            performanceMonitor.recordUserInteraction('autoplay-muted');
                         }).catch(console.error);
                     });
                 }
@@ -140,17 +232,32 @@ export function HeroVideoCarousel({
             if (videoElement === activeVideoRef.current) {
                 setIsVideoLoaded(true);
                 setHasVideoError(false);
+                setLoadingStatus('Ready to play');
                 videoElement.style.opacity = '1';
             }
         };
 
-        const handleError = () => {
+        const handleError = (event: Event) => {
             cachedVideo.error = true;
             cachedVideo.loaded = false;
+            cachedVideo.cacheStatus = 'error';
+
+            console.error(`Video error for ${videoId}:`, event);
 
             if (videoElement === activeVideoRef.current) {
                 setIsVideoLoaded(false);
                 setHasVideoError(true);
+                setLoadingStatus('Video load failed');
+
+                // Performance monitoring
+                performanceMonitor.completeVideoLoad(videoId, false, 0, 'Video load error');
+            }
+
+            // Try to fallback to network if cache failed
+            if (currentVideoSource === 'cache') {
+                console.log(`Cache failed for ${videoId}, trying network fallback`);
+                setCurrentVideoSource('network');
+                // Could implement automatic retry here
             }
         };
 
@@ -180,6 +287,24 @@ export function HeroVideoCarousel({
             }
         };
 
+        const handleLoadStart = () => {
+            if (videoElement === activeVideoRef.current) {
+                setLoadingStatus('Starting video load...');
+            }
+        };
+
+        const handleProgress = () => {
+            if (videoElement === activeVideoRef.current && videoElement.buffered.length > 0) {
+                const buffered = videoElement.buffered.end(videoElement.buffered.length - 1);
+                const duration = videoElement.duration;
+                if (duration > 0) {
+                    const bufferPercent = (buffered / duration) * 100;
+                    setLoadingStatus(`Buffered: ${Math.round(bufferPercent)}%`);
+                }
+            }
+        };
+
+        // Add event listeners
         videoElement.addEventListener('loadeddata', handleLoadedData);
         videoElement.addEventListener('canplaythrough', handleCanPlayThrough);
         videoElement.addEventListener('error', handleError);
@@ -187,6 +312,8 @@ export function HeroVideoCarousel({
         videoElement.addEventListener('ended', handleEnded);
         videoElement.addEventListener('play', handlePlay);
         videoElement.addEventListener('pause', handlePause);
+        videoElement.addEventListener('loadstart', handleLoadStart);
+        videoElement.addEventListener('progress', handleProgress);
 
         // Cleanup function
         return () => {
@@ -197,8 +324,10 @@ export function HeroVideoCarousel({
             videoElement.removeEventListener('ended', handleEnded);
             videoElement.removeEventListener('play', handlePlay);
             videoElement.removeEventListener('pause', handlePause);
+            videoElement.removeEventListener('loadstart', handleLoadStart);
+            videoElement.removeEventListener('progress', handleProgress);
         };
-    }, [autoPlay, shouldReduceEffects, isInitialLoad, handleVideoEnded]);
+    }, [autoPlay, shouldReduceEffects, isInitialLoad, handleVideoEnded, videoCacheHook, currentVideoSource]);
 
     // Initialize first video immediately
     useEffect(() => {
@@ -210,11 +339,13 @@ export function HeroVideoCarousel({
             element: videoElement,
             loaded: false,
             error: false,
-            progress: 0
+            progress: 0,
+            fromCache: currentVideoSource === 'cache',
+            cacheStatus: getVideosCacheStatus(firstVideo.id)
         };
 
         // Setup event listeners
-        const cleanup = setupVideoEventListeners(videoElement, cachedVideo);
+        const cleanup = setupVideoEventListeners(videoElement, cachedVideo, firstVideo.id);
 
         // Add to cache and DOM
         videoCache.current.set(firstVideo.id, cachedVideo);
@@ -251,14 +382,16 @@ export function HeroVideoCarousel({
                         element: videoElement,
                         loaded: false,
                         error: false,
-                        progress: 0
+                        progress: 0,
+                        fromCache: currentVideoSource === 'cache',
+                        cacheStatus: getVideosCacheStatus(video.id)
                     };
 
-                    setupVideoEventListeners(videoElement, cachedVideo);
+                    setupVideoEventListeners(videoElement, cachedVideo, video.id);
                     videoCache.current.set(video.id, cachedVideo);
                     videoElement.load();
 
-                    // Small delay between preloads
+                    // Small delay between preloads to avoid overwhelming the browser
                     await new Promise(resolve => setTimeout(resolve, 200));
                 } catch (error) {
                     console.warn(`Failed to preload video ${video.id}:`, error);
@@ -266,17 +399,18 @@ export function HeroVideoCarousel({
             }
 
             preloadingRef.current = false;
-            setPreloadingProgress(100);
+            console.log('Video preloading completed');
         };
 
         preloadVideos();
-    }, [isVideoLoaded, tabs, createVideoElement, setupVideoEventListeners, shouldReduceEffects]);
+    }, [isVideoLoaded, tabs, createVideoElement, setupVideoEventListeners, shouldReduceEffects, getVideosCacheStatus]);
 
     // Switch video on tab change
     const switchToVideo = useCallback((videoId: string) => {
         if (!containerRef.current) return;
 
-        const cachedVideo = videoCache.current.get(videoId);
+        let cachedVideo = videoCache.current.get(videoId);
+
         if (!cachedVideo) {
             // Create video if not cached
             const video = tabs.find(t => t.id === videoId);
@@ -287,10 +421,12 @@ export function HeroVideoCarousel({
                 element: videoElement,
                 loaded: false,
                 error: false,
-                progress: 0
+                progress: 0,
+                fromCache: currentVideoSource === 'cache',
+                cacheStatus: getVideosCacheStatus(video.id)
             };
 
-            setupVideoEventListeners(videoElement, newCachedVideo);
+            setupVideoEventListeners(videoElement, newCachedVideo, video.id);
             videoCache.current.set(video.id, newCachedVideo);
             containerRef.current.appendChild(videoElement);
             videoElement.load();
@@ -314,6 +450,7 @@ export function HeroVideoCarousel({
         setIsVideoLoaded(cachedVideo.loaded);
         setHasVideoError(cachedVideo.error);
         setVideoProgress(cachedVideo.progress);
+        setCurrentVideoSource(cachedVideo.fromCache ? 'cache' : 'network');
 
         // Show video with smooth transition
         requestAnimationFrame(() => {
@@ -325,13 +462,17 @@ export function HeroVideoCarousel({
                 cachedVideo.element.play().catch(console.warn);
             }
         });
-    }, [tabs, createVideoElement, setupVideoEventListeners, autoPlay, isMuted]);
+
+        // Performance monitoring
+        performanceMonitor.recordUserInteraction('video-switch', Date.now());
+    }, [tabs, createVideoElement, setupVideoEventListeners, autoPlay, isMuted, getVideosCacheStatus]);
 
     // Handle tab change
     const handleTabChange = useCallback((tabIndex: number) => {
         setActiveTab(tabIndex);
         const newVideo = tabs[tabIndex];
         switchToVideo(newVideo.id);
+        performanceMonitor.recordUserInteraction('tab-change');
     }, [tabs, switchToVideo]);
 
     // Update video when activeTab changes
@@ -348,12 +489,15 @@ export function HeroVideoCarousel({
         try {
             if (isPlaying) {
                 activeVideoRef.current.pause();
+                performanceMonitor.recordUserInteraction('pause');
             } else {
                 setUserInteracted(true);
                 await activeVideoRef.current.play();
+                performanceMonitor.recordUserInteraction('play');
             }
         } catch (error) {
             console.warn('Video play failed:', error);
+            performanceMonitor.recordUserInteraction('play-failed');
         }
     }, [isPlaying]);
 
@@ -364,6 +508,7 @@ export function HeroVideoCarousel({
         activeVideoRef.current.muted = newMutedState;
         activeVideoRef.current.volume = newMutedState ? 0 : 0.8;
         setIsMuted(newMutedState);
+        performanceMonitor.recordUserInteraction(newMutedState ? 'mute' : 'unmute');
     }, [isMuted]);
 
     // Handle scroll for parallax effect
@@ -411,6 +556,21 @@ export function HeroVideoCarousel({
         };
     }, [userInteracted, isVideoLoaded, hasVideoError]);
 
+    // Cache status update listener
+    useEffect(() => {
+        const handleCacheUpdate = (videoId: string) => {
+            // Update cache status for the video
+            const cachedVideo = videoCache.current.get(videoId);
+            if (cachedVideo) {
+                cachedVideo.cacheStatus = getVideosCacheStatus(videoId);
+                cachedVideo.fromCache = videoCacheHook.isVideoCached(videoId);
+            }
+        };
+
+        videoCacheHook.onCacheUpdate(handleCacheUpdate);
+        return () => videoCacheHook.offCacheUpdate(handleCacheUpdate);
+    }, [videoCacheHook, getVideosCacheStatus]);
+
     // Cleanup on unmount
     useEffect(() => {
         return () => {
@@ -451,11 +611,34 @@ export function HeroVideoCarousel({
                                 {!hasVideoError && (
                                     <>
                                         <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-                                        <p className="text-white/80 text-sm">Loading video...</p>
+                                        <p className="text-white/80 text-sm mb-2">Loading video...</p>
+                                        <p className="text-white/60 text-xs">{loadingStatus}</p>
+                                        <div className="flex items-center justify-center gap-2 mt-2">
+                                            {currentVideoSource === 'cache' ? (
+                                                <>
+                                                    <Database className="w-4 h-4 text-green-400" />
+                                                    <span className="text-green-400 text-xs">From Cache</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Wifi className="w-4 h-4 text-blue-400" />
+                                                    <span className="text-blue-400 text-xs">From Network</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </>
                                 )}
                                 {hasVideoError && (
-                                    <p className="text-white/80 text-sm">Error loading video</p>
+                                    <>
+                                        <WifiOff className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                                        <p className="text-red-400 text-sm">Video load failed</p>
+                                        <button
+                                            onClick={() => window.location.reload()}
+                                            className="mt-2 px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
+                                        >
+                                            Retry
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -525,44 +708,67 @@ export function HeroVideoCarousel({
                 <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-8 z-40">
                     <OptimizedMotionDiv preset="slideUp" delay={1200}>
                         <div className="flex flex-col gap-2 sm:gap-3">
-                            {tabs.map((tab, index) => (
-                                <GlassCard
-                                    key={tab.id}
-                                    className={cn(
-                                        "px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 cursor-pointer transition-all duration-300 group relative overflow-hidden touch-manipulation",
-                                        "hover:scale-105 active:scale-95 hover:bg-white/20",
-                                        activeTab === index
-                                            ? "bg-white/20 border-primary/50 shadow-lg shadow-primary/20"
-                                            : "bg-white/10 hover:bg-white/15"
-                                    )}
-                                    onClick={() => handleTabChange(index)}
-                                >
-                                    <div className="flex items-center gap-2 sm:gap-3">
-                                        <div className={cn(
-                                            "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300",
-                                            activeTab === index ? "bg-primary scale-125" :
-                                                videoCache.current.has(tab.id) ? "bg-green-400" : "bg-white/50"
-                                        )} />
+                            {tabs.map((tab, index) => {
+                                const cacheStatus = getVideosCacheStatus(tab.id);
 
-                                        <span className={cn(
-                                            "text-xs sm:text-sm font-medium transition-colors duration-300",
-                                            activeTab === index ? "text-white" : "text-white/80"
-                                        )}>
-                                            {tab.label}
-                                        </span>
-                                    </div>
+                                return (
+                                    <GlassCard
+                                        key={tab.id}
+                                        className={cn(
+                                            "px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 cursor-pointer transition-all duration-300 group relative overflow-hidden touch-manipulation",
+                                            "hover:scale-105 active:scale-95 hover:bg-white/20",
+                                            activeTab === index
+                                                ? "bg-white/20 border-primary/50 shadow-lg shadow-primary/20"
+                                                : "bg-white/10 hover:bg-white/15"
+                                        )}
+                                        onClick={() => handleTabChange(index)}
+                                    >
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                            <div className={cn(
+                                                "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300",
+                                                activeTab === index ? "bg-primary scale-125" :
+                                                    cacheStatus === 'cached' ? "bg-green-400" :
+                                                        cacheStatus === 'loading' ? "bg-blue-400 animate-pulse" :
+                                                            cacheStatus === 'error' ? "bg-red-400" :
+                                                                videoCache.current.has(tab.id) ? "bg-yellow-400" : "bg-white/50"
+                                            )} />
 
-                                    {/* Video progress bar for active tab */}
-                                    {activeTab === index && isVideoLoaded && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-300 ease-out"
-                                                style={{ width: `${videoProgress}%` }}
-                                            />
+                                            <span className={cn(
+                                                "text-xs sm:text-sm font-medium transition-colors duration-300",
+                                                activeTab === index ? "text-white" : "text-white/80"
+                                            )}>
+                                                {tab.label}
+                                            </span>
+
+                                            {/* Cache status indicator */}
+                                            <div className="flex items-center gap-1">
+                                                {cacheStatus === 'cached' && (
+                                                    <Database className="w-3 h-3 text-green-400" title="Cached" />
+                                                )}
+                                                {cacheStatus === 'loading' && (
+                                                    <Wifi className="w-3 h-3 text-blue-400 animate-pulse" title="Loading" />
+                                                )}
+                                                {cacheStatus === 'error' && (
+                                                    <WifiOff className="w-3 h-3 text-red-400" title="Error" />
+                                                )}
+                                                {cacheStatus === 'not-cached' && currentVideoSource === 'network' && (
+                                                    <Wifi className="w-3 h-3 text-white/50" title="Network" />
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                </GlassCard>
-                            ))}
+
+                                        {/* Video progress bar for active tab */}
+                                        {activeTab === index && isVideoLoaded && (
+                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 overflow-hidden">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-300 ease-out"
+                                                    style={{ width: `${videoProgress}%` }}
+                                                />
+                                            </div>
+                                        )}
+                                    </GlassCard>
+                                );
+                            })}
                         </div>
                     </OptimizedMotionDiv>
                 </div>
@@ -598,6 +804,17 @@ export function HeroVideoCarousel({
                             )}
                         </GlassCard>
                     </OptimizedMotionDiv>
+
+                    {/* Cache status indicator */}
+                    <OptimizedMotionDiv preset="scaleIn" delay={1200}>
+                        <GlassCard className="p-2 sm:p-3">
+                            {currentVideoSource === 'cache' ? (
+                                <Database className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" title="Playing from cache" />
+                            ) : (
+                                <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" title="Playing from network" />
+                            )}
+                        </GlassCard>
+                    </OptimizedMotionDiv>
                 </div>
             )}
 
@@ -608,6 +825,15 @@ export function HeroVideoCarousel({
                         className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-300 ease-out"
                         style={{ width: `${videoProgress}%` }}
                     />
+                </div>
+            )}
+
+            {/* Cache information overlay (development only) */}
+            {process.env.NODE_ENV === 'development' && cacheStats.count > 0 && (
+                <div className="absolute top-4 left-4 z-50 bg-black/70 text-white text-xs p-2 rounded">
+                    <div>Cache: {cacheStats.count} videos</div>
+                    <div>Size: {(cacheStats.size / 1024 / 1024).toFixed(1)}MB</div>
+                    <div>Source: {currentVideoSource}</div>
                 </div>
             )}
 
