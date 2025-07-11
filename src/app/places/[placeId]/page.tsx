@@ -1,24 +1,18 @@
 // src/app/places/[placeId]/page.tsx
 
-import { getPlaceById, getPlaces } from "@/lib/data";
-import { notFound } from "next/navigation";
+import {getPlaceById, getPlaces} from "@/lib/data";
+import {notFound} from "next/navigation";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Landmark, BookOpen, Star, MapPin, GalleryVertical } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HeroImageBanner } from '@/components/hero-image-banner';
+import {Badge} from "@/components/ui/badge";
+import {BookOpen, GalleryVertical, Landmark, MapPin, Star} from "lucide-react";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {HeroImageBanner} from '@/components/hero-image-banner';
 
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel"
-import { OptimizedPlaceCard } from "@/components/optimized-place-card";
-import { OptimizedMotionDiv } from "@/components/optimized-motion-div";
-import { Suspense } from 'react';
-import { Metadata } from 'next';
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "@/components/ui/carousel"
+import {OptimizedPlaceCard} from "@/components/optimized-place-card";
+import {OptimizedMotionDiv} from "@/components/optimized-motion-div";
+import {Suspense} from 'react';
+import {Metadata} from 'next';
 
 type PlaceDetailPageProps = {
     params: {
@@ -27,7 +21,7 @@ type PlaceDetailPageProps = {
 };
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: PlaceDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({params}: PlaceDetailPageProps): Promise<Metadata> {
     try {
         const place = await getPlaceById(params.placeId);
 
@@ -44,13 +38,18 @@ export async function generateMetadata({ params }: PlaceDetailPageProps): Promis
             keywords: `${place.name || ''}, ${place.city || ''}, ${place.category || ''}, ${(place.tags || []).join(', ')}, spiritual destination`,
             openGraph: {
                 title: `${place.name || 'Unknown Place'} - ${place.city || 'India'}`,
-                description: place.tagline || `Discover ${place.name || 'this amazing place'} in ${place.city || 'India'}`,
-                images: [{ url: place.thumbnail || '/placeholder.jpg', width: 1200, height: 630, alt: place.name || 'Place' }],
+                description: place.shortDescription || `Discover ${place.name || 'this amazing place'} in ${place.city || 'India'}`,
+                images: [{
+                    url: place.image || '/placeholder.jpg',
+                    width: 1200,
+                    height: 630,
+                    alt: place.name || 'Place'
+                }], // Use 'image' field
             },
             twitter: {
                 title: `${place.name || 'Unknown Place'} - ${place.city || 'India'}`,
-                description: place.tagline || `Discover ${place.name || 'this amazing place'} in ${place.city || 'India'}`,
-                images: [place.thumbnail || '/placeholder.jpg'],
+                description: place.shortDescription || `Discover ${place.name || 'this amazing place'} in ${place.city || 'India'}`,
+                images: [place.image || '/placeholder.jpg'], // Use 'image' field
             },
         };
     } catch (error) {
@@ -86,20 +85,20 @@ async function getPlaceData(placeId: string) {
             return null;
         }
 
-        // Safe place object with defaults
+        // Safe place object with defaults - using correct field names from data.ts
         const safePlace = {
             id: place.id || 'unknown',
             name: place.name || 'Unknown Place',
             city: place.city || 'Unknown City',
             category: place.category || 'Destination',
-            thumbnail: place.thumbnail || 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?w=600&h=400',
-            tagline: place.tagline || '',
-            tags: place.tags || [],
-            images: place.images || [],
-            highlights: place.highlights || [],
+            image: place.image || 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?w=600&h=400', // Use 'image' field
+            shortDescription: place.shortDescription || '',
             description: place.description || 'This is a beautiful spiritual destination.',
             history: place.history || 'This place has a rich cultural heritage.',
-            location: place.location || { lat: 0, lng: 0 }
+            highlights: place.highlights || [],
+            gallery: place.gallery || [], // Use 'gallery' field
+            tags: place.tags || [],
+            location: place.location || {lat: 0, lng: 0}
         };
 
         const safeAllPlaces = Array.isArray(allPlaces) ? allPlaces : [];
@@ -110,7 +109,7 @@ async function getPlaceData(placeId: string) {
             ))
             .slice(0, 3);
 
-        return { place: safePlace, relatedPlaces };
+        return {place: safePlace, relatedPlaces};
     } catch (error) {
         console.error('Error fetching place data:', error);
         return null;
@@ -121,19 +120,20 @@ async function getPlaceData(placeId: string) {
 function PlaceDetailLoading() {
     return (
         <div className="animate-fade-in">
-            <div className="h-[60vh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+            <div
+                className="h-[60vh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
                 <div className="text-white text-xl animate-pulse">Loading place details...</div>
             </div>
             <div className="section-padding bg-secondary">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                         <div className="lg:col-span-2 space-y-8">
-                            {Array.from({ length: 2 }).map((_, i) => (
-                                <div key={i} className="h-48 bg-white/10 animate-pulse rounded-lg" />
+                            {Array.from({length: 2}).map((_, i) => (
+                                <div key={i} className="h-48 bg-white/10 animate-pulse rounded-lg"/>
                             ))}
                         </div>
                         <div className="lg:col-span-1">
-                            <div className="h-64 bg-white/10 animate-pulse rounded-lg" />
+                            <div className="h-64 bg-white/10 animate-pulse rounded-lg"/>
                         </div>
                     </div>
                 </div>
@@ -142,26 +142,26 @@ function PlaceDetailLoading() {
     );
 }
 
-export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPageProps) {
+export default async function OptimizedPlaceDetailPage({params}: PlaceDetailPageProps) {
     const data = await getPlaceData(params.placeId);
 
     if (!data) {
         notFound();
     }
 
-    const { place, relatedPlaces } = data;
+    const {place, relatedPlaces} = data;
 
     return (
         <div className="animate-fade-in">
             {/* Hero Image Banner - Updated to use HeroImageBanner */}
-            <Suspense fallback={<PlaceDetailLoading />}>
+            <Suspense fallback={<PlaceDetailLoading/>}>
                 <div className="relative">
                     <HeroImageBanner
                         page="destinations"
                         title={place.name}
                         subtitle={`${place.city} • ${place.category}`}
-                        description={place.tagline}
-                        imageUrl={place.images?.[0] || place.thumbnail}
+                        description={place.shortDescription}
+                        imageUrl={place.gallery?.[0] || place.image}
                         height="60vh"
                         overlayOpacity={0.5}
                         parallaxEffect={true}
@@ -256,13 +256,14 @@ export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPa
                                 <GalleryVertical className="h-7 w-7 text-primary"/>
                                 Gallery
                             </h3>
-                            {place.images.length > 0 ? (
+                            {place.gallery.length > 0 ? (
                                 <Carousel className="w-full -ml-1">
                                     <CarouselContent>
-                                        {place.images.map((img, index) => (
+                                        {place.gallery.map((img, index) => (
                                             <CarouselItem key={index}>
                                                 <Card>
-                                                    <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
+                                                    <CardContent
+                                                        className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
                                                         <Image
                                                             src={img}
                                                             alt={`${place.name} gallery image ${index + 1}`}
@@ -275,14 +276,15 @@ export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPa
                                             </CarouselItem>
                                         ))}
                                     </CarouselContent>
-                                    <CarouselPrevious />
-                                    <CarouselNext />
+                                    <CarouselPrevious/>
+                                    <CarouselNext/>
                                 </Carousel>
                             ) : (
                                 <Card>
-                                    <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
+                                    <CardContent
+                                        className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
                                         <Image
-                                            src={place.thumbnail}
+                                            src={place.image}
                                             alt={place.name}
                                             fill
                                             className="object-cover"
@@ -300,12 +302,14 @@ export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPa
                             </h3>
                             <Card>
                                 <CardContent className="relative aspect-video p-0 rounded-lg overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                                    <div
+                                        className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                                         <div className="text-center text-white">
                                             <MapPin className="h-12 w-12 text-white/80 mx-auto mb-2"/>
                                             <p className="font-bold text-lg">{place.name}</p>
                                             <p className="text-sm">{place.city}</p>
-                                            <p className="text-xs mt-2">Lat: {place.location.lat}, Lng: {place.location.lng}</p>
+                                            <p className="text-xs mt-2">Lat: {place.location.lat},
+                                                Lng: {place.location.lng}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -322,7 +326,7 @@ export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPa
                         <h2 className="text-4xl font-headline text-center mb-12">Related Destinations</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {relatedPlaces.map((p, index) => (
-                                <OptimizedPlaceCard key={p?.id || index} place={p} index={index} showAnimation={false} />
+                                <OptimizedPlaceCard key={p?.id || index} place={p} index={index} showAnimation={false}/>
                             ))}
                         </div>
                     </div>
@@ -338,7 +342,7 @@ export default async function OptimizedPlaceDetailPage({ params }: PlaceDetailPa
                         "@type": "TouristAttraction",
                         "name": place.name,
                         "description": place.description,
-                        "image": place.thumbnail,
+                        "image": place.image, // Use 'image' field
                         "address": {
                             "@type": "PostalAddress",
                             "addressLocality": place.city,

@@ -1,7 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
-import {type Package} from '@/lib/data';
+import {Package} from '@/lib/data'; // Use the correct type from data.ts
 import {OptimizedPackageCard} from '@/components/optimized-package-card';
 import {Input} from '@/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
@@ -10,28 +10,29 @@ import {Button} from '@/components/ui/button';
 import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
-import { PLACEHOLDERS } from '@/utils/utils';
 
 export function PackagesClient({packages}: { packages: Package[] }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCity, setSelectedCity] = useState('all');
 
-    // Safe packages with defaults using constants
+    // Safe packages with defaults - using correct types from data.ts
     const safePackages = useMemo(() => {
         return packages?.map(pkg => ({
             id: pkg?.id || Math.random().toString(),
-            name: pkg?.name || PLACEHOLDERS.text.unknownPackage,
-            tagline: pkg?.tagline || PLACEHOLDERS.text.defaultTagline,
-            description: pkg?.description || '',
-            duration: pkg?.duration || PLACEHOLDERS.text.defaultDuration,
+            name: pkg?.name || 'Unknown Package',
+            description: pkg?.description || 'An amazing travel experience awaits you.',
+            duration: pkg?.duration || '3 Days',
             cities: pkg?.cities || [],
-            price: pkg?.price || PLACEHOLDERS.text.contactForPricing,
-            thumbnail: pkg?.thumbnail || PLACEHOLDERS.images.package,
-            images: pkg?.images || [],
-            tags: pkg?.tags || [],
+            image: pkg?.image || 'https://placehold.co/600x800/cccccc/666666?text=No+Image', // Use 'image' field
             highlights: pkg?.highlights || [],
+            itinerary: pkg?.itinerary || [],
             inclusions: pkg?.inclusions || [],
-            itinerary: pkg?.itinerary || []
+            gallery: pkg?.gallery || [], // Use 'gallery' field
+            tags: pkg?.tags || [],
+            // Handle price field properly - it could be string or number
+            price: pkg?.price || 'Contact for pricing',
+            originalPrice: pkg?.originalPrice,
+            discount: pkg?.discount
         })) || [];
     }, [packages]);
 

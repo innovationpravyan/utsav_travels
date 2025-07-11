@@ -7,25 +7,10 @@ import React, { useCallback, useRef, useState, memo } from "react";
 import { cn } from "@/utils/utils";
 import { useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
-
-// Types for data safety
-interface Place {
-    id: string;
-    name: string;
-    city: string;
-    category: string;
-    thumbnail: string;
-    tagline: string;
-    tags: string[];
-    images: string[];
-    highlights: string[];
-    description: string;
-    history: string;
-    location: { lat: number; lng: number };
-}
+import { Place } from '@/lib/data'; // Use the correct type from data.ts
 
 interface OptimizedPlaceCardProps {
-    place: Place;
+    place: Place; // Use the exported type from data.ts
     index?: number;
     variant?: 'default' | 'compact' | 'featured' | 'minimal' | 'hero';
     showAnimation?: boolean;
@@ -51,16 +36,16 @@ export const OptimizedPlaceCard = memo(({
     const { ref: inViewRef, isInView } = useThreeInView(0.05);
     const { shouldReduceMotion, shouldReduceEffects } = usePerformancePreference();
 
-    // Safe place object with comprehensive defaults
+    // Safe place object with comprehensive defaults - using correct field names
     const safePlaceProps = {
         id: place?.id || `place-${index}`,
         name: place?.name || 'Unknown Place',
         city: place?.city || 'Unknown City',
         category: place?.category || 'Destination',
-        thumbnail: place?.thumbnail || '/images/placeholder-place.jpg',
-        tagline: place?.tagline || 'Discover this amazing destination',
+        image: place?.image || 'https://placehold.co/600x800/cccccc/666666?text=No+Image', // Use 'image' field
+        shortDescription: place?.shortDescription || 'Discover this amazing destination',
         tags: Array.isArray(place?.tags) ? place.tags.slice(0, 3) : [],
-        images: Array.isArray(place?.images) ? place.images : [],
+        gallery: Array.isArray(place?.gallery) ? place.gallery : [], // Use 'gallery' field
         highlights: Array.isArray(place?.highlights) ? place.highlights : [],
         description: place?.description || '',
         history: place?.history || '',
@@ -196,14 +181,14 @@ export const OptimizedPlaceCard = memo(({
                 >
                     <div className="relative h-full w-full overflow-hidden rounded-3xl bg-black">
 
-                        {/* Background Image with optimized loading */}
+                        {/* Background Image with optimized loading - using correct field */}
                         <div className={cn(
                             "absolute inset-0 transition-transform duration-500",
                             isHovered && !shouldReduceEffects ? "scale-110" : "scale-100"
                         )}>
                             {!imageError ? (
                                 <Image
-                                    src={safePlaceProps.thumbnail}
+                                    src={safePlaceProps.image}
                                     alt={`Beautiful view of ${safePlaceProps.name}`}
                                     fill
                                     className={cn(
@@ -264,12 +249,12 @@ export const OptimizedPlaceCard = memo(({
                                 {safePlaceProps.name}
                             </h3>
 
-                            {safePlaceProps.tagline && (
+                            {safePlaceProps.shortDescription && (
                                 <p className={cn(
                                     "text-primary/90 font-medium text-shadow mb-4",
                                     styles.subtitle
                                 )}>
-                                    {safePlaceProps.tagline}
+                                    {safePlaceProps.shortDescription}
                                 </p>
                             )}
 
@@ -357,7 +342,7 @@ export const OptimizedPlaceCard = memo(({
                             <p>Destination: {safePlaceProps.name}</p>
                             <p>Location: {safePlaceProps.city}</p>
                             <p>Category: {safePlaceProps.category}</p>
-                            {safePlaceProps.tagline && <p>Description: {safePlaceProps.tagline}</p>}
+                            {safePlaceProps.shortDescription && <p>Description: {safePlaceProps.shortDescription}</p>}
                         </div>
                     </div>
                 </article>

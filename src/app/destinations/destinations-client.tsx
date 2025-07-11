@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useState} from 'react';
-import {type Place} from '@/lib/data';
+import {Place} from '@/lib/data'; // Use the correct type from data.ts
 import {OptimizedPlaceCard} from '@/components/optimized-place-card';
 import {Input} from '@/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
@@ -11,7 +11,6 @@ import {Card} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {OptimizedMotionDiv} from '@/components/optimized-motion-div';
 import {useSafeWindow} from "@/utils/three-utils";
-import {PLACEHOLDERS} from '@/utils/utils';
 
 export function DestinationsClient({places}: { places: Place[] }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -21,20 +20,20 @@ export function DestinationsClient({places}: { places: Place[] }) {
     const [isDesktop, setIsDesktop] = useState(false);
     const windowObj = useSafeWindow();
 
-    // Safe places with defaults using constants
+    // Safe places with defaults - using correct types from data.ts
     const safePlaces = useMemo(() => {
         return places?.map(place => ({
             id: place?.id || Math.random().toString(),
-            name: place?.name || PLACEHOLDERS.text.unknownPlace,
-            city: place?.city || PLACEHOLDERS.text.unknownCity,
-            category: place?.category || PLACEHOLDERS.text.defaultCategory,
-            thumbnail: place?.thumbnail || PLACEHOLDERS.images.place,
-            tagline: place?.tagline || '',
-            tags: place?.tags || [],
-            images: place?.images || [],
-            highlights: place?.highlights || [],
+            name: place?.name || 'Unknown Place',
+            city: place?.city || 'Unknown City',
+            category: place?.category || 'Destination',
+            image: place?.image || 'https://placehold.co/600x800/cccccc/666666?text=No+Image', // Use 'image' field
+            shortDescription: place?.shortDescription || 'Discover this amazing destination',
             description: place?.description || '',
             history: place?.history || '',
+            highlights: place?.highlights || [],
+            gallery: place?.gallery || [], // Use 'gallery' field
+            tags: place?.tags || [],
             location: place?.location || {lat: 0, lng: 0}
         })) || [];
     }, [places]);

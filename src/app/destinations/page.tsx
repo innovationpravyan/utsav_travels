@@ -125,7 +125,7 @@ export default async function OptimizedDestinationsPage() {
               })}
             </div>
 
-            {/* Featured Categories Preview */}
+            {/* Featured Categories Preview - FIXED IMAGE FIELD */}
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {categories.slice(0, 3).map((category, index) => {
                 const categoryPlaces = allPlaces.filter(p => p?.category === category);
@@ -140,7 +140,7 @@ export default async function OptimizedDestinationsPage() {
                       <GlassCard className="p-0 overflow-hidden group">
                         <div className="relative h-48">
                           <img
-                              src={representativePlace?.thumbnail || '/placeholder.jpg'}
+                              src={representativePlace?.image || 'https://placehold.co/600x400/cccccc/666666?text=No+Image'}
                               alt={category}
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                               loading="lazy"

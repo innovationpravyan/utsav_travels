@@ -5,13 +5,34 @@ import Link from "next/link";
 import { OptimizedPlaceCard } from "@/components/optimized-place-card";
 import { OptimizedPackageCard } from "@/components/optimized-package-card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Award, Calendar, Globe, MapPin, Sparkles, Star, Users, Phone, Mail } from "lucide-react";
+import {
+    ArrowRight,
+    Award,
+    Calendar,
+    Globe,
+    MapPin,
+    Sparkles,
+    Star,
+    Users,
+    Phone,
+    Mail,
+    Compass,
+    Camera,
+    Heart,
+    Crown,
+    Gem,
+    Plane,
+    Sunset,
+    Coffee,
+    Palmtree
+} from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { OptimizedMotionDiv, StaggerContainer } from "@/components/optimized-motion-div";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
 import { cn } from '@/utils/utils';
+import { Place, Package } from '@/lib/data';
 import {
     HOMEPAGE_STATS,
     TESTIMONIALS,
@@ -19,61 +40,141 @@ import {
     createWhatsAppUrl
 } from "@/utils/utils";
 
-// Types for data safety
-interface Place {
-    id: string;
-    name: string;
-    city: string;
-    category: string;
-    thumbnail: string;
-    tagline: string;
-    tags: string[];
-    images: string[];
-    highlights: string[];
-    description: string;
-    history: string;
-    location: { lat: number; lng: number };
-}
-
-interface Package {
-    id: string;
-    name: string;
-    tagline: string;
-    description: string;
-    duration: string;
-    cities: string[];
-    price: string;
-    thumbnail: string;
-    images: string[];
-    tags: string[];
-    highlights: string[];
-    inclusions: string[];
-    itinerary: any[];
-}
-
 interface OptimizedHomeClientProps {
     featuredPlaces: Place[];
     popularPackages: Package[];
 }
 
-// Helper function to get icon component
+// Enhanced icon mapping with luxury-themed icons
 const getIconComponent = (iconName: string) => {
     const icons = {
         MapPin,
         Users,
         Calendar,
         Award,
+        Compass,
+        Camera,
+        Heart,
+        Crown,
+        Gem,
+        Plane,
+        Sunset,
+        Coffee,
+        Palmtree,
+        Star,
+        Globe,
     };
-    return icons[iconName as keyof typeof icons] || MapPin;
+    return icons[iconName as keyof typeof icons] || Crown;
 };
 
-// Memoized statistics section
-const OptimizedStatsSection = memo(() => {
+// Enhanced hero section with luxury aesthetic
+const LuxuryHeroSection = memo(() => {
+    const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.addEventListener('loadeddata', () => setIsVideoLoaded(true));
+        }
+    }, []);
+
+    return (
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+            {/* Video Background */}
+            <div className="absolute inset-0 z-0">
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className={cn(
+                        "w-full h-full object-cover transition-opacity duration-1000",
+                        isVideoLoaded ? "opacity-100" : "opacity-0"
+                    )}
+                >
+                    <source src="/videos/luxury-travel-hero.mp4" type="video/mp4" />
+                </video>
+
+                {/* Fallback gradient background */}
+                <div className={cn(
+                    "absolute inset-0 hero-gradient transition-opacity duration-1000",
+                    isVideoLoaded ? "opacity-0" : "opacity-100"
+                )} />
+            </div>
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 hero-overlay z-10" />
+
+            {/* Floating elegant elements */}
+            <div className="absolute inset-0 z-20 pointer-events-none">
+                <div className="absolute top-20 left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl animate-float-elegant" />
+                <div className="absolute bottom-20 right-20 w-56 h-56 bg-gradient-to-r from-carnation-300/20 to-fairy-500/20 rounded-full blur-3xl animate-float-elegant delay-1000" />
+                <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-thistle-400/20 rounded-full blur-xl animate-bounce-gentle delay-700" />
+                <div className="absolute top-1/3 right-1/3 w-24 h-24 bg-uranian-400/20 rounded-full blur-lg animate-float-elegant delay-1500" />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-30 container-luxury text-center text-white">
+                <OptimizedMotionDiv preset="fadeIn" delay={500}>
+                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 rounded-full backdrop-blur-sm mb-8">
+                        <Crown className="w-5 h-5 text-carnation-300" />
+                        <span className="text-caption text-white tracking-wider">Luxury Awaits</span>
+                    </div>
+                </OptimizedMotionDiv>
+
+                <OptimizedMotionDiv preset="slideUp" delay={700}>
+                    <h1 className="text-display text-5xl md:text-7xl lg:text-8xl font-bold mb-8">
+                        Discover Extraordinary
+                        <span className="block text-gradient-rainbow">Escapes</span>
+                    </h1>
+                </OptimizedMotionDiv>
+
+                <OptimizedMotionDiv preset="fadeIn" delay={900}>
+                    <p className="text-body text-xl md:text-2xl text-white/95 max-w-4xl mx-auto mb-10 leading-relaxed font-light">
+                        Immerse yourself in curated luxury experiences that transcend ordinary travel.
+                        Create unforgettable memories in the world's most breathtaking destinations.
+                    </p>
+                </OptimizedMotionDiv>
+
+                <StaggerContainer staggerDelay={200}>
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                        <OptimizedMotionDiv preset="slideUp" delay={1100}>
+                            <Button className="btn-primary btn-large group shadow-luxury">
+                                <Gem className="w-6 h-6" />
+                                Begin Your Journey
+                                <Sparkles className="w-6 h-6 group-hover:animate-spin" />
+                            </Button>
+                        </OptimizedMotionDiv>
+
+                        <OptimizedMotionDiv preset="slideUp" delay={1300}>
+                            <Button variant="outline" className="btn-outline btn-large text-white hover:bg-white hover:text-thistle-900">
+                                <Camera className="w-6 h-6" />
+                                Explore Destinations
+                            </Button>
+                        </OptimizedMotionDiv>
+                    </div>
+                </StaggerContainer>
+
+                {/* Scroll indicator */}
+                <OptimizedMotionDiv preset="fadeIn" delay={1500} className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+                    <div className="animate-bounce-gentle">
+                        <ArrowRight className="w-6 h-6 text-white/80 rotate-90" />
+                    </div>
+                </OptimizedMotionDiv>
+            </div>
+        </section>
+    );
+});
+
+LuxuryHeroSection.displayName = 'LuxuryHeroSection';
+
+// Enhanced statistics section with luxury theme
+const LuxuryStatsSection = memo(() => {
     const [countersStarted, setCountersStarted] = useState(false);
     const { ref: sectionRef, isInView } = useThreeInView(0.2);
     const { shouldReduceEffects } = usePerformancePreference();
 
-    // Optimized counter with reduced motion support
     const OptimizedCounter = memo(({
                                        value,
                                        suffix,
@@ -90,7 +191,6 @@ const OptimizedStatsSection = memo(() => {
 
         useEffect(() => {
             if (!isVisible || hasAnimated.current) return;
-
             hasAnimated.current = true;
 
             if (!shouldAnimate) {
@@ -98,8 +198,8 @@ const OptimizedStatsSection = memo(() => {
                 return;
             }
 
-            const duration = 2000;
-            const steps = 60;
+            const duration = 2500;
+            const steps = 80;
             const increment = value / steps;
             let currentCount = 0;
 
@@ -117,7 +217,7 @@ const OptimizedStatsSection = memo(() => {
         }, [isVisible, value, shouldAnimate]);
 
         return (
-            <span className="text-4xl md:text-5xl font-bold">
+            <span className="text-display text-4xl md:text-6xl font-bold text-thistle-800">
                 {count.toLocaleString()}{suffix}
             </span>
         );
@@ -131,51 +231,92 @@ const OptimizedStatsSection = memo(() => {
         }
     }, [isInView, countersStarted]);
 
-    return (
-        <section
-            ref={sectionRef}
-            className="relative section-padding bg-gradient-to-br from-slate-800 via-purple-900 to-slate-800 contain-layout"
-        >
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-10">
-                <div className="w-full h-full bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_1px)] bg-[length:24px_24px]" />
-            </div>
+    // Enhanced stats data with luxury themes
+    const luxuryStats = [
+        {
+            icon: 'Crown',
+            value: 15000,
+            suffix: '+',
+            label: 'Luxury Travelers',
+            color: 'text-thistle-600',
+            bgColor: 'bg-thistle-50'
+        },
+        {
+            icon: 'Gem',
+            value: 300,
+            suffix: '+',
+            label: 'Premium Destinations',
+            color: 'text-fairy-600',
+            bgColor: 'bg-fairy-50'
+        },
+        {
+            icon: 'Star',
+            value: 99,
+            suffix: '%',
+            label: 'Satisfaction Rate',
+            color: 'text-carnation-600',
+            bgColor: 'bg-carnation-50'
+        },
+        {
+            icon: 'Award',
+            value: 15,
+            suffix: '+',
+            label: 'Years Excellence',
+            color: 'text-uranian-600',
+            bgColor: 'bg-uranian-50'
+        },
+    ];
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="text-center mb-16">
+    return (
+        <section ref={sectionRef} className="section-padding section-luxury">
+            <div className="container-luxury">
+                <div className="text-center mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                            Trusted by
-                            <span className="block text-gradient-alt">Thousands</span>
+                        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-thistle-100 to-fairy-100 rounded-full mb-8">
+                            <Star className="w-5 h-5 text-thistle-600" />
+                            <span className="text-caption text-thistle-700 tracking-wider">Excellence Recognized</span>
+                        </div>
+                    </OptimizedMotionDiv>
+
+                    <OptimizedMotionDiv preset="slideUp" delay={200}>
+                        <h2 className="text-heading text-5xl md:text-6xl font-bold text-thistle-900 mb-8">
+                            Luxury Travel
+                            <span className="block text-gradient-luxury">By The Numbers</span>
                         </h2>
                     </OptimizedMotionDiv>
-                    <OptimizedMotionDiv preset="fadeIn" delay={200}>
-                        <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-                            Join our community of spiritual travelers exploring India's most sacred destinations
+
+                    <OptimizedMotionDiv preset="fadeIn" delay={400}>
+                        <p className="text-body text-lg md:text-xl text-thistle-700 max-w-3xl mx-auto leading-relaxed">
+                            Join an exclusive community of discerning travelers who choose excellence in every journey
                         </p>
                     </OptimizedMotionDiv>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                    {HOMEPAGE_STATS.map((stat, index) => {
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+                    {luxuryStats.map((stat, index) => {
                         const IconComponent = getIconComponent(stat.icon);
                         return (
                             <OptimizedMotionDiv
                                 key={stat.label}
                                 preset="scaleIn"
-                                delay={index * 100}
+                                delay={index * 150}
                                 hover={!shouldReduceEffects}
                                 className="text-center"
                             >
-                                <GlassCard className="p-6 md:p-8 group hover:scale-105 transition-all duration-200">
+                                <div className={cn(
+                                    "card-luxury p-8 md:p-10 group hover-luxury",
+                                    stat.bgColor
+                                )}>
                                     <div className={cn(
-                                        "mx-auto mb-4 p-3 md:p-4 rounded-full w-fit bg-white/10 transition-transform duration-200",
-                                        !shouldReduceEffects && "group-hover:rotate-12"
+                                        "mx-auto mb-6 p-4 md:p-5 rounded-3xl w-fit transition-transform duration-400",
+                                        stat.color,
+                                        "bg-white shadow-soft",
+                                        !shouldReduceEffects && "group-hover:rotate-6 group-hover:scale-110"
                                     )}>
-                                        <IconComponent className={cn("h-6 w-6 md:h-8 md:w-8", stat.color)} />
+                                        <IconComponent className="h-8 w-8 md:h-10 md:w-10" />
                                     </div>
 
-                                    <div className={cn("mb-2", stat.color)}>
+                                    <div className="mb-4">
                                         <OptimizedCounter
                                             value={stat.value}
                                             suffix={stat.suffix}
@@ -184,8 +325,10 @@ const OptimizedStatsSection = memo(() => {
                                         />
                                     </div>
 
-                                    <p className="text-white/70 font-medium text-sm md:text-base">{stat.label}</p>
-                                </GlassCard>
+                                    <p className="text-body text-thistle-700 font-medium text-sm md:text-base leading-relaxed">
+                                        {stat.label}
+                                    </p>
+                                </div>
                             </OptimizedMotionDiv>
                         );
                     })}
@@ -195,42 +338,40 @@ const OptimizedStatsSection = memo(() => {
     );
 });
 
-OptimizedStatsSection.displayName = 'OptimizedStatsSection';
+LuxuryStatsSection.displayName = 'LuxuryStatsSection';
 
-// Memoized destinations section
-const OptimizedDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces: Place[] }) => {
+// Enhanced destinations section with elegant theme
+const ElegantDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces: Place[] }) => {
     const { shouldReduceEffects } = usePerformancePreference();
 
     return (
-        <section className="section-padding bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative contain-layout">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-10">
-                <div className="w-full h-full bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:24px_24px]" />
+        <section className="section-padding section-thistle relative overflow-hidden">
+            {/* Background decorations */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-16 right-16 w-72 h-72 bg-gradient-to-r from-fairy-200/30 to-thistle-200/30 rounded-full blur-3xl animate-float-elegant" />
+                <div className="absolute bottom-24 left-24 w-96 h-96 bg-gradient-to-r from-carnation-200/20 to-uranian-200/20 rounded-full blur-3xl animate-float-elegant delay-1000" />
             </div>
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="text-center mb-16">
+            <div className="container-luxury relative z-10">
+                <div className="text-center mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <div className="flex justify-center mb-6">
-                            <GlassCard className="p-4 rounded-full">
-                                <MapPin className="w-8 h-8 text-white" />
-                            </GlassCard>
+                        <div className="inline-flex items-center gap-3 px-6 py-3 glass-dreamy rounded-full mb-8">
+                            <Globe className="w-5 h-5 text-thistle-600" />
+                            <span className="text-caption text-thistle-700 tracking-wider">Curated Destinations</span>
                         </div>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="slideUp" delay={200}>
-                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-                            Sacred
-                            <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                                Destinations
-                            </span>
+                        <h2 className="text-heading text-5xl md:text-7xl font-bold text-thistle-900 mb-8 tracking-tight">
+                            Breathtaking
+                            <span className="block text-gradient-luxury">Destinations</span>
                         </h2>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                        <p className="text-white/90 max-w-3xl mx-auto text-lg md:text-xl font-light leading-relaxed">
-                            Embark on extraordinary spiritual journeys to handpicked destinations that promise to create
-                            memories for a lifetime.
+                        <p className="text-body text-thistle-700 max-w-4xl mx-auto text-lg md:text-xl font-light leading-relaxed">
+                            Each destination is carefully selected for its unique beauty, cultural richness, and ability to create
+                            magical moments that will stay with you forever.
                         </p>
                     </OptimizedMotionDiv>
                 </div>
@@ -242,38 +383,40 @@ const OptimizedDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces:
                                 opts={{ align: "start", loop: true }}
                                 className="w-full"
                             >
-                                <CarouselContent className="-ml-2 md:-ml-4">
+                                <CarouselContent className="-ml-3 md:-ml-4">
                                     {featuredPlaces.map((place, index) => (
-                                        <CarouselItem key={place.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                                            <OptimizedPlaceCard
-                                                place={place}
-                                                index={index}
-                                                showAnimation={!shouldReduceEffects}
-                                            />
+                                        <CarouselItem key={place.id} className="pl-3 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                                            <div className="card-luxury hover-luxury overflow-hidden">
+                                                <OptimizedPlaceCard
+                                                    place={place}
+                                                    index={index}
+                                                    showAnimation={!shouldReduceEffects}
+                                                />
+                                            </div>
                                         </CarouselItem>
                                     ))}
                                 </CarouselContent>
 
-                                <CarouselPrevious className="hidden lg:flex bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 shadow-xl -left-6" />
-                                <CarouselNext className="hidden lg:flex bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 shadow-xl -right-6" />
+                                <CarouselPrevious className="hidden lg:flex glass-luxury text-thistle-600 hover:bg-thistle-50 shadow-luxury -left-8" />
+                                <CarouselNext className="hidden lg:flex glass-luxury text-thistle-600 hover:bg-thistle-50 shadow-luxury -right-8" />
                             </Carousel>
                         </OptimizedMotionDiv>
                     </div>
                 ) : (
-                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-16">
-                        <GlassCard className="inline-block p-8">
-                            <MapPin className="w-12 h-12 text-white/50 mx-auto mb-4" />
-                            <p className="text-white/80 text-lg">Loading sacred destinations...</p>
-                        </GlassCard>
+                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-20">
+                        <div className="card-luxury inline-block p-10">
+                            <Globe className="w-16 h-16 text-thistle-400 mx-auto mb-6" />
+                            <p className="text-thistle-600 text-lg">Curating breathtaking destinations...</p>
+                        </div>
                     </OptimizedMotionDiv>
                 )}
 
-                <OptimizedMotionDiv preset="slideUp" delay={800} className="text-center mt-16">
-                    <Button asChild className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm hover:from-white/20 hover:to-white/10 text-white border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 px-8 py-6 text-lg rounded-full group">
+                <OptimizedMotionDiv preset="slideUp" delay={800} className="text-center mt-20">
+                    <Button asChild className="btn-primary btn-large group shadow-luxury">
                         <Link href="/destinations">
                             <span className="flex items-center">
                                 Explore All Destinations
-                                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover:translate-x-1" />
                             </span>
                         </Link>
                     </Button>
@@ -283,78 +426,77 @@ const OptimizedDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces:
     );
 });
 
-OptimizedDestinationsSection.displayName = 'OptimizedDestinationsSection';
+ElegantDestinationsSection.displayName = 'ElegantDestinationsSection';
 
-// Memoized packages section
-const OptimizedPackagesSection = memo(({ popularPackages }: { popularPackages: Package[] }) => {
+// Enhanced packages section with luxury theme
+const DreamyPackagesSection = memo(({ popularPackages }: { popularPackages: Package[] }) => {
     const { shouldReduceEffects } = usePerformancePreference();
 
     return (
-        <section className="section-padding bg-gradient-to-br from-rose-900 via-pink-900 to-purple-900 relative contain-layout">
-            {/* Floating background elements */}
+        <section className="section-padding section-fairy relative overflow-hidden">
+            {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-r from-pink-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-orange-400/5 to-red-500/5 rounded-full blur-3xl animate-pulse animation-delay-2000" />
+                <div className="absolute top-24 left-16 w-80 h-80 bg-gradient-to-r from-carnation-200/20 to-thistle-200/20 rounded-full blur-3xl animate-pulse-luxury" />
+                <div className="absolute bottom-24 right-24 w-96 h-96 bg-gradient-to-r from-fairy-200/15 to-uranian-200/15 rounded-full blur-3xl animate-pulse-luxury delay-2000" />
             </div>
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="text-center mb-16">
+            <div className="container-luxury relative z-10">
+                <div className="text-center mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <div className="flex justify-center mb-6">
-                            <GlassCard className="p-4 rounded-full">
-                                <Star className="w-8 h-8 text-white" />
-                            </GlassCard>
+                        <div className="inline-flex items-center gap-3 px-6 py-3 glass-dreamy rounded-full mb-8">
+                            <Heart className="w-5 h-5 text-fairy-600" />
+                            <span className="text-caption text-fairy-700 tracking-wider">Luxury Experiences</span>
                         </div>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="slideUp" delay={200}>
-                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-                            Popular
-                            <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                                Packages
-                            </span>
+                        <h2 className="text-heading text-5xl md:text-7xl font-bold text-fairy-900 mb-8 tracking-tight">
+                            Dreamy
+                            <span className="block text-gradient-dreamy">Experiences</span>
                         </h2>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                        <p className="text-white/90 max-w-3xl mx-auto text-lg md:text-xl font-light leading-relaxed">
-                            Carefully curated spiritual experiences that blend adventure, culture, and luxury into
-                            unforgettable journeys.
+                        <p className="text-body text-fairy-700 max-w-4xl mx-auto text-lg md:text-xl font-light leading-relaxed">
+                            Meticulously crafted luxury packages that blend comfort, adventure, and exclusive access
+                            into extraordinary journeys tailored to your desires.
                         </p>
                     </OptimizedMotionDiv>
                 </div>
 
                 {popularPackages?.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid-luxury">
                         {popularPackages.map((pkg, index) => (
                             <OptimizedMotionDiv
                                 key={pkg.id}
                                 preset="slideUp"
-                                delay={index * 200}
+                                delay={index * 250}
                             >
-                                <OptimizedPackageCard
-                                    pkg={pkg}
-                                    index={index}
-                                    showAnimation={!shouldReduceEffects}
-                                />
+                                <div className="card-luxury hover-luxury h-full">
+                                    <OptimizedPackageCard
+                                        pkg={pkg}
+                                        index={index}
+                                        showAnimation={!shouldReduceEffects}
+                                    />
+                                </div>
                             </OptimizedMotionDiv>
                         ))}
                     </div>
                 ) : (
-                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-16">
-                        <GlassCard className="inline-block p-8">
-                            <Star className="w-12 h-12 text-white/50 mx-auto mb-4" />
-                            <p className="text-white/80 text-lg">Loading tour packages...</p>
-                        </GlassCard>
+                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-20">
+                        <div className="card-luxury inline-block p-10">
+                            <Heart className="w-16 h-16 text-fairy-400 mx-auto mb-6" />
+                            <p className="text-fairy-600 text-lg">Crafting dreamy experiences...</p>
+                        </div>
                     </OptimizedMotionDiv>
                 )}
 
-                <OptimizedMotionDiv preset="slideUp" delay={600} className="text-center mt-16">
-                    <Button asChild className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm hover:from-white/20 hover:to-white/10 text-white border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 px-8 py-6 text-lg rounded-full group">
+                <OptimizedMotionDiv preset="slideUp" delay={700} className="text-center mt-20">
+                    <Button asChild className="btn-secondary btn-large group shadow-dreamy">
                         <Link href="/packages">
                             <span className="flex items-center">
-                                View All Packages
-                                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                View All Experiences
+                                <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover:translate-x-1" />
                             </span>
                         </Link>
                     </Button>
@@ -364,37 +506,45 @@ const OptimizedPackagesSection = memo(({ popularPackages }: { popularPackages: P
     );
 });
 
-OptimizedPackagesSection.displayName = 'OptimizedPackagesSection';
+DreamyPackagesSection.displayName = 'DreamyPackagesSection';
 
-// Memoized testimonials section using constants
-const OptimizedTestimonialsSection = memo(() => {
+// Enhanced testimonials section with elegant styling
+const ElegantTestimonialsSection = memo(() => {
     return (
-        <section className="section-padding bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 contain-layout">
-            <div className="container mx-auto px-4">
-                <div className="text-center mb-16">
+        <section className="section-padding section-carnation">
+            <div className="container-luxury">
+                <div className="text-center mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                            What Our
-                            <span className="block text-gradient-alt">Travelers Say</span>
+                        <div className="inline-flex items-center gap-3 px-6 py-3 glass-luxury rounded-full mb-8">
+                            <Star className="w-5 h-5 text-carnation-600" />
+                            <span className="text-caption text-carnation-700 tracking-wider">Guest Stories</span>
+                        </div>
+                    </OptimizedMotionDiv>
+
+                    <OptimizedMotionDiv preset="slideUp" delay={200}>
+                        <h2 className="text-heading text-5xl md:text-6xl font-bold text-carnation-900 mb-8">
+                            What Our Guests
+                            <span className="block text-gradient-dreamy">Say About Us</span>
                         </h2>
                     </OptimizedMotionDiv>
-                    <OptimizedMotionDiv preset="fadeIn" delay={200}>
-                        <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-                            Real experiences from real travelers who have discovered the magic of spiritual India
+
+                    <OptimizedMotionDiv preset="fadeIn" delay={400}>
+                        <p className="text-body text-lg md:text-xl text-carnation-700 max-w-3xl mx-auto leading-relaxed">
+                            Hear from luxury travelers who have experienced the magic of our curated journeys
                         </p>
                     </OptimizedMotionDiv>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {TESTIMONIALS.map((testimonial, index) => (
                         <OptimizedMotionDiv
                             key={testimonial.name}
                             preset="slideUp"
-                            delay={index * 200}
+                            delay={index * 250}
                             hover
                         >
-                            <GlassCard className="p-8 text-center h-full hover:scale-105 transition-all duration-200">
-                                <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 rounded-full overflow-hidden ring-2 ring-white/20">
+                            <div className="card-luxury p-10 text-center h-full hover-elegant">
+                                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-full overflow-hidden ring-4 ring-carnation-200 shadow-elegant">
                                     <img
                                         src={testimonial.image}
                                         alt={testimonial.name}
@@ -403,19 +553,21 @@ const OptimizedTestimonialsSection = memo(() => {
                                     />
                                 </div>
 
-                                <div className="flex justify-center mb-4">
+                                <div className="flex justify-center mb-6">
                                     {Array.from({ length: testimonial.rating }).map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 md:h-5 md:w-5 text-yellow-400 fill-current" />
+                                        <Star key={i} className="h-5 w-5 md:h-6 md:w-6 text-carnation-400 fill-current mx-0.5" />
                                     ))}
                                 </div>
 
-                                <p className="text-white/80 mb-6 italic leading-relaxed">"{testimonial.text}"</p>
+                                <p className="text-body text-carnation-800 mb-8 italic leading-relaxed text-lg">
+                                    "{testimonial.text}"
+                                </p>
 
-                                <div className="text-white">
-                                    <p className="font-semibold text-lg">{testimonial.name}</p>
-                                    <p className="text-white/60 text-sm">{testimonial.location}</p>
+                                <div className="text-carnation-900">
+                                    <p className="text-subheading font-semibold text-xl mb-1">{testimonial.name}</p>
+                                    <p className="text-body text-carnation-600">{testimonial.location}</p>
                                 </div>
-                            </GlassCard>
+                            </div>
                         </OptimizedMotionDiv>
                     ))}
                 </div>
@@ -424,46 +576,51 @@ const OptimizedTestimonialsSection = memo(() => {
     );
 });
 
-OptimizedTestimonialsSection.displayName = 'OptimizedTestimonialsSection';
+ElegantTestimonialsSection.displayName = 'ElegantTestimonialsSection';
 
-// Final CTA section using constants
-const FinalCTASection = memo(() => {
+// Enhanced final CTA section with luxury styling
+const LuxuryCTASection = memo(() => {
     return (
-        <section className="section-padding bg-gradient-to-br from-black via-slate-900 to-black flex items-center justify-center relative contain-layout">
+        <section className="section-padding section-elegant text-white relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-400/5 to-purple-600/5 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-gradient-to-r from-thistle-400/10 to-fairy-400/10 rounded-full blur-3xl animate-pulse-luxury" />
+                <div className="absolute top-16 right-16 w-40 h-40 bg-carnation-400/20 rounded-full blur-2xl animate-float-elegant" />
+                <div className="absolute bottom-16 left-16 w-56 h-56 bg-uranian-400/15 rounded-full blur-2xl animate-float-elegant delay-1000" />
             </div>
 
-            <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="container-luxury text-center relative z-10">
                 <OptimizedMotionDiv preset="scaleIn">
-                    <Globe className="w-16 h-16 text-primary mx-auto mb-6" />
+                    <div className="inline-flex items-center justify-center w-24 h-24 glass-luxury rounded-full mb-10">
+                        <Crown className="w-12 h-12 text-white" />
+                    </div>
                 </OptimizedMotionDiv>
 
                 <OptimizedMotionDiv preset="slideUp" delay={200}>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                        Ready for Your
-                        <span className="block text-gradient">Spiritual Journey?</span>
+                    <h2 className="text-display text-4xl md:text-6xl font-bold mb-8">
+                        Ready to Create Your
+                        <span className="block text-gradient-rainbow">Perfect Escape?</span>
                     </h2>
                 </OptimizedMotionDiv>
 
                 <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                    <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Let us help you discover the sacred beauty of India's most spiritual destinations.
+                    <p className="text-body text-xl md:text-2xl text-white/95 mb-12 max-w-3xl mx-auto leading-relaxed">
+                        Let our luxury travel specialists design an extraordinary journey that exceeds your wildest dreams
+                        and creates memories to treasure forever.
                     </p>
                 </OptimizedMotionDiv>
 
                 <StaggerContainer staggerDelay={200}>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                         <OptimizedMotionDiv preset="slideUp" delay={600}>
                             <Button
                                 asChild
-                                className="bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary text-white px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200 group"
+                                className="btn-accent btn-large group shadow-elegant"
                             >
                                 <Link href="/contact">
-                                    <Phone className="mr-2 w-5 h-5" />
-                                    Start Your Journey
-                                    <Sparkles className="ml-2 w-5 h-5" />
+                                    <Gem className="w-6 h-6" />
+                                    Start Planning
+                                    <Sparkles className="w-6 h-6 group-hover:animate-spin" />
                                 </Link>
                             </Button>
                         </OptimizedMotionDiv>
@@ -472,11 +629,11 @@ const FinalCTASection = memo(() => {
                             <Button
                                 asChild
                                 variant="outline"
-                                className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 px-8 py-6 text-lg rounded-full transition-all duration-200 group"
+                                className="btn-outline btn-large text-white hover:bg-white hover:text-thistle-900"
                             >
-                                <Link href={createWhatsAppUrl("Hi! I'm interested in planning a spiritual journey. Please share more details.")}>
-                                    <Mail className="mr-2 w-5 h-5" />
-                                    WhatsApp Us
+                                <Link href={createWhatsAppUrl("Hello! I'm interested in creating a luxury travel experience. Please share more details.")}>
+                                    <Phone className="w-6 h-6" />
+                                    Connect with Us
                                 </Link>
                             </Button>
                         </OptimizedMotionDiv>
@@ -487,14 +644,15 @@ const FinalCTASection = memo(() => {
     );
 });
 
-FinalCTASection.displayName = 'FinalCTASection';
+LuxuryCTASection.displayName = 'LuxuryCTASection';
 
-// Main component
+// Main enhanced component with luxury theme
 export const OptimizedHomeClient = memo(({
                                              featuredPlaces = [],
                                              popularPackages = []
                                          }: OptimizedHomeClientProps) => {
     const [isVisible, setIsVisible] = useState(false);
+
     useEffect(() => {
         setIsVisible(true);
     }, []);
@@ -502,14 +660,15 @@ export const OptimizedHomeClient = memo(({
     return (
         <div className="relative overflow-hidden">
             <div className={cn(
-                "relative z-10 transition-all duration-300",
+                "relative z-10 transition-all duration-500",
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             )}>
-                <OptimizedStatsSection />
-                <OptimizedDestinationsSection featuredPlaces={featuredPlaces} />
-                <OptimizedPackagesSection popularPackages={popularPackages} />
-                <OptimizedTestimonialsSection />
-                <FinalCTASection />
+                <LuxuryHeroSection />
+                <LuxuryStatsSection />
+                <ElegantDestinationsSection featuredPlaces={featuredPlaces} />
+                <DreamyPackagesSection popularPackages={popularPackages} />
+                <ElegantTestimonialsSection />
+                <LuxuryCTASection />
             </div>
         </div>
     );

@@ -7,26 +7,10 @@ import React, { useCallback, useRef, useState, memo } from "react";
 import { cn } from "@/utils/utils";
 import { useThreeInView } from '@/utils/three-utils';
 import { usePerformancePreference } from '@/hooks/use-mobile';
-
-// Types for data safety
-interface Package {
-    id: string;
-    name: string;
-    tagline: string;
-    description: string;
-    duration: string;
-    cities: string[];
-    price: string;
-    thumbnail: string;
-    images: string[];
-    tags: string[];
-    highlights: string[];
-    inclusions: string[];
-    itinerary: any[];
-}
+import { Package } from '@/lib/data'; // Use the correct type from data.ts
 
 interface OptimizedPackageCardProps {
-    pkg: Package;
+    pkg: Package; // Use the exported type from data.ts
     index?: number;
     variant?: 'default' | 'compact' | 'featured' | 'minimal' | 'premium' | 'hero';
     showAnimation?: boolean;
@@ -52,21 +36,23 @@ export const OptimizedPackageCard = memo(({
     const { ref: inViewRef, isInView } = useThreeInView(0.05);
     const { shouldReduceMotion, shouldReduceEffects } = usePerformancePreference();
 
-    // Safe package object with comprehensive defaults
+    // Safe package object with comprehensive defaults - using correct field names
     const safePackageProps = {
         id: pkg?.id || `package-${index}`,
         name: pkg?.name || 'Unknown Package',
-        tagline: pkg?.tagline || 'Discover new places',
         description: pkg?.description || 'An amazing travel experience awaits you.',
         duration: pkg?.duration || '3 Days',
         cities: Array.isArray(pkg?.cities) ? pkg.cities.slice(0, 3) : ['Unknown City'],
-        price: pkg?.price || 'Contact for pricing',
-        thumbnail: pkg?.thumbnail || '/images/placeholder-package.jpg',
-        images: Array.isArray(pkg?.images) ? pkg.images : [],
-        tags: Array.isArray(pkg?.tags) ? pkg.tags.slice(0, 4) : [],
+        image: pkg?.image || 'https://placehold.co/600x800/cccccc/666666?text=No+Image', // Use 'image' field
         highlights: Array.isArray(pkg?.highlights) ? pkg.highlights : [],
+        itinerary: Array.isArray(pkg?.itinerary) ? pkg.itinerary : [],
         inclusions: Array.isArray(pkg?.inclusions) ? pkg.inclusions : [],
-        itinerary: Array.isArray(pkg?.itinerary) ? pkg.itinerary : []
+        gallery: Array.isArray(pkg?.gallery) ? pkg.gallery : [], // Use 'gallery' field
+        tags: Array.isArray(pkg?.tags) ? pkg.tags.slice(0, 4) : [],
+        // Handle price field properly
+        price: pkg?.price || 'Contact for pricing',
+        originalPrice: pkg?.originalPrice,
+        discount: pkg?.discount
     };
 
     // Mouse interaction handlers with performance optimization
@@ -152,9 +138,10 @@ export const OptimizedPackageCard = memo(({
     const styles = variantStyles[variant];
 
     // Price extraction and formatting
-    const priceMatch = safePackageProps.price.match(/[\d,]+/);
-    const priceNumber = priceMatch ? priceMatch[0] : safePackageProps.price;
-    const currency = safePackageProps.price.includes('₹') ? '₹' : '$';
+    const priceString = safePackageProps.price?.toString() || 'Contact for pricing';
+    const priceMatch = priceString.match(/[\d,]+/);
+    const priceNumber = priceMatch ? priceMatch[0] : priceString;
+    const currency = priceString.includes('₹') ? '₹' : '$';
 
     // Click handler with analytics
     const handleClick = useCallback(() => {
@@ -219,14 +206,14 @@ export const OptimizedPackageCard = memo(({
                             : "bg-black"
                     )}>
 
-                        {/* Background Image */}
+                        {/* Background Image - using correct field */}
                         <div className={cn(
                             "absolute inset-0 transition-transform duration-500",
                             isHovered && !shouldReduceEffects ? "scale-110" : "scale-100"
                         )}>
                             {!imageError ? (
                                 <Image
-                                    src={safePackageProps.thumbnail}
+                                    src={safePackageProps.image}
                                     alt={`${safePackageProps.name} tour package`}
                                     fill
                                     className={cn(
@@ -293,12 +280,12 @@ export const OptimizedPackageCard = memo(({
                                 {safePackageProps.name}
                             </h3>
 
-                            {/* Tagline */}
+                            {/* Description */}
                             <p className={cn(
                                 "text-accent/90 font-medium text-shadow mb-4",
                                 styles.subtitle
                             )}>
-                                {safePackageProps.tagline}
+                                {safePackageProps.description}
                             </p>
 
                             {/* Cities */}
@@ -355,7 +342,7 @@ export const OptimizedPackageCard = memo(({
                                     <div className="flex items-center gap-2">
                                         <DollarSign className="h-4 w-4 text-green-400" />
                                         <span className={cn("text-green-400 font-bold", styles.subtitle)}>
-                      {priceNumber !== safePackageProps.price ? `${currency}${priceNumber}` : safePackageProps.price}
+                      {priceNumber !== priceString ? `${currency}${priceNumber}` : priceString}
                     </span>
                                     </div>
                                     {variant !== 'minimal' && (
@@ -432,7 +419,7 @@ export const OptimizedPackageCard = memo(({
                             <p>Duration: {safePackageProps.duration}</p>
                             <p>Cities: {safePackageProps.cities.join(', ')}</p>
                             <p>Price: {safePackageProps.price}</p>
-                            <p>Description: {safePackageProps.tagline}</p>
+                            <p>Description: {safePackageProps.description}</p>
                         </div>
                     </div>
                 </article>
