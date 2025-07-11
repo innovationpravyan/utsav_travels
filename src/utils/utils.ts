@@ -418,8 +418,8 @@ export const MEDIA_CONFIG = {
         varanasi: {
             id: 'varanasi',
             label: 'Varanasi',
-            src: '/videos/varanasi-hero.webm',
-            mp4: '/videos/varanasi-hero.mp4',
+            src: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/banaras.webm',
+            mp4: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/banaras.webm',
             title: 'Sacred Varanasi',
             subtitle: 'The Spiritual Capital of India',
             description: 'Experience the eternal city where spirituality flows like the sacred Ganges',

@@ -1,16 +1,24 @@
+// @ts-ignore
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import {
   getFirestore,
   type Firestore,
   connectFirestoreEmulator,
   terminate,
-
 } from "firebase/firestore";
-import { getAuth, type Auth } from "firebase/auth";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
-import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
-import { getPerformance, type FirebasePerformance } from "firebase/performance";
-import { AppError, env, FIREBASE_CONFIG, ERROR_MESSAGES } from "@/utils/utils";
+
+/**
+ * Firebase configuration - Replace with your actual config
+ */
+const FIREBASE_CONFIG = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDbifj2_jatQIx5GNkiDXAOHmAYOCrnzqo",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "utsavtravels-299d5.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "utsavtravels-299d5",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "utsavtravels-299d5.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "841887025085",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:841887025085:web:b663dd26817b4aa849f4d4",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-8S5PS1SVXG",
+};
 
 /**
  * Firebase configuration interface
@@ -22,7 +30,25 @@ interface FirebaseConfig {
   storageBucket: string;
   messagingSenderId: string;
   appId: string;
-  measurementId?: string;
+}
+
+/**
+ * Environment detection
+ */
+const env = {
+  isDev: process.env.NODE_ENV === 'development',
+  isServer: typeof window === 'undefined',
+  isClient: typeof window !== 'undefined',
+};
+
+/**
+ * App Error class
+ */
+class AppError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'AppError';
+  }
 }
 
 /**
@@ -64,15 +90,11 @@ function validateFirebaseConfig(config: FirebaseConfig): void {
 }
 
 /**
- * Firebase services interface
+ * Firebase services interface (simplified)
  */
 interface FirebaseServices {
   app: FirebaseApp;
   db: Firestore;
-  auth: Auth;
-  storage: FirebaseStorage;
-  analytics: Analytics | null;
-  performance: FirebasePerformance | null;
 }
 
 /**
@@ -98,7 +120,7 @@ function initializeFirebaseApp(): FirebaseApp {
   } catch (error) {
     console.error("❌ Failed to initialize Firebase app:", error);
     throw new AppError(
-        ERROR_MESSAGES.firebase.init,
+        "Failed to initialize Firebase application",
         "FIREBASE_INIT_ERROR"
     );
   }
@@ -133,82 +155,22 @@ function initializeFirestore(app: FirebaseApp): Firestore {
   } catch (error) {
     console.error("❌ Failed to initialize Firestore:", error);
     throw new AppError(
-        ERROR_MESSAGES.firebase.firestore,
+        "Failed to initialize Firestore",
         "FIRESTORE_INIT_ERROR"
     );
   }
 }
 
 /**
- * Initialize Firebase Analytics (client-side only)
- */
-async function initializeAnalytics(
-    app: FirebaseApp
-): Promise<Analytics | null> {
-  if (env.isServer || !FIREBASE_CONFIG.measurementId) {
-    return null;
-  }
-
-  try {
-    const supported = await isSupported();
-    if (!supported) {
-      console.warn("⚠️ Firebase Analytics not supported in this environment");
-      return null;
-    }
-
-    const analytics = getAnalytics(app);
-
-    if (env.isDev) {
-      console.log("📊 Firebase Analytics initialized");
-    }
-
-    return analytics;
-  } catch (error) {
-    console.warn("⚠️ Failed to initialize Firebase Analytics:", error);
-    return null;
-  }
-}
-
-/**
- * Initialize Firebase Performance (client-side only)
- */
-function initializePerformance(app: FirebaseApp): FirebasePerformance | null {
-  if (env.isServer) {
-    return null;
-  }
-
-  try {
-    const performance = getPerformance(app);
-
-    if (env.isDev) {
-      console.log("⚡ Firebase Performance initialized");
-    }
-
-    return performance;
-  } catch (error) {
-    console.warn("⚠️ Failed to initialize Firebase Performance:", error);
-    return null;
-  }
-}
-
-/**
- * Initialize all Firebase services
+ * Initialize Firebase services (simplified to only Firestore)
  */
 async function initializeFirebaseServices(): Promise<FirebaseServices> {
   const app = initializeFirebaseApp();
   const db = initializeFirestore(app);
-  const auth = getAuth(app);
-  const storage = getStorage(app);
-  const analytics = await initializeAnalytics(app);
-  const performance = initializePerformance(app);
 
   return {
     app,
     db,
-    auth,
-    storage,
-    analytics,
-    performance,
   };
 }
 
@@ -249,7 +211,7 @@ export class FirebaseManager {
       this.isInitialized = true;
 
       if (env.isDev) {
-        console.log("🚀 All Firebase services initialized successfully");
+        console.log("🚀 Firebase services initialized successfully");
       }
 
       return this.services;
@@ -258,6 +220,7 @@ export class FirebaseManager {
       throw error;
     }
   }
+
   async terminate(): Promise<void> {
     if (!this.services) return;
 
@@ -282,28 +245,38 @@ const firebaseManager = FirebaseManager.getInstance();
 export async function getFirebaseServices(): Promise<FirebaseServices> {
   return firebaseManager.getServices();
 }
+
 export const getFirebaseDb = async (): Promise<Firestore> => {
   const services = await getFirebaseServices();
   return services.db;
 };
+
+/**
+ * Synchronous exports for cases where you're sure Firebase is initialized
+ */
+let _app: FirebaseApp | null = null;
+let _db: Firestore | null = null;
+
+// Initialize synchronous exports (non-blocking)
+getFirebaseServices().then(services => {
+  _app = services.app;
+  _db = services.db;
+}).catch(error => {
+  console.error("Failed to initialize Firebase services:", error);
+});
+
+// Safe synchronous exports (will throw if not initialized)
+export const getDb = (): Firestore => {
+  if (!_db) {
+    throw new AppError("Firestore not initialized. Use getFirebaseDb() first.", "NOT_INITIALIZED");
+  }
+  return _db;
+};
+
 /**
  * Legacy exports for backward compatibility
  */
-let legacyApp: FirebaseApp | null = null;
-let legacyDb: Firestore | null = null;
-
-// Initialize legacy exports
-(async () => {
-  try {
-    const services = await getFirebaseServices();
-    legacyApp = services.app;
-    legacyDb = services.db;
-  } catch (error) {
-    console.error("Failed to initialize legacy Firebase exports:", error);
-  }
-})();
-
-export { legacyApp as app, legacyDb as db };
+export { _app as app, _db as db };
 
 /**
  * Firebase connection utilities
