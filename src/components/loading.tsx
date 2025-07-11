@@ -22,8 +22,6 @@ interface LoadingProps {
   showProgress?: boolean;
   variant?: 'default' | 'minimal' | 'detailed';
   timeout?: number;
-  onComplete?: (results: Map<string, PreloadResult>) => void;
-  onError?: (error: Error) => void;
 }
 
 interface VideoLoadingState {
@@ -38,9 +36,7 @@ export default function Loading({
                                   message = "Preparing your spiritual journey...",
                                   showProgress = true,
                                   variant = 'default',
-                                  timeout = 45000, // 45 seconds for video loading
-                                  onComplete,
-                                  onError
+                                  timeout = 45000 // 45 seconds for video loading
                                 }: LoadingProps = {}) {
   // Loading states
   const [overallProgress, setOverallProgress] = useState(0);
@@ -190,10 +186,16 @@ export default function Loading({
       setOverallProgress(100);
       setLoadingStage('complete');
 
-      // Call completion callback
-      if (onComplete) {
-        onComplete(results);
-      }
+      // Log cache statistics internally
+      console.log('Video preloading completed:', results);
+
+      const successCount = Array.from(results.values()).filter(r => r.success).length;
+      const fromCacheCount = Array.from(results.values()).filter(r => r.fromCache).length;
+      const totalSize = Array.from(results.values()).reduce((sum, r) => sum + r.size, 0);
+
+      console.log(`Videos loaded: ${successCount}/${results.size} successful`);
+      console.log(`Cache efficiency: ${fromCacheCount}/${successCount} from cache`);
+      console.log(`Total size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
 
       console.log(`Video preloading completed: ${results.size} videos processed`);
 
@@ -202,11 +204,10 @@ export default function Loading({
       setError(err instanceof Error ? err.message : 'Failed to preload videos');
       setLoadingStage('error');
 
-      if (onError) {
-        onError(err instanceof Error ? err : new Error('Video preloading failed'));
-      }
+      // Continue loading anyway - videos will fall back to direct URLs
+      console.warn('Continuing with direct video URLs as fallback');
     }
-  }, [updateVideoState, onComplete, onError]);
+  }, [updateVideoState]);
 
   /**
    * Initialize preloading on component mount
