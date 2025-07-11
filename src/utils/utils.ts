@@ -408,8 +408,8 @@ export const MEDIA_CONFIG = {
         default: {
             id: 'default',
             label: 'Default',
-            src: '/videos/homepage_video.webm',
-            mp4: '/videos/homepage_video.mp4',
+            src: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/home_page.webm',
+            mp4: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/home_page.webm',
             title: 'Discover Sacred India',
             subtitle: 'Journey Through Spiritual Heritage',
             description: 'Embark on transformative journeys through India\'s most sacred destinations',
@@ -428,8 +428,8 @@ export const MEDIA_CONFIG = {
         kedarnath: {
             id: 'kedarnath',
             label: 'Kedarnath',
-            src: '/videos/kedarnath-hero.webm',
-            mp4: '/videos/kedarnath-hero.mp4',
+            src: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/kedarnath-1.webm',
+            mp4: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/kedarnath-1.webm',
             title: 'Mystical Kedarnath',
             subtitle: 'Lord Shiva\'s Sacred Abode',
             description: 'Journey to the divine heights where earth meets heaven in eternal devotion',
@@ -438,8 +438,8 @@ export const MEDIA_CONFIG = {
         rishikesh: {
             id: 'rishikesh',
             label: 'Rishikesh',
-            src: '/videos/rishikesh-hero.webm',
-            mp4: '/videos/rishikesh-hero.mp4',
+            src: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/rishikesh-1.webm',
+            mp4: 'https://keg8uji58siagch9.public.blob.vercel-storage.com/rishikesh-1.webm',
             title: 'Serene Rishikesh',
             subtitle: 'Yoga Capital of the World',
             description: 'Find inner peace in the foothills of the Himalayas where the Ganges flows pure',

@@ -1,19 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, Play, Volume2, VolumeX, Wifi, WifiOff, Database } from 'lucide-react';
-import { cn } from '@/utils/utils';
-import { OptimizedMotionDiv, StaggerContainer } from '@/components/optimized-motion-div';
-import { GlassCard } from '@/components/ui/glass-card';
-import { useSafeWindow } from '@/utils/three-utils';
-import { usePerformancePreference } from '@/hooks/use-mobile';
-import { useVideoCache } from '@/hooks/use-video-cache';
-import { performanceMonitor } from '@/utils/performance-monitor';
-import {
-    MEDIA_CONFIG,
-    getVideoCarouselTabs,
-    getVideoSource
-} from '@/utils/utils';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {Database, Pause, Play, Volume2, VolumeX, Wifi, WifiOff} from 'lucide-react';
+import {cn, getVideoCarouselTabs, MEDIA_CONFIG} from '@/utils/utils';
+import {OptimizedMotionDiv, StaggerContainer} from '@/components/optimized-motion-div';
+import {GlassCard} from '@/components/ui/glass-card';
+import {useSafeWindow} from '@/utils/three-utils';
+import {usePerformancePreference} from '@/hooks/use-mobile';
+import {useVideoCache} from '@/hooks/use-video-cache';
+import {performanceMonitor} from '@/utils/performance-monitor';
 
 /**
  * Enhanced Hero Video Carousel with Smart Caching
@@ -55,7 +50,7 @@ interface CachedVideo {
 }
 
 export function HeroVideoCarousel({
-                                      height = '100vh',
+                                      height,
                                       className,
                                       autoPlay = true
                                   }: HeroVideoCarouselProps) {
@@ -77,7 +72,7 @@ export function HeroVideoCarousel({
     const containerRef = useRef<HTMLDivElement>(null);
     const preloadingRef = useRef<boolean>(false);
     const windowObj = useSafeWindow();
-    const { shouldReduceEffects } = usePerformancePreference();
+    const {shouldReduceEffects} = usePerformancePreference();
     const videoCacheHook = useVideoCache();
 
     // Access video carousel config from MEDIA_CONFIG
@@ -154,7 +149,7 @@ export function HeroVideoCarousel({
         const videoElement = document.createElement('video');
         videoElement.className = 'absolute inset-0 w-full h-full object-cover transition-opacity duration-800';
         videoElement.style.opacity = '0';
-        videoElement.style.WebkitTransform = 'translateZ(0)';
+        videoElement.style.webkitTransform = 'translateZ(0)';
         videoElement.style.transform = 'translateZ(0)';
         videoElement.autoplay = false;
         videoElement.loop = false;
@@ -528,7 +523,7 @@ export function HeroVideoCarousel({
             }
         };
 
-        windowObj.addEventListener('scroll', onScroll, { passive: true });
+        windowObj.addEventListener('scroll', onScroll, {passive: true});
         return () => windowObj.removeEventListener('scroll', onScroll);
     }, [windowObj, shouldReduceEffects]);
 
@@ -546,7 +541,7 @@ export function HeroVideoCarousel({
 
         const events = ['click', 'touchstart', 'keydown'];
         events.forEach(event => {
-            document.addEventListener(event, handleUserInteraction, { once: true });
+            document.addEventListener(event, handleUserInteraction, {once: true});
         });
 
         return () => {
@@ -574,7 +569,7 @@ export function HeroVideoCarousel({
     // Cleanup on unmount
     useEffect(() => {
         return () => {
-            videoCache.current.forEach(({ element }) => {
+            videoCache.current.forEach(({element}) => {
                 element.pause();
                 element.remove();
             });
@@ -584,9 +579,9 @@ export function HeroVideoCarousel({
 
     return (
         <section
-            className={cn('hero-video-carousel relative w-full overflow-hidden touch-manipulation', className)}
+            className={cn('hero-video-carousel relative w-full overflow-hidden touch-manipulation', height ? '' : 'h-[50vh] md:h-screen', className)}
             style={{
-                height,
+                ...(height && { height }),
                 WebkitTouchCallout: 'none',
                 WebkitUserSelect: 'none',
                 userSelect: 'none'
@@ -604,24 +599,25 @@ export function HeroVideoCarousel({
                             "absolute inset-0 bg-cover bg-center transition-opacity duration-300 z-10",
                             isVideoLoaded && !hasVideoError ? "opacity-0" : "opacity-100"
                         )}
-                        style={{ backgroundImage: `url(${currentVideo.thumbnail})` }}
+                        style={{backgroundImage: `url(${currentVideo.thumbnail})`}}
                     >
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                             <div className="text-center">
                                 {!hasVideoError && (
                                     <>
-                                        <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
+                                        <div
+                                            className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"/>
                                         <p className="text-white/80 text-sm mb-2">Loading video...</p>
                                         <p className="text-white/60 text-xs">{loadingStatus}</p>
                                         <div className="flex items-center justify-center gap-2 mt-2">
                                             {currentVideoSource === 'cache' ? (
                                                 <>
-                                                    <Database className="w-4 h-4 text-green-400" />
+                                                    <Database className="w-4 h-4 text-green-400"/>
                                                     <span className="text-green-400 text-xs">From Cache</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Wifi className="w-4 h-4 text-blue-400" />
+                                                    <Wifi className="w-4 h-4 text-blue-400"/>
                                                     <span className="text-blue-400 text-xs">From Network</span>
                                                 </>
                                             )}
@@ -630,7 +626,7 @@ export function HeroVideoCarousel({
                                 )}
                                 {hasVideoError && (
                                     <>
-                                        <WifiOff className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                                        <WifiOff className="w-16 h-16 text-red-400 mx-auto mb-4"/>
                                         <p className="text-red-400 text-sm">Video load failed</p>
                                         <button
                                             onClick={() => window.location.reload()}
@@ -646,8 +642,8 @@ export function HeroVideoCarousel({
                 )}
 
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-black/50 z-20" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 z-20" />
+                <div className="absolute inset-0 bg-black/50 z-20"/>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 z-20"/>
             </div>
 
             {/* Content */}
@@ -695,7 +691,8 @@ export function HeroVideoCarousel({
                             <GlassCard className="inline-flex flex-col items-center gap-2 px-3 py-2 sm:px-4 sm:py-3">
                                 <span className="text-xs sm:text-sm font-light text-white/70">Scroll to explore</span>
                                 <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-white/50 to-transparent relative">
-                                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-bounce" />
+                                    <div
+                                        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-bounce"/>
                                 </div>
                             </GlassCard>
                         </OptimizedMotionDiv>
@@ -731,7 +728,7 @@ export function HeroVideoCarousel({
                                                         cacheStatus === 'loading' ? "bg-blue-400 animate-pulse" :
                                                             cacheStatus === 'error' ? "bg-red-400" :
                                                                 videoCache.current.has(tab.id) ? "bg-yellow-400" : "bg-white/50"
-                                            )} />
+                                            )}/>
 
                                             <span className={cn(
                                                 "text-xs sm:text-sm font-medium transition-colors duration-300",
@@ -743,26 +740,28 @@ export function HeroVideoCarousel({
                                             {/* Cache status indicator */}
                                             <div className="flex items-center gap-1">
                                                 {cacheStatus === 'cached' && (
-                                                    <Database className="w-3 h-3 text-green-400" title="Cached" />
+                                                    <Database className="w-3 h-3 text-green-400" title="Cached"/>
                                                 )}
                                                 {cacheStatus === 'loading' && (
-                                                    <Wifi className="w-3 h-3 text-blue-400 animate-pulse" title="Loading" />
+                                                    <Wifi className="w-3 h-3 text-blue-400 animate-pulse"
+                                                          title="Loading"/>
                                                 )}
                                                 {cacheStatus === 'error' && (
-                                                    <WifiOff className="w-3 h-3 text-red-400" title="Error" />
+                                                    <WifiOff className="w-3 h-3 text-red-400" title="Error"/>
                                                 )}
                                                 {cacheStatus === 'not-cached' && currentVideoSource === 'network' && (
-                                                    <Wifi className="w-3 h-3 text-white/50" title="Network" />
+                                                    <Wifi className="w-3 h-3 text-white/50" title="Network"/>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Video progress bar for active tab */}
                                         {activeTab === index && isVideoLoaded && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 overflow-hidden">
+                                            <div
+                                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 overflow-hidden">
                                                 <div
                                                     className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-300 ease-out"
-                                                    style={{ width: `${videoProgress}%` }}
+                                                    style={{width: `${videoProgress}%`}}
                                                 />
                                             </div>
                                         )}
@@ -776,7 +775,8 @@ export function HeroVideoCarousel({
 
             {/* Video Controls */}
             {videoCarouselConfig.showControls && (
-                <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50 flex gap-2 sm:gap-3">
+                <div
+                    className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50 flex gap-2 sm:gap-3">
                     <OptimizedMotionDiv preset="scaleIn" delay={1000}>
                         <GlassCard
                             className="p-2 sm:p-3 cursor-pointer group hover:scale-110 active:scale-95 transition-all duration-200 touch-manipulation"
@@ -784,9 +784,11 @@ export function HeroVideoCarousel({
                             aria-label={isMuted ? "Unmute video" : "Mute video"}
                         >
                             {isMuted ? (
-                                <VolumeX className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors" />
+                                <VolumeX
+                                    className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
                             ) : (
-                                <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors" />
+                                <Volume2
+                                    className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
                             )}
                         </GlassCard>
                     </OptimizedMotionDiv>
@@ -798,9 +800,11 @@ export function HeroVideoCarousel({
                             aria-label={isPlaying ? "Pause video" : "Play video"}
                         >
                             {isPlaying ? (
-                                <Pause className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors" />
+                                <Pause
+                                    className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
                             ) : (
-                                <Play className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors" />
+                                <Play
+                                    className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
                             )}
                         </GlassCard>
                     </OptimizedMotionDiv>
@@ -809,9 +813,9 @@ export function HeroVideoCarousel({
                     <OptimizedMotionDiv preset="scaleIn" delay={1200}>
                         <GlassCard className="p-2 sm:p-3">
                             {currentVideoSource === 'cache' ? (
-                                <Database className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" title="Playing from cache" />
+                                <Database className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" title="Playing from cache"/>
                             ) : (
-                                <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" title="Playing from network" />
+                                <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" title="Playing from network"/>
                             )}
                         </GlassCard>
                     </OptimizedMotionDiv>
@@ -823,7 +827,7 @@ export function HeroVideoCarousel({
                 <div className="absolute top-0 left-0 right-0 z-40 h-1 sm:h-1.5 bg-white/10">
                     <div
                         className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-300 ease-out"
-                        style={{ width: `${videoProgress}%` }}
+                        style={{width: `${videoProgress}%`}}
                     />
                 </div>
             )}
