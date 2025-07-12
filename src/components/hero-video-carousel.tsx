@@ -1,7 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Database, Pause, Play, Volume2, VolumeX, Wifi, WifiOff} from 'lucide-react';
+import {Volume2, VolumeX} from 'lucide-react';
 import {cn, getVideoCarouselTabs, MEDIA_CONFIG} from '@/utils/utils';
 import {OptimizedMotionDiv, StaggerContainer} from '@/components/optimized-motion-div';
 import {GlassCard} from '@/components/ui/glass-card';
@@ -329,21 +329,21 @@ export function HeroVideoCarousel({
         if (!containerRef.current || tabs.length === 0) return;
 
         const firstVideo = tabs[0];
-        const videoElement = createVideoElement(firstVideo);
+        const videoElement = createVideoElement(firstVideo!);
         const cachedVideo: CachedVideo = {
             element: videoElement,
             loaded: false,
             error: false,
             progress: 0,
             fromCache: currentVideoSource === 'cache',
-            cacheStatus: getVideosCacheStatus(firstVideo.id)
+            cacheStatus: getVideosCacheStatus(firstVideo!.id)
         };
 
         // Setup event listeners
-        const cleanup = setupVideoEventListeners(videoElement, cachedVideo, firstVideo.id);
+        const cleanup = setupVideoEventListeners(videoElement, cachedVideo, firstVideo!.id);
 
         // Add to cache and DOM
-        videoCache.current.set(firstVideo.id, cachedVideo);
+        videoCache.current.set(firstVideo!.id, cachedVideo);
         containerRef.current.appendChild(videoElement);
         activeVideoRef.current = videoElement;
 
@@ -369,27 +369,27 @@ export function HeroVideoCarousel({
 
             for (let i = 1; i < tabs.length; i++) {
                 const video = tabs[i];
-                if (videoCache.current.has(video.id)) continue;
+                if (videoCache.current.has(video!.id)) continue;
 
                 try {
-                    const videoElement = createVideoElement(video);
+                    const videoElement = createVideoElement(video!);
                     const cachedVideo: CachedVideo = {
                         element: videoElement,
                         loaded: false,
                         error: false,
                         progress: 0,
                         fromCache: currentVideoSource === 'cache',
-                        cacheStatus: getVideosCacheStatus(video.id)
+                        cacheStatus: getVideosCacheStatus(video!.id)
                     };
 
-                    setupVideoEventListeners(videoElement, cachedVideo, video.id);
-                    videoCache.current.set(video.id, cachedVideo);
+                    setupVideoEventListeners(videoElement, cachedVideo, video!.id);
+                    videoCache.current.set(video!.id, cachedVideo);
                     videoElement.load();
 
                     // Small delay between preloads to avoid overwhelming the browser
                     await new Promise(resolve => setTimeout(resolve, 200));
                 } catch (error) {
-                    console.warn(`Failed to preload video ${video.id}:`, error);
+                    console.warn(`Failed to preload video ${video!.id}:`, error);
                 }
             }
 
@@ -466,14 +466,14 @@ export function HeroVideoCarousel({
     const handleTabChange = useCallback((tabIndex: number) => {
         setActiveTab(tabIndex);
         const newVideo = tabs[tabIndex];
-        switchToVideo(newVideo.id);
+        switchToVideo(newVideo!.id);
         performanceMonitor.recordUserInteraction('tab-change');
     }, [tabs, switchToVideo]);
 
     // Update video when activeTab changes
     useEffect(() => {
         if (currentVideo && activeTab !== 0) {
-            switchToVideo(currentVideo.id);
+            switchToVideo(currentVideo!.id);
         }
     }, [activeTab, currentVideo, switchToVideo]);
 
@@ -581,7 +581,7 @@ export function HeroVideoCarousel({
         <section
             className={cn('hero-video-carousel relative w-full overflow-hidden touch-manipulation', height ? '' : 'h-[50vh] md:h-screen', className)}
             style={{
-                ...(height && { height }),
+                ...(height && {height}),
                 WebkitTouchCallout: 'none',
                 WebkitUserSelect: 'none',
                 userSelect: 'none'
@@ -599,7 +599,7 @@ export function HeroVideoCarousel({
                             "absolute inset-0 bg-cover bg-center transition-opacity duration-300 z-10",
                             isVideoLoaded && !hasVideoError ? "opacity-0" : "opacity-100"
                         )}
-                        style={{backgroundImage: `url(${currentVideo.thumbnail})`}}
+                        style={{backgroundImage: `url(${currentVideo!.thumbnail})`}}
                     >
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                             <div className="text-center">
@@ -609,24 +609,10 @@ export function HeroVideoCarousel({
                                             className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"/>
                                         <p className="text-white/80 text-sm mb-2">Loading video...</p>
                                         <p className="text-white/60 text-xs">{loadingStatus}</p>
-                                        <div className="flex items-center justify-center gap-2 mt-2">
-                                            {currentVideoSource === 'cache' ? (
-                                                <>
-                                                    <Database className="w-4 h-4 text-green-400"/>
-                                                    <span className="text-green-400 text-xs">From Cache</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Wifi className="w-4 h-4 text-blue-400"/>
-                                                    <span className="text-blue-400 text-xs">From Network</span>
-                                                </>
-                                            )}
-                                        </div>
                                     </>
                                 )}
                                 {hasVideoError && (
                                     <>
-                                        <WifiOff className="w-16 h-16 text-red-400 mx-auto mb-4"/>
                                         <p className="text-red-400 text-sm">Video load failed</p>
                                         <button
                                             onClick={() => window.location.reload()}
@@ -656,11 +642,11 @@ export function HeroVideoCarousel({
             >
                 <div className="text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <StaggerContainer staggerDelay={200}>
-                        <OptimizedMotionDiv preset="slideUp" key={`title-${currentVideo.id}`}>
+                        <OptimizedMotionDiv preset="slideUp" key={`title-${currentVideo!.id}`}>
                             <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight">
-                                {currentVideo.title.split(' ').map((word, index) => (
+                                {currentVideo!.title.split(' ').map((word, index) => (
                                     <span
-                                        key={`${currentVideo.id}-${index}`}
+                                        key={`${currentVideo!.id}-${index}`}
                                         className={cn(
                                             "inline-block mr-2 sm:mr-4 transition-all duration-300",
                                             index % 2 === 0
@@ -674,28 +660,30 @@ export function HeroVideoCarousel({
                             </h1>
                         </OptimizedMotionDiv>
 
-                        <OptimizedMotionDiv preset="fadeIn" delay={300} key={`subtitle-${currentVideo.id}`}>
+                        <OptimizedMotionDiv preset="fadeIn" delay={300} key={`subtitle-${currentVideo!.id}`}>
                             <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-primary/90 font-light mb-4 sm:mb-6 tracking-wide">
-                                {currentVideo.subtitle}
+                                {currentVideo!.subtitle}
                             </p>
                         </OptimizedMotionDiv>
 
-                        <OptimizedMotionDiv preset="fadeIn" delay={500} key={`description-${currentVideo.id}`}>
+                        <OptimizedMotionDiv preset="fadeIn" delay={500} key={`description-${currentVideo!.id}`}>
                             <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
-                                {currentVideo.description}
+                                {currentVideo!.description}
                             </p>
                         </OptimizedMotionDiv>
 
                         {/* Scroll indicator */}
-                        <OptimizedMotionDiv preset="fadeIn" delay={800} className="mt-8 sm:mt-12 md:mt-16">
-                            <GlassCard className="inline-flex flex-col items-center gap-2 px-3 py-2 sm:px-4 sm:py-3">
-                                <span className="text-xs sm:text-sm font-light text-white/70">Scroll to explore</span>
-                                <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-white/50 to-transparent relative">
-                                    <div
-                                        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-bounce"/>
-                                </div>
-                            </GlassCard>
-                        </OptimizedMotionDiv>
+                        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+                            <OptimizedMotionDiv preset="fadeIn" delay={800}>
+                                <GlassCard className="inline-flex flex-col items-center gap-2 px-3 py-2 sm:px-4 sm:py-3">
+                                    <span className="text-xs sm:text-sm font-light text-white/70">Scroll to explore</span>
+                                    <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-white/50 to-transparent relative">
+                                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-bounce"/>
+                                    </div>
+                                </GlassCard>
+                            </OptimizedMotionDiv>
+                        </div>
+
                     </StaggerContainer>
                 </div>
             </div>
@@ -736,23 +724,6 @@ export function HeroVideoCarousel({
                                             )}>
                                                 {tab.label}
                                             </span>
-
-                                            {/* Cache status indicator */}
-                                            <div className="flex items-center gap-1">
-                                                {cacheStatus === 'cached' && (
-                                                    <Database className="w-3 h-3 text-green-400" title="Cached"/>
-                                                )}
-                                                {cacheStatus === 'loading' && (
-                                                    <Wifi className="w-3 h-3 text-blue-400 animate-pulse"
-                                                          title="Loading"/>
-                                                )}
-                                                {cacheStatus === 'error' && (
-                                                    <WifiOff className="w-3 h-3 text-red-400" title="Error"/>
-                                                )}
-                                                {cacheStatus === 'not-cached' && currentVideoSource === 'network' && (
-                                                    <Wifi className="w-3 h-3 text-white/50" title="Network"/>
-                                                )}
-                                            </div>
                                         </div>
 
                                         {/* Video progress bar for active tab */}
@@ -789,33 +760,6 @@ export function HeroVideoCarousel({
                             ) : (
                                 <Volume2
                                     className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
-                            )}
-                        </GlassCard>
-                    </OptimizedMotionDiv>
-
-                    <OptimizedMotionDiv preset="scaleIn" delay={1100}>
-                        <GlassCard
-                            className="p-2 sm:p-3 cursor-pointer group hover:scale-110 active:scale-95 transition-all duration-200 touch-manipulation"
-                            onClick={handleTogglePlay}
-                            aria-label={isPlaying ? "Pause video" : "Play video"}
-                        >
-                            {isPlaying ? (
-                                <Pause
-                                    className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
-                            ) : (
-                                <Play
-                                    className="h-4 w-4 sm:h-5 sm:w-5 text-white group-hover:text-primary transition-colors"/>
-                            )}
-                        </GlassCard>
-                    </OptimizedMotionDiv>
-
-                    {/* Cache status indicator */}
-                    <OptimizedMotionDiv preset="scaleIn" delay={1200}>
-                        <GlassCard className="p-2 sm:p-3">
-                            {currentVideoSource === 'cache' ? (
-                                <Database className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" title="Playing from cache"/>
-                            ) : (
-                                <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" title="Playing from network"/>
                             )}
                         </GlassCard>
                     </OptimizedMotionDiv>
