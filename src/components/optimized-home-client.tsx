@@ -592,7 +592,7 @@ const PackagesSection = memo(({
                             <span className="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                 Travel Packages
                             </span>
-                            {selectedPlace !== 'all' && (
+                            {selectedPlace !== 'All Destinations' && (
                                 <span className="block text-2xl md:text-3xl text-gray-600 font-medium mt-4">
                                     for {selectedPlace}
                                 </span>
