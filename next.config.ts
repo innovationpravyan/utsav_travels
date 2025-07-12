@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'keg8uji58siagch9.public.blob.vercel-storage.com',
         port: '',
         pathname: '/**',

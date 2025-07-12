@@ -33,30 +33,26 @@ function DebugInfo({ places, packages }: { places: any[], packages: any[] }) {
     if (process.env.NODE_ENV !== 'development') return null;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            background: 'rgba(0,0,0,0.8)',
-            color: 'white',
-            padding: '10px',
-            fontSize: '12px',
-            zIndex: 9999,
-            maxWidth: '300px'
-        }}>
-            <h4>Debug Info:</h4>
-            <p>Places loaded: {places?.length || 0}</p>
-            <p>Packages loaded: {packages?.length || 0}</p>
+        <div className="fixed top-4 right-4 bg-thistle-900/95 text-white p-4 rounded-xl text-xs z-[9999] max-w-xs backdrop-blur-md border border-thistle-700 shadow-luxury">
+            <h4 className="text-thistle-200 font-medium mb-2">Debug Info:</h4>
+            <div className="space-y-1 text-thistle-300">
+                <p>Places loaded: <span className="text-fairy-300 font-medium">{places?.length || 0}</span></p>
+                <p>Packages loaded: <span className="text-carnation-300 font-medium">{packages?.length || 0}</span></p>
+            </div>
             {places?.length > 0 && (
-                <details>
-                    <summary>First Place:</summary>
-                    <pre>{JSON.stringify(places[0], null, 2)}</pre>
+                <details className="mt-2">
+                    <summary className="cursor-pointer text-uranian-300 hover:text-uranian-200">First Place:</summary>
+                    <pre className="mt-1 text-[10px] text-thistle-400 overflow-auto max-h-20">
+                        {JSON.stringify(places[0], null, 2)}
+                    </pre>
                 </details>
             )}
             {packages?.length > 0 && (
-                <details>
-                    <summary>First Package:</summary>
-                    <pre>{JSON.stringify(packages[0], null, 2)}</pre>
+                <details className="mt-2">
+                    <summary className="cursor-pointer text-sky-300 hover:text-sky-200">First Package:</summary>
+                    <pre className="mt-1 text-[10px] text-thistle-400 overflow-auto max-h-20">
+                        {JSON.stringify(packages[0], null, 2)}
+                    </pre>
                 </details>
             )}
         </div>
@@ -192,15 +188,36 @@ async function getHomeData() {
     }
 }
 
-// Enhanced loading component with video preloading
+// Enhanced loading component with luxury theme
 function EnhancedLoading() {
     return (
-        <Loading
-            message="Loading sacred destinations and experiences..."
-            showProgress={true}
-            variant="detailed"
-            timeout={45000}
-        />
+        <div className="min-h-screen flex items-center justify-center section-luxury">
+            <div className="text-center">
+                {/* Luxury loading animation */}
+                <div className="relative mx-auto mb-8 w-24 h-24">
+                    <div className="absolute inset-0 border-4 border-thistle-200/30 rounded-full" />
+                    <div className="absolute inset-0 border-4 border-t-thistle-500 border-r-fairy-500 border-b-carnation-500 border-l-uranian-500 rounded-full animate-spin" />
+                    <div className="absolute inset-4 border-2 border-thistle-300/50 rounded-full animate-spin animation-delay-500" style={{ animationDirection: 'reverse' }} />
+                </div>
+
+                <div className="space-y-4">
+                    <h2 className="text-heading text-2xl md:text-3xl font-bold text-thistle-800">
+                        Preparing Your Luxury Experience
+                    </h2>
+                    <p className="text-body text-thistle-600 max-w-md mx-auto px-4">
+                        Loading sacred destinations and experiences...
+                    </p>
+
+                    {/* Progress dots */}
+                    <div className="flex justify-center gap-2 mt-6">
+                        <div className="w-3 h-3 bg-thistle-400 rounded-full animate-bounce" />
+                        <div className="w-3 h-3 bg-fairy-400 rounded-full animate-bounce delay-200" />
+                        <div className="w-3 h-3 bg-carnation-400 rounded-full animate-bounce delay-500" />
+                        <div className="w-3 h-3 bg-uranian-400 rounded-full animate-bounce delay-700" />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -228,41 +245,44 @@ function VideoOptimizedHomePage({
     );
 }
 
-// Error boundary component
+// Error boundary component with luxury theme
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) {
     return (
-        <div style={{
-            padding: '40px',
-            textAlign: 'center',
-            backgroundColor: '#fee2e2',
-            color: '#dc2626',
-            borderRadius: '8px',
-            margin: '20px'
-        }}>
-            <h2>Something went wrong loading the page</h2>
-            <details style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>
-                <summary>Error details</summary>
-                {error.message}
-            </details>
-            <button
-                onClick={resetErrorBoundary}
-                style={{
-                    marginTop: '10px',
-                    padding: '10px 20px',
-                    backgroundColor: '#dc2626',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                }}
-            >
-                Try again
-            </button>
+        <div className="min-h-screen flex items-center justify-center section-luxury p-4">
+            <div className="text-center max-w-lg">
+                <div className="card-luxury p-8">
+                    <div className="w-20 h-20 bg-carnation-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-10 h-10 text-carnation-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+
+                    <h2 className="text-heading text-2xl font-bold text-thistle-800 mb-4">
+                        Something went wrong loading the page
+                    </h2>
+
+                    <details className="mb-6 text-left">
+                        <summary className="cursor-pointer text-thistle-600 hover:text-thistle-700 mb-2">
+                            Error details
+                        </summary>
+                        <div className="bg-carnation-50 p-4 rounded-lg text-sm text-thistle-700 font-mono whitespace-pre-wrap overflow-auto max-h-32">
+                            {error.message}
+                        </div>
+                    </details>
+
+                    <button
+                        onClick={resetErrorBoundary}
+                        className="btn-primary"
+                    >
+                        Try again
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }
 
-// Main home page component with enhanced error handling
+// Main home page component with enhanced error handling and luxury theme
 export default async function OptimizedHomePage() {
     console.log('🚀 OptimizedHomePage component rendering...');
 
@@ -281,7 +301,7 @@ export default async function OptimizedHomePage() {
     const { featuredPlaces, popularPackages } = homeData;
 
     return (
-        <>
+        <div className="animate-fade-in-up">
             {/* Video Preloading Screen */}
             <Suspense fallback={<EnhancedLoading />}>
                 <VideoOptimizedHomePage
@@ -447,6 +467,6 @@ export default async function OptimizedHomePage() {
                     })
                 }}
             />
-        </>
+        </div>
     );
 }

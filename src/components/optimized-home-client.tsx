@@ -63,6 +63,7 @@ const getIconComponent = (iconName: string) => {
         Palmtree,
         Star,
         Globe,
+        Sparkles,
     };
     return icons[iconName as keyof typeof icons] || Crown;
 };
@@ -108,58 +109,60 @@ const LuxuryHeroSection = memo(() => {
 
             {/* Floating elegant elements */}
             <div className="absolute inset-0 z-20 pointer-events-none">
-                <div className="absolute top-20 left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl animate-float-elegant" />
-                <div className="absolute bottom-20 right-20 w-56 h-56 bg-gradient-to-r from-carnation-300/20 to-fairy-500/20 rounded-full blur-3xl animate-float-elegant delay-1000" />
-                <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-thistle-400/20 rounded-full blur-xl animate-bounce-gentle delay-700" />
-                <div className="absolute top-1/3 right-1/3 w-24 h-24 bg-uranian-400/20 rounded-full blur-lg animate-float-elegant delay-1500" />
+                <div className="absolute top-20 left-10 w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full blur-2xl animate-float-elegant" />
+                <div className="absolute bottom-20 right-20 w-40 h-40 md:w-56 md:h-56 bg-gradient-to-r from-carnation-300/20 to-fairy-500/20 rounded-full blur-3xl animate-float-elegant delay-1000" />
+                <div className="absolute top-1/2 left-1/4 w-24 h-24 md:w-32 md:h-32 bg-thistle-400/20 rounded-full blur-xl animate-bounce-gentle delay-700" />
+                <div className="absolute top-1/3 right-1/3 w-20 h-20 md:w-24 md:h-24 bg-uranian-400/20 rounded-full blur-lg animate-float-elegant delay-1500" />
             </div>
 
             {/* Content */}
-            <div className="relative z-30 container-luxury text-center text-white">
+            <div className="relative z-30 container-luxury text-center text-white px-4">
                 <OptimizedMotionDiv preset="fadeIn" delay={500}>
-                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 rounded-full backdrop-blur-sm mb-8">
-                        <Crown className="w-5 h-5 text-carnation-300" />
-                        <span className="text-caption text-white tracking-wider">Luxury Awaits</span>
+                    <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 glass-luxury rounded-full mb-6 md:mb-8">
+                        <Crown className="w-4 h-4 md:w-5 md:h-5 text-carnation-300" />
+                        <span className="text-caption text-white tracking-wider text-xs md:text-sm">Luxury Awaits</span>
                     </div>
                 </OptimizedMotionDiv>
 
                 <OptimizedMotionDiv preset="slideUp" delay={700}>
-                    <h1 className="text-display text-5xl md:text-7xl lg:text-8xl font-bold mb-8">
+                    <h1 className="text-display text-4xl md:text-6xl lg:text-8xl xl:text-9xl font-bold mb-6 md:mb-8 leading-tight">
                         Discover Extraordinary
                         <span className="block text-gradient-rainbow">Escapes</span>
                     </h1>
                 </OptimizedMotionDiv>
 
                 <OptimizedMotionDiv preset="fadeIn" delay={900}>
-                    <p className="text-body text-xl md:text-2xl text-white/95 max-w-4xl mx-auto mb-10 leading-relaxed font-light">
+                    <p className="text-body text-lg md:text-xl lg:text-2xl text-white/95 max-w-4xl mx-auto mb-8 md:mb-10 leading-relaxed font-light px-4">
                         Immerse yourself in curated luxury experiences that transcend ordinary travel.
                         Create unforgettable memories in the world's most breathtaking destinations.
                     </p>
                 </OptimizedMotionDiv>
 
                 <StaggerContainer staggerDelay={200}>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center px-4">
                         <OptimizedMotionDiv preset="slideUp" delay={1100}>
-                            <Button className="btn-primary btn-large group shadow-luxury">
-                                <Gem className="w-6 h-6" />
-                                Begin Your Journey
-                                <Sparkles className="w-6 h-6 group-hover:animate-spin" />
+                            <Button className="btn-primary btn-large group shadow-luxury w-full sm:w-auto">
+                                <Gem className="w-5 h-5 md:w-6 md:h-6" />
+                                <span className="hidden sm:inline">Begin Your Journey</span>
+                                <span className="sm:hidden">Start Journey</span>
+                                <Sparkles className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-spin" />
                             </Button>
                         </OptimizedMotionDiv>
 
                         <OptimizedMotionDiv preset="slideUp" delay={1300}>
-                            <Button variant="outline" className="btn-outline btn-large text-white hover:bg-white hover:text-thistle-900">
-                                <Camera className="w-6 h-6" />
-                                Explore Destinations
+                            <Button variant="outline" className="btn-outline btn-large text-white hover:bg-white hover:text-thistle-900 w-full sm:w-auto">
+                                <Camera className="w-5 h-5 md:w-6 md:h-6" />
+                                <span className="hidden sm:inline">Explore Destinations</span>
+                                <span className="sm:hidden">Explore</span>
                             </Button>
                         </OptimizedMotionDiv>
                     </div>
                 </StaggerContainer>
 
                 {/* Scroll indicator */}
-                <OptimizedMotionDiv preset="fadeIn" delay={1500} className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+                <OptimizedMotionDiv preset="fadeIn" delay={1500} className="absolute bottom-8 md:bottom-10 left-1/2 transform -translate-x-1/2">
                     <div className="animate-bounce-gentle">
-                        <ArrowRight className="w-6 h-6 text-white/80 rotate-90" />
+                        <ArrowRight className="w-5 h-5 md:w-6 md:h-6 text-white/80 rotate-90" />
                     </div>
                 </OptimizedMotionDiv>
             </div>
@@ -217,7 +220,7 @@ const LuxuryStatsSection = memo(() => {
         }, [isVisible, value, shouldAnimate]);
 
         return (
-            <span className="text-display text-4xl md:text-6xl font-bold text-thistle-800">
+            <span className="text-display text-2xl md:text-4xl lg:text-6xl font-bold text-thistle-800">
                 {count.toLocaleString()}{suffix}
             </span>
         );
@@ -270,29 +273,29 @@ const LuxuryStatsSection = memo(() => {
     return (
         <section ref={sectionRef} className="section-padding section-luxury">
             <div className="container-luxury">
-                <div className="text-center mb-20">
+                <div className="text-center mb-12 md:mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-thistle-100 to-fairy-100 rounded-full mb-8">
-                            <Star className="w-5 h-5 text-thistle-600" />
-                            <span className="text-caption text-thistle-700 tracking-wider">Excellence Recognized</span>
+                        <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-thistle-100 to-fairy-100 rounded-full mb-6 md:mb-8">
+                            <Star className="w-4 h-4 md:w-5 md:h-5 text-thistle-600" />
+                            <span className="text-caption text-thistle-700 tracking-wider text-xs md:text-sm">Excellence Recognized</span>
                         </div>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="slideUp" delay={200}>
-                        <h2 className="text-heading text-5xl md:text-6xl font-bold text-thistle-900 mb-8">
+                        <h2 className="text-heading text-3xl md:text-5xl lg:text-6xl font-bold text-thistle-900 mb-6 md:mb-8">
                             Luxury Travel
                             <span className="block text-gradient-luxury">By The Numbers</span>
                         </h2>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                        <p className="text-body text-lg md:text-xl text-thistle-700 max-w-3xl mx-auto leading-relaxed">
+                        <p className="text-body text-base md:text-lg lg:text-xl text-thistle-700 max-w-3xl mx-auto leading-relaxed px-4">
                             Join an exclusive community of discerning travelers who choose excellence in every journey
                         </p>
                     </OptimizedMotionDiv>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
                     {luxuryStats.map((stat, index) => {
                         const IconComponent = getIconComponent(stat.icon);
                         return (
@@ -304,19 +307,19 @@ const LuxuryStatsSection = memo(() => {
                                 className="text-center"
                             >
                                 <div className={cn(
-                                    "card-luxury p-8 md:p-10 group hover-luxury",
+                                    "card-luxury p-6 md:p-8 lg:p-10 group hover-luxury h-full",
                                     stat.bgColor
                                 )}>
                                     <div className={cn(
-                                        "mx-auto mb-6 p-4 md:p-5 rounded-3xl w-fit transition-transform duration-400",
+                                        "mx-auto mb-4 md:mb-6 p-3 md:p-4 lg:p-5 rounded-3xl w-fit transition-transform duration-400",
                                         stat.color,
                                         "bg-white shadow-soft",
                                         !shouldReduceEffects && "group-hover:rotate-6 group-hover:scale-110"
                                     )}>
-                                        <IconComponent className="h-8 w-8 md:h-10 md:w-10" />
+                                        <IconComponent className="h-6 w-6 md:h-8 md:w-8 lg:h-10 lg:w-10" />
                                     </div>
 
-                                    <div className="mb-4">
+                                    <div className="mb-3 md:mb-4">
                                         <OptimizedCounter
                                             value={stat.value}
                                             suffix={stat.suffix}
@@ -325,7 +328,7 @@ const LuxuryStatsSection = memo(() => {
                                         />
                                     </div>
 
-                                    <p className="text-body text-thistle-700 font-medium text-sm md:text-base leading-relaxed">
+                                    <p className="text-body text-thistle-700 font-medium text-xs md:text-sm lg:text-base leading-relaxed">
                                         {stat.label}
                                     </p>
                                 </div>
@@ -348,28 +351,28 @@ const ElegantDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces: P
         <section className="section-padding section-thistle relative overflow-hidden">
             {/* Background decorations */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-16 right-16 w-72 h-72 bg-gradient-to-r from-fairy-200/30 to-thistle-200/30 rounded-full blur-3xl animate-float-elegant" />
-                <div className="absolute bottom-24 left-24 w-96 h-96 bg-gradient-to-r from-carnation-200/20 to-uranian-200/20 rounded-full blur-3xl animate-float-elegant delay-1000" />
+                <div className="absolute top-16 right-16 w-48 h-48 md:w-72 md:h-72 bg-gradient-to-r from-fairy-200/30 to-thistle-200/30 rounded-full blur-3xl animate-float-elegant" />
+                <div className="absolute bottom-24 left-24 w-64 h-64 md:w-96 md:h-96 bg-gradient-to-r from-carnation-200/20 to-uranian-200/20 rounded-full blur-3xl animate-float-elegant delay-1000" />
             </div>
 
             <div className="container-luxury relative z-10">
-                <div className="text-center mb-20">
+                <div className="text-center mb-12 md:mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <div className="inline-flex items-center gap-3 px-6 py-3 glass-dreamy rounded-full mb-8">
-                            <Globe className="w-5 h-5 text-thistle-600" />
-                            <span className="text-caption text-thistle-700 tracking-wider">Curated Destinations</span>
+                        <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 glass-dreamy rounded-full mb-6 md:mb-8">
+                            <Globe className="w-4 h-4 md:w-5 md:h-5 text-thistle-600" />
+                            <span className="text-caption text-thistle-700 tracking-wider text-xs md:text-sm">Curated Destinations</span>
                         </div>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="slideUp" delay={200}>
-                        <h2 className="text-heading text-5xl md:text-7xl font-bold text-thistle-900 mb-8 tracking-tight">
+                        <h2 className="text-heading text-3xl md:text-5xl lg:text-7xl font-bold text-thistle-900 mb-6 md:mb-8 tracking-tight">
                             Breathtaking
                             <span className="block text-gradient-luxury">Destinations</span>
                         </h2>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                        <p className="text-body text-thistle-700 max-w-4xl mx-auto text-lg md:text-xl font-light leading-relaxed">
+                        <p className="text-body text-thistle-700 max-w-4xl mx-auto text-base md:text-lg lg:text-xl font-light leading-relaxed px-4">
                             Each destination is carefully selected for its unique beauty, cultural richness, and ability to create
                             magical moments that will stay with you forever.
                         </p>
@@ -383,10 +386,10 @@ const ElegantDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces: P
                                 opts={{ align: "start", loop: true }}
                                 className="w-full"
                             >
-                                <CarouselContent className="-ml-3 md:-ml-4">
+                                <CarouselContent className="-ml-2 md:-ml-4">
                                     {featuredPlaces.map((place, index) => (
-                                        <CarouselItem key={place.id} className="pl-3 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                                            <div className="card-luxury hover-luxury overflow-hidden">
+                                        <CarouselItem key={place.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+                                            <div className="card-luxury hover-luxury overflow-hidden h-full">
                                                 <OptimizedPlaceCard
                                                     place={place}
                                                     index={index}
@@ -397,26 +400,27 @@ const ElegantDestinationsSection = memo(({ featuredPlaces }: { featuredPlaces: P
                                     ))}
                                 </CarouselContent>
 
-                                <CarouselPrevious className="hidden lg:flex glass-luxury text-thistle-600 hover:bg-thistle-50 shadow-luxury -left-8" />
-                                <CarouselNext className="hidden lg:flex glass-luxury text-thistle-600 hover:bg-thistle-50 shadow-luxury -right-8" />
+                                <CarouselPrevious className="hidden lg:flex glass-luxury text-thistle-600 hover:bg-thistle-50 shadow-luxury -left-6 md:-left-8" />
+                                <CarouselNext className="hidden lg:flex glass-luxury text-thistle-600 hover:bg-thistle-50 shadow-luxury -right-6 md:-right-8" />
                             </Carousel>
                         </OptimizedMotionDiv>
                     </div>
                 ) : (
-                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-20">
-                        <div className="card-luxury inline-block p-10">
-                            <Globe className="w-16 h-16 text-thistle-400 mx-auto mb-6" />
-                            <p className="text-thistle-600 text-lg">Curating breathtaking destinations...</p>
+                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-16 md:py-20">
+                        <div className="card-luxury inline-block p-8 md:p-10">
+                            <Globe className="w-12 h-12 md:w-16 md:h-16 text-thistle-400 mx-auto mb-4 md:mb-6" />
+                            <p className="text-thistle-600 text-base md:text-lg">Curating breathtaking destinations...</p>
                         </div>
                     </OptimizedMotionDiv>
                 )}
 
-                <OptimizedMotionDiv preset="slideUp" delay={800} className="text-center mt-20">
+                <OptimizedMotionDiv preset="slideUp" delay={800} className="text-center mt-12 md:mt-20">
                     <Button asChild className="btn-primary btn-large group shadow-luxury">
                         <Link href="/destinations">
-                            <span className="flex items-center">
-                                Explore All Destinations
-                                <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            <span className="flex items-center gap-2 md:gap-3">
+                                <span className="hidden sm:inline">Explore All Destinations</span>
+                                <span className="sm:hidden">Explore All</span>
+                                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                             </span>
                         </Link>
                     </Button>
@@ -436,28 +440,28 @@ const DreamyPackagesSection = memo(({ popularPackages }: { popularPackages: Pack
         <section className="section-padding section-fairy relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-24 left-16 w-80 h-80 bg-gradient-to-r from-carnation-200/20 to-thistle-200/20 rounded-full blur-3xl animate-pulse-luxury" />
-                <div className="absolute bottom-24 right-24 w-96 h-96 bg-gradient-to-r from-fairy-200/15 to-uranian-200/15 rounded-full blur-3xl animate-pulse-luxury delay-2000" />
+                <div className="absolute top-24 left-16 w-56 h-56 md:w-80 md:h-80 bg-gradient-to-r from-carnation-200/20 to-thistle-200/20 rounded-full blur-3xl animate-pulse-luxury" />
+                <div className="absolute bottom-24 right-24 w-64 h-64 md:w-96 md:h-96 bg-gradient-to-r from-fairy-200/15 to-uranian-200/15 rounded-full blur-3xl animate-pulse-luxury delay-2000" />
             </div>
 
             <div className="container-luxury relative z-10">
-                <div className="text-center mb-20">
+                <div className="text-center mb-12 md:mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <div className="inline-flex items-center gap-3 px-6 py-3 glass-dreamy rounded-full mb-8">
-                            <Heart className="w-5 h-5 text-fairy-600" />
-                            <span className="text-caption text-fairy-700 tracking-wider">Luxury Experiences</span>
+                        <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 glass-dreamy rounded-full mb-6 md:mb-8">
+                            <Heart className="w-4 h-4 md:w-5 md:h-5 text-fairy-600" />
+                            <span className="text-caption text-fairy-700 tracking-wider text-xs md:text-sm">Luxury Experiences</span>
                         </div>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="slideUp" delay={200}>
-                        <h2 className="text-heading text-5xl md:text-7xl font-bold text-fairy-900 mb-8 tracking-tight">
+                        <h2 className="text-heading text-3xl md:text-5xl lg:text-7xl font-bold text-fairy-900 mb-6 md:mb-8 tracking-tight">
                             Dreamy
                             <span className="block text-gradient-dreamy">Experiences</span>
                         </h2>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                        <p className="text-body text-fairy-700 max-w-4xl mx-auto text-lg md:text-xl font-light leading-relaxed">
+                        <p className="text-body text-fairy-700 max-w-4xl mx-auto text-base md:text-lg lg:text-xl font-light leading-relaxed px-4">
                             Meticulously crafted luxury packages that blend comfort, adventure, and exclusive access
                             into extraordinary journeys tailored to your desires.
                         </p>
@@ -465,14 +469,14 @@ const DreamyPackagesSection = memo(({ popularPackages }: { popularPackages: Pack
                 </div>
 
                 {popularPackages?.length > 0 ? (
-                    <div className="grid-luxury">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                         {popularPackages.map((pkg, index) => (
                             <OptimizedMotionDiv
                                 key={pkg.id}
                                 preset="slideUp"
                                 delay={index * 250}
                             >
-                                <div className="card-luxury hover-luxury h-full">
+                                <div className="card-luxury hover-luxury h-full overflow-hidden">
                                     <OptimizedPackageCard
                                         pkg={pkg}
                                         index={index}
@@ -483,20 +487,21 @@ const DreamyPackagesSection = memo(({ popularPackages }: { popularPackages: Pack
                         ))}
                     </div>
                 ) : (
-                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-20">
-                        <div className="card-luxury inline-block p-10">
-                            <Heart className="w-16 h-16 text-fairy-400 mx-auto mb-6" />
-                            <p className="text-fairy-600 text-lg">Crafting dreamy experiences...</p>
+                    <OptimizedMotionDiv preset="fadeIn" className="text-center py-16 md:py-20">
+                        <div className="card-luxury inline-block p-8 md:p-10">
+                            <Heart className="w-12 h-12 md:w-16 md:h-16 text-fairy-400 mx-auto mb-4 md:mb-6" />
+                            <p className="text-fairy-600 text-base md:text-lg">Crafting dreamy experiences...</p>
                         </div>
                     </OptimizedMotionDiv>
                 )}
 
-                <OptimizedMotionDiv preset="slideUp" delay={700} className="text-center mt-20">
+                <OptimizedMotionDiv preset="slideUp" delay={700} className="text-center mt-12 md:mt-20">
                     <Button asChild className="btn-secondary btn-large group shadow-dreamy">
                         <Link href="/packages">
-                            <span className="flex items-center">
-                                View All Experiences
-                                <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            <span className="flex items-center gap-2 md:gap-3">
+                                <span className="hidden sm:inline">View All Experiences</span>
+                                <span className="sm:hidden">View All</span>
+                                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                             </span>
                         </Link>
                     </Button>
@@ -513,29 +518,29 @@ const ElegantTestimonialsSection = memo(() => {
     return (
         <section className="section-padding section-carnation">
             <div className="container-luxury">
-                <div className="text-center mb-20">
+                <div className="text-center mb-12 md:mb-20">
                     <OptimizedMotionDiv preset="slideUp">
-                        <div className="inline-flex items-center gap-3 px-6 py-3 glass-luxury rounded-full mb-8">
-                            <Star className="w-5 h-5 text-carnation-600" />
-                            <span className="text-caption text-carnation-700 tracking-wider">Guest Stories</span>
+                        <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 glass-luxury rounded-full mb-6 md:mb-8">
+                            <Star className="w-4 h-4 md:w-5 md:h-5 text-carnation-600" />
+                            <span className="text-caption text-carnation-700 tracking-wider text-xs md:text-sm">Guest Stories</span>
                         </div>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="slideUp" delay={200}>
-                        <h2 className="text-heading text-5xl md:text-6xl font-bold text-carnation-900 mb-8">
+                        <h2 className="text-heading text-3xl md:text-5xl lg:text-6xl font-bold text-carnation-900 mb-6 md:mb-8">
                             What Our Guests
                             <span className="block text-gradient-dreamy">Say About Us</span>
                         </h2>
                     </OptimizedMotionDiv>
 
                     <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                        <p className="text-body text-lg md:text-xl text-carnation-700 max-w-3xl mx-auto leading-relaxed">
+                        <p className="text-body text-base md:text-lg lg:text-xl text-carnation-700 max-w-3xl mx-auto leading-relaxed px-4">
                             Hear from luxury travelers who have experienced the magic of our curated journeys
                         </p>
                     </OptimizedMotionDiv>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
                     {TESTIMONIALS.map((testimonial, index) => (
                         <OptimizedMotionDiv
                             key={testimonial.name}
@@ -543,8 +548,8 @@ const ElegantTestimonialsSection = memo(() => {
                             delay={index * 250}
                             hover
                         >
-                            <div className="card-luxury p-10 text-center h-full hover-elegant">
-                                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-full overflow-hidden ring-4 ring-carnation-200 shadow-elegant">
+                            <div className="card-luxury p-6 md:p-8 lg:p-10 text-center h-full hover-elegant">
+                                <div className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-auto mb-6 md:mb-8 rounded-full overflow-hidden ring-4 ring-carnation-200 shadow-elegant">
                                     <img
                                         src={testimonial.image}
                                         alt={testimonial.name}
@@ -553,19 +558,19 @@ const ElegantTestimonialsSection = memo(() => {
                                     />
                                 </div>
 
-                                <div className="flex justify-center mb-6">
+                                <div className="flex justify-center mb-4 md:mb-6">
                                     {Array.from({ length: testimonial.rating }).map((_, i) => (
-                                        <Star key={i} className="h-5 w-5 md:h-6 md:w-6 text-carnation-400 fill-current mx-0.5" />
+                                        <Star key={i} className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-carnation-400 fill-current mx-0.5" />
                                     ))}
                                 </div>
 
-                                <p className="text-body text-carnation-800 mb-8 italic leading-relaxed text-lg">
+                                <p className="text-body text-carnation-800 mb-6 md:mb-8 italic leading-relaxed text-sm md:text-base lg:text-lg">
                                     "{testimonial.text}"
                                 </p>
 
                                 <div className="text-carnation-900">
-                                    <p className="text-subheading font-semibold text-xl mb-1">{testimonial.name}</p>
-                                    <p className="text-body text-carnation-600">{testimonial.location}</p>
+                                    <p className="text-subheading font-semibold text-lg md:text-xl mb-1">{testimonial.name}</p>
+                                    <p className="text-body text-carnation-600 text-sm md:text-base">{testimonial.location}</p>
                                 </div>
                             </div>
                         </OptimizedMotionDiv>
@@ -584,43 +589,44 @@ const LuxuryCTASection = memo(() => {
         <section className="section-padding section-elegant text-white relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-gradient-to-r from-thistle-400/10 to-fairy-400/10 rounded-full blur-3xl animate-pulse-luxury" />
-                <div className="absolute top-16 right-16 w-40 h-40 bg-carnation-400/20 rounded-full blur-2xl animate-float-elegant" />
-                <div className="absolute bottom-16 left-16 w-56 h-56 bg-uranian-400/15 rounded-full blur-2xl animate-float-elegant delay-1000" />
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 bg-gradient-to-r from-thistle-400/10 to-fairy-400/10 rounded-full blur-3xl animate-pulse-luxury" />
+                <div className="absolute top-16 right-16 w-32 h-32 md:w-40 md:h-40 bg-carnation-400/20 rounded-full blur-2xl animate-float-elegant" />
+                <div className="absolute bottom-16 left-16 w-40 h-40 md:w-56 md:h-56 bg-uranian-400/15 rounded-full blur-2xl animate-float-elegant delay-1000" />
             </div>
 
-            <div className="container-luxury text-center relative z-10">
+            <div className="container-luxury text-center relative z-10 px-4">
                 <OptimizedMotionDiv preset="scaleIn">
-                    <div className="inline-flex items-center justify-center w-24 h-24 glass-luxury rounded-full mb-10">
-                        <Crown className="w-12 h-12 text-white" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 glass-luxury rounded-full mb-8 md:mb-10">
+                        <Crown className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-white" />
                     </div>
                 </OptimizedMotionDiv>
 
                 <OptimizedMotionDiv preset="slideUp" delay={200}>
-                    <h2 className="text-display text-4xl md:text-6xl font-bold mb-8">
+                    <h2 className="text-display text-3xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8">
                         Ready to Create Your
                         <span className="block text-gradient-rainbow">Perfect Escape?</span>
                     </h2>
                 </OptimizedMotionDiv>
 
                 <OptimizedMotionDiv preset="fadeIn" delay={400}>
-                    <p className="text-body text-xl md:text-2xl text-white/95 mb-12 max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-body text-base md:text-lg lg:text-xl mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed">
                         Let our luxury travel specialists design an extraordinary journey that exceeds your wildest dreams
                         and creates memories to treasure forever.
                     </p>
                 </OptimizedMotionDiv>
 
                 <StaggerContainer staggerDelay={200}>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
                         <OptimizedMotionDiv preset="slideUp" delay={600}>
                             <Button
                                 asChild
-                                className="btn-accent btn-large group shadow-elegant"
+                                className="btn-accent btn-large group shadow-elegant w-full sm:w-auto"
                             >
                                 <Link href="/contact">
-                                    <Gem className="w-6 h-6" />
-                                    Start Planning
-                                    <Sparkles className="w-6 h-6 group-hover:animate-spin" />
+                                    <Gem className="w-5 h-5 md:w-6 md:h-6" />
+                                    <span className="hidden sm:inline">Start Planning</span>
+                                    <span className="sm:hidden">Plan Now</span>
+                                    <Sparkles className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-spin" />
                                 </Link>
                             </Button>
                         </OptimizedMotionDiv>
@@ -629,11 +635,12 @@ const LuxuryCTASection = memo(() => {
                             <Button
                                 asChild
                                 variant="outline"
-                                className="btn-outline btn-large text-white hover:bg-white hover:text-thistle-900"
+                                className="btn-outline btn-large text-white hover:bg-white hover:text-thistle-900 w-full sm:w-auto"
                             >
                                 <Link href={createWhatsAppUrl("Hello! I'm interested in creating a luxury travel experience. Please share more details.")}>
-                                    <Phone className="w-6 h-6" />
-                                    Connect with Us
+                                    <Phone className="w-5 h-5 md:w-6 md:h-6" />
+                                    <span className="hidden sm:inline">Connect with Us</span>
+                                    <span className="sm:hidden">Connect</span>
                                 </Link>
                             </Button>
                         </OptimizedMotionDiv>
